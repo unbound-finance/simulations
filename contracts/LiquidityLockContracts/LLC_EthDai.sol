@@ -41,7 +41,7 @@ contract LLC_EthDai {
     address _owner;
 
     // Position in Valuing - eth/dai is zero
-    uint32 position = 0;
+    uint32 position = 1;
 
     // tokens locked by users
     mapping (address => uint256) _tokensLocked;
@@ -85,7 +85,7 @@ contract LLC_EthDai {
         // call Permit and Transfer
         uint deadline = block.timestamp.add(extraTime);
 
-        transferLPT(LPTamt, deadline, v, r, s);
+        transferLPT(msg.sender, LPTamt, deadline, v, r, s);
         
 
         // map locked tokens to user
@@ -96,8 +96,42 @@ contract LLC_EthDai {
         
     }
 
-    function transferLPT(uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
-        LPTContract.permit(msg.sender, address(this), amount, deadline, v, r, s);
+    function lockLPT1 (uint256 LPTamt, uint8 tokenNum) public {
+        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
+        uint256 totalLPTokens = LPTContract.totalSupply();
+
+        // token0 is DAI, token1 is WETH
+        // COULD REMOVE _token1 and _time. They are not used. But we need to test this first.
+        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+        
+        uint256 totalDai = _token0 * 2; // This is assuming the value of WETH is equal to value in DAI
+
+        // Use Uniswap oracle to compute average of valuations
+
+        // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
+        uint256 LPTValueInDai = totalDai.mul(LPTamt).div(totalLPTokens);  
+
+        
+
+        transferLPT1(LPTamt);
+        
+
+        // map locked tokens to user
+        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // Call Valuing Contract
+        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum, position, 0); // Hardcode "0" for AAA rating
+        
+    }
+
+    function transferLPT1(uint256 amount) internal {
+        //LPTContract.permit(msg.sender, address(this), amount, deadline, v, r, s);
+        LPTContract.transferFrom(msg.sender, address(this), amount);
+        
+    }
+
+    function transferLPT(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
+        LPTContract.permit(user, address(this), amount, deadline, v, r, s);
         LPTContract.transferFrom(msg.sender, address(this), amount);
         
     }
