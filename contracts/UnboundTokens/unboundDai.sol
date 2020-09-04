@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+// import "../utils/IERC223.sol";
+// import "../utils/IERC223Recipient.sol";
+
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -127,6 +130,51 @@ contract UnboundDai is Context, IERC20 {
         return _balances[account];
     }
 
+    // /**
+    //  * @dev Transfer the specified amount of tokens to the specified address.
+    //  *      Invokes the `tokenFallback` function if the recipient is a contract.
+    //  *      The token transfer fails if the recipient is a contract
+    //  *      but does not implement the `tokenFallback` function
+    //  *      or the fallback function to receive funds.
+    //  *
+    //  * @param _to    Receiver address.
+    //  * @param _value Amount of tokens that will be transferred.
+    //  * @param _data  Transaction metadata.
+    //  */
+    // function transfer(address _to, uint _value, bytes memory _data) public override returns (bool success){
+    //     // Standard function transfer similar to ERC20 transfer with no _data .
+    //     // Added due to backwards compatibility reasons .
+    //     _balances[msg.sender] = _balances[msg.sender].sub(_value);
+    //     _balances[_to] = _balances[_to].add(_value);
+    //     if(Address.isContract(_to)) {
+    //         IERC223Recipient receiver = IERC223Recipient(_to);
+    //         receiver.tokenFallback(msg.sender, _value, _data);
+    //     }
+    //     emit Transfer(msg.sender, _to, _value, _data);
+    //     return true;
+    // }
+    
+    // /**
+    //  * @dev Transfer the specified amount of tokens to the specified address.
+    //  *      This function works the same with the previous one
+    //  *      but doesn't contain `_data` param.
+    //  *      Added due to backwards compatibility reasons.
+    //  *
+    //  * @param _to    Receiver address.
+    //  * @param _value Amount of tokens that will be transferred.
+    //  */
+    // function transfer(address _to, uint _value) public override returns (bool success){
+    //     bytes memory empty = hex"00000000";
+    //     _balances[msg.sender] = _balances[msg.sender].sub(_value);
+    //     _balances[_to] = _balances[_to].add(_value);
+    //     if(Address.isContract(_to)) {
+    //         IERC223Recipient receiver = IERC223Recipient(_to);
+    //         receiver.tokenFallback(msg.sender, _value, empty);
+    //     }
+    //     emit Transfer(msg.sender, _to, _value, empty);
+    //     return true;
+    // }
+
     /**
      * @dev See {IERC20-transfer}.
      *
@@ -213,20 +261,20 @@ contract UnboundDai is Context, IERC20 {
         return true;
     }
 
-    /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
-     *
-     * This is internal function is equivalent to {transfer}, and can be used to
-     * e.g. implement automatic token fees, slashing mechanisms, etc.
-     *
-     * Emits a {Transfer} event.
-     *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     */
+    // /**
+    //  * @dev Moves tokens `amount` from `sender` to `recipient`.
+    //  *
+    //  * This is internal function is equivalent to {transfer}, and can be used to
+    //  * e.g. implement automatic token fees, slashing mechanisms, etc.
+    //  *
+    //  * Emits a {Transfer} event.
+    //  *
+    //  * Requirements:
+    //  *
+    //  * - `sender` cannot be the zero address.
+    //  * - `recipient` cannot be the zero address.
+    //  * - `sender` must have a balance of at least `amount`.
+    //  */
     function _transfer(address sender, address recipient, uint256 amount) internal virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");

@@ -4,15 +4,21 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+//import "../utils/IERC223Recipient.sol";
 
-interface stakingInterface {
-    // function _mint(address account, uint256 amount, uint256 fee, address feeAddr) external;
-    // function _burn(address account, uint256 toBurn, uint256 fee, address feeAddr) external;
-    // function checkLoan(address user) external view returns (uint256 owed);
-    // function balanceOf(address account) external view returns (uint256); 
+// interface stakingInterface {
+//     // function _mint(address account, uint256 amount, uint256 fee, address feeAddr) external;
+//     // function _burn(address account, uint256 toBurn, uint256 fee, address feeAddr) external;
+//     // function checkLoan(address user) external view returns (uint256 owed);
+//     // function balanceOf(address account) external view returns (uint256); 
+// }
+
+interface uDaiInterface {
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address _to, uint _value) external returns (bool success);
 }
 
-contract feeSplitter {
+contract feeSplitter /* is IERC223Recipient */ {
     using SafeMath for uint256;
     using Address for address;
 
@@ -28,14 +34,16 @@ contract feeSplitter {
     // Dev fund (20%)
     address _devFundAddr;
     
+    // uDai Address
+    address _uDaiAddr;
     //Approved Contracts
     // mapping (uint32 => address) listOfLLC;
 
 
 
     //Unbound Token Contracts
-    // uEthContract private uEthInterface;
-    stakingInterface private stakingContract;
+    uDaiInterface private uDaiContract;
+    // stakingInterface private stakingContract;
 
     // Modifiers
     modifier onlyOwner() {
@@ -44,11 +52,16 @@ contract feeSplitter {
     }
 
     // Constructor
-    constructor (address stakeAddr, address eFundAddr, address devFundAddr) public {
-        stakingContract = stakingInterface(stakeAddr);
+    constructor (address stakeAddr, address eFundAddr, address devFundAddr, address uDai) public {
+        // stakingContract = stakingInterface(stakeAddr);
+        uDaiContract = uDaiInterface(uDai);
+
+        // Sets corresponding addresses
         _owner = msg.sender;
+        _stakeAddr = stakeAddr;
         _eFundAddr = eFundAddr;
         _devFundAddr = devFundAddr;
+        _uDaiAddr = uDai;
         
     }
 
@@ -56,15 +69,42 @@ contract feeSplitter {
 
     // onlyOwner Functions
 
-    function tokenFallback() public {
-        
+    // function tokenFallback(address _from, uint _value, bytes memory _data) public override {
+    //     require(_from == _uDaiAddr, "coming from incorrect address");
+
+    //     // to achieve 40/40/20, we will cut _value into fifths.
+    //     // This is hardcoded and cannot be altered. Would require rework to be able to change % distribution.
+    //     uint256 fifth = _value.div(5);
+
+    //     // sends 40%
+    //     uDaiContract.transfer(_stakeAddr, fifth.add(fifth));
+    //     uDaiContract.transfer(_eFundAddr, fifth.add(fifth));
+
+    //     // sends 20%
+    //     // This math is to ensure we do not accidentally create or destroy tokens out of thin air.
+    //     uDaiContract.transfer(_devFundAddr, _value.sum(fifth.mul(4)));
+
+    // }
+
+    // This must be called
+    function splitFunds() public {
+        uint256 funds = uDaiContract.balanceOf(address(this));
+        require(funds > 0, "Nothing to split");
+
+        // to achieve 40/40/20, we will cut funds into fifths.
+        // This is hardcoded and cannot be altered. Would require rework to be able to change % distribution.
+        uint256 fifth = funds.div(5);
+
+        // sends 40%
+        uDaiContract.transfer(_stakeAddr, fifth.add(fifth));
+        uDaiContract.transfer(_eFundAddr, fifth.add(fifth));
+
+        // sends 20%
+        // This math is to ensure we do not accidentally create or destroy tokens out of thin air.
+        uDaiContract.transfer(_devFundAddr, funds.sub(fifth.mul(4)));
+
     }
 
-
-    // // grants an LLC permission
-    // function addLLC (address LLC, uint32 position) public onlyOwner {
-    //     listOfLLC[position] = LLC;
-    // }
 
     // Checks if sender is owner
     function isOwner() public view returns (bool) {
@@ -76,8 +116,20 @@ contract feeSplitter {
         _owner = _newOwner;
     }
 
-    // Changes Fee Address
-    function setFeeHolder(address _newFeeAddr) public onlyOwner {
-        feeHolder = _newFeeAddr;
+    // change stake Address
+    function changeStake(address _newAddr) public onlyOwner {
+        _stakeAddr = _newAddr;
     }
+
+    // change devFund Address
+    function changeDev(address _newAddr) public onlyOwner {
+        _devFundAddr = _newAddr;
+    }
+
+    // change emergency Fund Address
+    function changeE(address _newAddr) public onlyOwner {
+        _eFundAddr = _newAddr;
+    }
+
+    // change uDai? Probably should not...
 }
