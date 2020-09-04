@@ -44,7 +44,7 @@ contract LLC_EthDai {
     uint32 position = 1;
 
     // tokens locked by users
-    mapping (address => uint256) _tokensLocked;
+    mapping (address => uint256) public _tokensLocked;
 
     // Interfaced Contracts
     valuingInterface private valuingContract;
