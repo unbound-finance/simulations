@@ -52,13 +52,13 @@ contract feeSplitter /* is IERC223Recipient */ {
     }
 
     // Constructor
-    constructor (address stakeAddr, address eFundAddr, address devFundAddr, address uDai) public {
+    constructor (address eFundAddr, address devFundAddr, address uDai) public {
         // stakingContract = stakingInterface(stakeAddr);
         uDaiContract = uDaiInterface(uDai);
 
         // Sets corresponding addresses
         _owner = msg.sender;
-        _stakeAddr = stakeAddr;
+        _stakeAddr = devFundAddr;
         _eFundAddr = eFundAddr;
         _devFundAddr = devFundAddr;
         _uDaiAddr = uDai;

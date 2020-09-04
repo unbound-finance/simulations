@@ -114,6 +114,7 @@ contract unboundStaking {
     }
 
     // Constructor
+    // LPTaddress is for uDai/Dai
     constructor (address LPTaddress, address feeSplitter, address uDai, address dai, address routerAddr) public {
         _owner = msg.sender;
 

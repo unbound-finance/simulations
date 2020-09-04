@@ -41,7 +41,7 @@ contract LLC_EthDai {
     address _owner;
 
     // Position in Valuing - eth/dai is zero
-    uint32 position = 1;
+    uint32 position = 0;
 
     // tokens locked by users
     mapping (address => uint256) public _tokensLocked;
