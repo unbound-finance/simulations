@@ -22,12 +22,6 @@ contract Valuing_01 {
     // Fee Owner
     address feeHolder;
 
-    // Will this be the same for all LPT, or will there also be AAA fee, AA, etc.
-    uint256 feeRate;  // 0.25% would be 400
-
-    uint256 AAArate; // 50% would be factor of 2
-    uint256 AArate; // 40% 
-
      // Liquidity Lock Contract structs - contains fee and loan rate
     struct LiquidityLock {
         uint256 feeRate;
@@ -55,8 +49,6 @@ contract Valuing_01 {
         uDaiContract = uDaiInterface(uDaiAddress);
         _owner = msg.sender;
         feeHolder = feeAddr;
-        feeRate = 400;
-        AAArate = 2;
     }
 
     // Token Creation Functions
