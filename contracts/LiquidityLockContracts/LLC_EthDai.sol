@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 interface valuingInterface {
-    function unboundCreate(uint256 amount, address user, uint8 token, uint32 LLC, uint32 rating) external;
-    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, uint8 token, uint32 LLC) external;
+    function unboundCreate(uint256 amount, address user, uint8 token) external;
+    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, uint8 token) external;
     
 }
 
@@ -40,8 +40,8 @@ contract LLC_EthDai {
     //Owner Address
     address _owner;
 
-    // Position in Valuing - eth/dai is zero
-    uint32 position = 0;
+    // Position in Valuing - eth/dai is zero 
+    // uint32 position = 0;  REMOVE ONCE TESTED
 
     // tokens locked by users
     mapping (address => uint256) public _tokensLocked;
@@ -92,7 +92,7 @@ contract LLC_EthDai {
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
         // Call Valuing Contract
-        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum, position, 0); // Hardcode "0" for AAA rating
+        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum); // Hardcode "0" for AAA rating
         
     }
 
@@ -120,7 +120,7 @@ contract LLC_EthDai {
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
         // Call Valuing Contract
-        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum, position, 0); // Hardcode "0" for AAA rating
+        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum); // Hardcode "0" for AAA rating
         
     }
 
@@ -143,7 +143,7 @@ contract LLC_EthDai {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
         // Burning of Udai will happen first
-        valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, tokenNum, position);
+        valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, tokenNum);
         
         LPTContract.transfer(msg.sender, LPToken);
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);

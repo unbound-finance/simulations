@@ -28,8 +28,17 @@ contract Valuing_01 {
     uint256 AAArate; // 50% would be factor of 2
     uint256 AArate; // 40% 
 
+     // Liquidity Lock Contract structs - contains fee and loan rate
+    struct LiquidityLock {
+        uint256 feeRate;
+        uint256 loanRate;
+        bool active;
+    }
+
     //Approved Contracts
-    mapping (uint32 => address) listOfLLC;
+    mapping (address => LiquidityLock) listOfLLC;
+
+   
 
     //Unbound Token Contracts
     // uEthContract private uEthInterface;
@@ -52,23 +61,23 @@ contract Valuing_01 {
 
     // Token Creation Functions
 
-    function unboundCreate(uint256 amount, address user, uint8 token, uint32 LLC, uint32 rating) external {
-        require (listOfLLC[LLC] == msg.sender, "LLC not authorized");
+    function unboundCreate(uint256 amount, address user, uint8 token) external {
+        require (listOfLLC[msg.sender].active, "LLC not authorized");
         if (token == 0) {   // 0 = DAI
-            if (rating == 0) { // represents AAA rate
-                uint256 loanAmt = amount.div(AAArate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
-                uDaiContract._mint(user, loanAmt, feeRate, feeHolder);
+            
+                uint256 loanAmt = amount.div(listOfLLC[msg.sender].loanRate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
+                uDaiContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, feeHolder);
 
                 // do swap here
-            }
+            
         } else {
             revert();
         }
 
     }
 
-    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, uint8 token, uint32 LLC) external {
-        require (listOfLLC[LLC] == msg.sender, "LLC not authorized");
+    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, uint8 token) external {
+        require (listOfLLC[msg.sender].active, "LLC not authorized");
         if (token == 0) {
             uint256 userLoaned = uDaiContract.checkLoan(user);
             uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
@@ -76,17 +85,45 @@ contract Valuing_01 {
 
             // perform the swap  -- version 2
 
-            uDaiContract._burn(user, toPayInUDai, feeRate, feeHolder);
+            uDaiContract._burn(user, toPayInUDai, listOfLLC[msg.sender].feeRate, feeHolder);
         } else {
             revert();
         }
     }
 
+    function getLLCStruct(address LLC) public view returns (uint256 fee, uint256 loanrate) {
+        fee = listOfLLC[LLC].feeRate;
+        loanrate = listOfLLC[LLC].loanRate;
+    }
+
     // onlyOwner Functions
 
     // grants an LLC permission
-    function addLLC (address LLC, uint32 position) public onlyOwner {
-        listOfLLC[position] = LLC;
+    function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
+        listOfLLC[LLC].feeRate = fee;
+        listOfLLC[LLC].loanRate = loan;
+        listOfLLC[LLC].active = true;
+    }
+
+    // grants LLC permission via constructor of LLC:
+    // Intended to work only when LLC is deployed by _owner
+    // Potential vulnerability using tx.origin. Please review
+    // msg.sender in constructor will be 0x0000... so this will NOT work
+    function addLLCauto (uint256 loan, uint256 fee) external {
+        require (tx.origin == _owner); 
+        listOfLLC[msg.sender].feeRate = fee;
+        listOfLLC[msg.sender].loanRate = loan;
+        listOfLLC[msg.sender].active = true;
+    }
+    
+
+
+
+    // Disables an LLC:
+    function disableLLC (address LLC) public onlyOwner {
+        listOfLLC[LLC].feeRate = 0;
+        listOfLLC[LLC].loanRate = 0;
+        listOfLLC[LLC].active = false;
     }
 
     // Checks if sender is owner

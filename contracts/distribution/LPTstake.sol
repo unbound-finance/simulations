@@ -151,11 +151,14 @@ contract unboundStaking {
         // Assumes DAI is token0, uDai token1
         (uint amountA, uint amountB, uint liquidity) = router.addLiquidity(_daiAddr, _uDaiAddr, Dai, uDai, daiMin, uDaiMin, address(this), block.timestamp.add(600));
 
+
+        // splits pot
+        splitPot();
+        
         // credits user with locked liquidity
         _liquidityLocked[msg.sender] = _liquidityLocked[msg.sender].add(liquidity);
 
-        // splits pot
-
+        
 
         // if user has not yet staked, adds them to the list.
         if (!_isStaked[msg.sender]) {
