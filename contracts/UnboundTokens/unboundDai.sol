@@ -48,6 +48,14 @@ contract UnboundDai is Context, IERC20 {
     string private _symbol;
     uint8 private _decimals;
 
+    // PERMIT VARIABLES
+    bytes32 public DOMAIN_SEPARATOR;
+    // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    mapping(address => uint) public nonces;
+
+
+
     // tracks users who minted. Need or don't need?
     mapping (address => uint256) private _minted;
 
@@ -82,6 +90,21 @@ contract UnboundDai is Context, IERC20 {
         _decimals = 18;
         _owner = msg.sender;
         _totalSupply = 0;
+
+        // Permit??
+        uint chainId;
+        assembly {
+            chainId := chainid
+        }
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
+                keccak256(bytes(name)),
+                keccak256(bytes('1')),
+                chainId,
+                address(this)
+            )
+        );
     }
 
     /**
@@ -130,50 +153,21 @@ contract UnboundDai is Context, IERC20 {
         return _balances[account];
     }
 
-    // /**
-    //  * @dev Transfer the specified amount of tokens to the specified address.
-    //  *      Invokes the `tokenFallback` function if the recipient is a contract.
-    //  *      The token transfer fails if the recipient is a contract
-    //  *      but does not implement the `tokenFallback` function
-    //  *      or the fallback function to receive funds.
-    //  *
-    //  * @param _to    Receiver address.
-    //  * @param _value Amount of tokens that will be transferred.
-    //  * @param _data  Transaction metadata.
-    //  */
-    // function transfer(address _to, uint _value, bytes memory _data) public override returns (bool success){
-    //     // Standard function transfer similar to ERC20 transfer with no _data .
-    //     // Added due to backwards compatibility reasons .
-    //     _balances[msg.sender] = _balances[msg.sender].sub(_value);
-    //     _balances[_to] = _balances[_to].add(_value);
-    //     if(Address.isContract(_to)) {
-    //         IERC223Recipient receiver = IERC223Recipient(_to);
-    //         receiver.tokenFallback(msg.sender, _value, _data);
-    //     }
-    //     emit Transfer(msg.sender, _to, _value, _data);
-    //     return true;
-    // }
-    
-    // /**
-    //  * @dev Transfer the specified amount of tokens to the specified address.
-    //  *      This function works the same with the previous one
-    //  *      but doesn't contain `_data` param.
-    //  *      Added due to backwards compatibility reasons.
-    //  *
-    //  * @param _to    Receiver address.
-    //  * @param _value Amount of tokens that will be transferred.
-    //  */
-    // function transfer(address _to, uint _value) public override returns (bool success){
-    //     bytes memory empty = hex"00000000";
-    //     _balances[msg.sender] = _balances[msg.sender].sub(_value);
-    //     _balances[_to] = _balances[_to].add(_value);
-    //     if(Address.isContract(_to)) {
-    //         IERC223Recipient receiver = IERC223Recipient(_to);
-    //         receiver.tokenFallback(msg.sender, _value, empty);
-    //     }
-    //     emit Transfer(msg.sender, _to, _value, empty);
-    //     return true;
-    // }
+    //  PERMIT FUNCTION
+    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
+        require(deadline >= block.timestamp, 'EXPIRED');
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                DOMAIN_SEPARATOR,
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+            )
+        );
+        address recoveredAddress = ecrecover(digest, v, r, s);
+        require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_SIGNATURE');
+        _approve(owner, spender, value);
+        }
+    }
 
     /**
      * @dev See {IERC20-transfer}.
