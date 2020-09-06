@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 interface valuingInterface {
-    function unboundCreate(uint256 amount, address user, uint8 token) external;
-    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, uint8 token) external;
+    function unboundCreate(uint256 amount, address user, address token) external;
+    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external;
     
 }
 
@@ -67,7 +67,7 @@ contract LLC_EthDai {
     // Lock/Unlock functions
     // Mint path
     // tokenNum must be 0 (for now)
-    function lockLPT (uint256 LPTamt, uint8 tokenNum, uint extraTime, uint8 v, bytes32 r, bytes32 s) public {
+    function lockLPT (uint256 LPTamt, address uTokenAddr, uint8 v, bytes32 r, bytes32 s) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
@@ -83,7 +83,7 @@ contract LLC_EthDai {
         uint256 LPTValueInDai = totalDai.mul(LPTamt).div(totalLPTokens);  
 
         // call Permit and Transfer
-        uint deadline = block.timestamp.add(extraTime);
+        uint deadline = block.timestamp.add(600); // Hardcoding 10 minutes.
 
         transferLPT(msg.sender, LPTamt, deadline, v, r, s);
         
@@ -92,11 +92,11 @@ contract LLC_EthDai {
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
         // Call Valuing Contract
-        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum); // Hardcode "0" for AAA rating
+        valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
         
     }
 
-    function lockLPT1 (uint256 LPTamt, uint8 tokenNum) public {
+    function lockLPT1 (uint256 LPTamt, address uTokenAddr) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
@@ -120,7 +120,7 @@ contract LLC_EthDai {
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
         // Call Valuing Contract
-        valuingContract.unboundCreate(LPTValueInDai, msg.sender, tokenNum); // Hardcode "0" for AAA rating
+        valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
         
     }
 
@@ -139,11 +139,11 @@ contract LLC_EthDai {
     // Burn Path
 
     // tokenNum must be 0
-    function unlockLPT (uint256 LPToken, uint8 tokenNum) public {
+    function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
         // Burning of Udai will happen first
-        valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, tokenNum);
+        valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
         
         LPTContract.transfer(msg.sender, LPToken);
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);

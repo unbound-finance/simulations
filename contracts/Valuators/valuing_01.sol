@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 
-interface uDaiInterface {
+interface unboundInterface {
     function _mint(address account, uint256 amount, uint256 fee, address feeAddr) external;
     function _burn(address account, uint256 toBurn, uint256 fee, address feeAddr) external;
     function checkLoan(address user) external view returns (uint256 owed);
@@ -32,11 +32,14 @@ contract Valuing_01 {
     //Approved Contracts
     mapping (address => LiquidityLock) listOfLLC;
 
-   
+    // Approved unbound tokens
+    mapping (address => bool) isUnbound;
 
     //Unbound Token Contracts
     // uEthContract private uEthInterface;
-    uDaiInterface private uDaiContract;
+
+    // DO WE NEED THIS?? 
+    //unboundInterface private uDaiContract;
 
     // Modifiers
     modifier onlyOwner() {
@@ -45,42 +48,36 @@ contract Valuing_01 {
     }
 
     // Constructor
-    constructor (address feeAddr, address uDaiAddress) public {
-        uDaiContract = uDaiInterface(uDaiAddress);
+    constructor (address feeAddr) public {
+        
         _owner = msg.sender;
         feeHolder = feeAddr;
     }
 
     // Token Creation Functions
 
-    function unboundCreate(uint256 amount, address user, uint8 token) external {
+    function unboundCreate(uint256 amount, address user, address token) external {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
-        if (token == 0) {   // 0 = DAI
-            
-                uint256 loanAmt = amount.div(listOfLLC[msg.sender].loanRate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
-                uDaiContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, feeHolder);
-
-                // do swap here
-            
-        } else {
-            revert();
-        }
+        require (isUnbound[token], "invalid unbound contract");
+        
+        unboundInterface unboundContract = unboundInterface(token);
+        uint256 loanAmt = amount.div(listOfLLC[msg.sender].loanRate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
+        unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, feeHolder);
 
     }
 
-    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, uint8 token) external {
+    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
-        if (token == 0) {
-            uint256 userLoaned = uDaiContract.checkLoan(user);
-            uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
-            // compute amount of uDai necessary to unlock LPT
+        require (isUnbound[token], "invalid unbound contract");
+        unboundInterface unboundContract = unboundInterface(token);
+        uint256 userLoaned = unboundContract.checkLoan(user);
+        uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
+        // compute amount of uDai necessary to unlock LPT
 
-            // perform the swap  -- version 2
+        
 
-            uDaiContract._burn(user, toPayInUDai, listOfLLC[msg.sender].feeRate, feeHolder);
-        } else {
-            revert();
-        }
+        unboundContract._burn(user, toPayInUDai, listOfLLC[msg.sender].feeRate, feeHolder);
+        
     }
 
     function getLLCStruct(address LLC) public view returns (uint256 fee, uint256 loanrate) {
@@ -89,6 +86,11 @@ contract Valuing_01 {
     }
 
     // onlyOwner Functions
+
+    // grant permission for an unbound token to be called
+    function allowToken (address uToken) public onlyOwner {
+        isUnbound[uToken] = true;
+    }
 
     // grants an LLC permission
     function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
