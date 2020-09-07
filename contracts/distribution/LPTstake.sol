@@ -88,7 +88,7 @@ contract unboundStaking {
     address _daiAddr;
 
     // Uniswap Router -- CHANGE FOR MAINNET
-    address uniswapRouter = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    address uniswapRouter;
 
     // tracks uDai that has been credited to stakers
     // call balanceOf(address(this)) from uDai, minus _trackedTokens to get tokens waiting to be split
@@ -125,7 +125,7 @@ contract unboundStaking {
 
         // sets addresses and initiates interfaces
         _feeSplitterAddr = feeSplitter;
-
+        uniswapRouter = routerAddr;
         _uDaiAddr = uDai;
         _daiAddr = dai;
 

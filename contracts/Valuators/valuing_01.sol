@@ -48,8 +48,8 @@ contract Valuing_01 {
     }
 
     // Constructor
-    constructor (address feeAddr) public {
-        
+    constructor (address feeAddr, address uDai) public {
+        isUnbound[uDai] = true;
         _owner = msg.sender;
         feeHolder = feeAddr;
     }
