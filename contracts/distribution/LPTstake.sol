@@ -8,6 +8,7 @@ interface uDaiERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function transfer(address _to, uint _value) external returns (bool success);
     function balanceOf(address account) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
 interface daiInterface {
@@ -19,6 +20,7 @@ interface daiInterface {
     function transferFrom(address from, address to, uint value) external returns (bool);
     function transfer(address to, uint value) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
+    function approve(address spender, uint value) external returns (bool);
 }
 
 interface LPT {
@@ -85,6 +87,9 @@ contract unboundStaking {
     address _uDaiAddr;
     address _daiAddr;
 
+    // Uniswap Router -- CHANGE FOR MAINNET
+    address uniswapRouter = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+
     // tracks uDai that has been credited to stakers
     // call balanceOf(address(this)) from uDai, minus _trackedTokens to get tokens waiting to be split
     uint256 public _trackedRewardUdai;
@@ -143,6 +148,10 @@ contract unboundStaking {
         uDaiContract.transferFrom(msg.sender, address(this), uDai);
         daiContract.transferFrom(msg.sender, address(this), Dai);
 
+        // Call Approval to uDai and Dai
+        uDaiContract.approve(uniswapRouter, uDai);
+        daiContract.approve(uniswapRouter, Dai);
+
         // calculate Minimums (10% below given amount for now)
         uint256 uDaiMin = uDai.sub(uDai.div(10));
         uint256 daiMin = Dai.sub(Dai.div(10));
@@ -154,7 +163,7 @@ contract unboundStaking {
 
         // splits pot
         splitPot();
-        
+
         // credits user with locked liquidity
         _liquidityLocked[msg.sender] = _liquidityLocked[msg.sender].add(liquidity);
 
