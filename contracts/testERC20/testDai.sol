@@ -10,6 +10,7 @@ contract TestDai is IERC20 {
     string public constant symbol = 'TDAI';
     uint8 public constant decimals = 18;
     uint  public override totalSupply;
+    string public constant version = "1";  // From DAI contract
     mapping(address => uint) public override balanceOf;
     mapping(address => mapping(address => uint)) public override allowance;
 
@@ -23,25 +24,19 @@ contract TestDai is IERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor(address tester) public {
+    constructor(address tester, uint256 chainId_) public {
         balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000 * (10 ** 18));
         balanceOf[tester] = balanceOf[tester].add(100000000 * (10 ** 18));
         totalSupply = totalSupply.add(1000000 * (10 ** 18));
 
         // Permit??
-        uint chainId;
-        assembly {
-            chainId := chainid
-        }
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
-                keccak256(bytes(name)),
-                keccak256(bytes('1')),
-                chainId,
-                address(this)
-            )
-        );
+        DOMAIN_SEPARATOR = keccak256(abi.encode(
+            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+            keccak256(bytes(name)),
+            keccak256(bytes(version)),
+            chainId_,
+            address(this)
+        ));
     }
 
     function _mint(address to, uint value) public {
@@ -85,19 +80,29 @@ contract TestDai is IERC20 {
         return true;
     }
 
-    //  PERMIT FUNCTION
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
-        require(deadline >= block.timestamp, 'EXPIRED');
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                '\x19\x01',
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-            )
-        );
-        address recoveredAddress = ecrecover(digest, v, r, s);
-        require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_SIGNATURE');
-        _approve(owner, spender, value);
-        }
+    //  PERMIT FUNCTION - from DAI contract
+    function permit(address holder, address spender, uint256 nonce, uint256 expiry,
+                    bool allowed, uint8 v, bytes32 r, bytes32 s) external
+    {
+        bytes32 digest =
+            keccak256(abi.encodePacked(
+                "\x19\x01",                    // Do not understand what this is for
+                DOMAIN_SEPARATOR,              
+                keccak256(abi.encode(          // are we just taking a hash of a hash here?
+                    PERMIT_TYPEHASH,
+                    holder,
+                    spender,
+                    nonce,
+                    expiry,
+                    allowed))
+        ));
+
+        require(holder != address(0), "invalid-address-0");
+        require(holder == ecrecover(digest, v, r, s), "invalid-permit");
+        require(expiry == 0 || now <= expiry, "permit-expired");
+        require(nonce == nonces[holder]++, "invalid-nonce");           // When does nonces[holder] actually change?
+        uint wad = allowed ? uint(-1) : 0;
+        allowance[holder][spender] = wad;
+        emit Approval(holder, spender, wad);
     }
 }
