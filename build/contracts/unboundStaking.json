@@ -94,7 +94,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -113,7 +114,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -132,7 +134,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -145,7 +148,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -164,7 +168,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -220,7 +225,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -21465,12 +21471,65 @@
         }
       },
       "links": {},
-      "address": "0x339004Ea6d1F74B94A905a314B52211f0DdeC00F",
-      "transactionHash": "0x75b1b6ddd9e696a5450810b1d5b097bfe78fac7d66d9c35d51dc671bec631be7"
+      "address": "0xD1D857BA3B9b802350599C43E7cBA9936D5c16c2",
+      "transactionHash": "0x7ee697d6fc855c6dcf5857905e14adb06f3407db688b8b49acb088822e91e565"
+    },
+    "5777": {
+      "events": {
+        "0x0c7ef932d3b91976772937f18d5ef9b39a9930bef486b576c374f047c4b512dc": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "user",
+              "type": "address"
+            }
+          ],
+          "name": "Claim",
+          "type": "event"
+        },
+        "0x9e71bc8eea02a63969f509818f2dafb9254532904319f9dbda79b67bd34a5f3d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "liquidityTokens",
+              "type": "uint256"
+            }
+          ],
+          "name": "Staked",
+          "type": "event"
+        },
+        "0x6834bcb181c65df18ce2da14523ae95d5db81f9a666b2334d1b58e8caa952cfb": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "user",
+              "type": "address"
+            }
+          ],
+          "name": "UnStaked",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x0aac0613c95650525411169695e96237b3e45d06",
+      "transactionHash": "0x01c8549261586a183f151270d061dbb53d12fd3b84ee3ee2df537907e19e6f9f"
     }
   },
   "schemaVersion": "3.2.3",
-  "updatedAt": "2020-09-07T05:53:27.249Z",
+  "updatedAt": "2020-09-07T17:33:02.203Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {}
   },
