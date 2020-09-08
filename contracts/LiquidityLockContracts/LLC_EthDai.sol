@@ -4,6 +4,10 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+import '@uniswap/lib/contracts/libraries/FixedPoint.sol';
+
+import "../utils/UniswapV2OracleLibrary.sol";
+
 interface valuingInterface {
     function unboundCreate(uint256 amount, address user, address token) external;
     function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external;
@@ -36,15 +40,28 @@ interface liquidityPoolToken {
 contract LLC_EthDai {
     using SafeMath for uint256;
     using Address for address;
+    using FixedPoint for *;
 
     //Owner Address
     address _owner;
 
-    // Position in Valuing - eth/dai is zero 
-    // uint32 position = 0;  REMOVE ONCE TESTED
+    // LPT address
+    address pair;
+
+    // Oracle Variables
+    uint    public price0CumulativeLast;
+    uint    public price1CumulativeLast;
+    uint32  public blockTimestampLast;
+    FixedPoint.uq112x112 public price0Average;
+    FixedPoint.uq112x112 public price1Average;
+
+    uint public constant PERIOD = 60; // set to 60 seconds for easy testing.
 
     // tokens locked by users
     mapping (address => uint256) public _tokensLocked;
+
+    // token position of Stablecoin
+    uint8 _position;
 
     // Interfaced Contracts
     valuingInterface private valuingContract;
@@ -57,11 +74,33 @@ contract LLC_EthDai {
     }
 
     // Constructor
-    constructor (address valuingAddress, address LPTaddress) public {
+    constructor (address valuingAddress, address LPTaddress, uint8 position) public {
         _owner = msg.sender;
         
         valuingContract = valuingInterface(valuingAddress);
         LPTContract = liquidityPoolToken(LPTaddress);
+        pair = LPTaddress;
+
+        // Set Position of Stablecoin
+        require(position == 0 || position == 1, "invalid");
+        _position = position;
+
+        // ORACLE
+
+        // (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =
+        //     UniswapV2OracleLibrary.currentCumulativePrices(address(pair));
+
+        // price0CumulativeLast = price0Cumulative;
+        // price1CumulativeLast = price1Cumulative;
+        // blockTimestampLast = blockTimestamp;
+
+        price0CumulativeLast = LPTContract.price0CumulativeLast(); // fetch the current accumulated price value (1 / 0)
+        price1CumulativeLast = LPTContract.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
+        uint112 reserve0;
+        uint112 reserve1;
+        (reserve0, reserve1, blockTimestampLast) = LPTContract.getReserves();
+
+        // require(reserve0 != 0 && reserve1 != 0, 'NO_RESERVES'); // ensure that there's liquidity in the pair
     }
 
     // Lock/Unlock functions
@@ -70,25 +109,39 @@ contract LLC_EthDai {
     function lockLPT (uint256 LPTamt, address uTokenAddr, uint8 v, bytes32 r, bytes32 s) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
-
-        // token0 is DAI, token1 is WETH
-        // COULD REMOVE _token1 and _time. They are not used. But we need to test this first.
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
         
-        uint256 totalDai = _token0 * 2; // This is assuming the value of WETH is equal to value in DAI
+        // Gets reserve values
+        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
 
-        // Use Uniswap oracle to compute average of valuations
+        // checks if enough time has passed to update price oracle
+        if (_time - blockTimestampLast >= PERIOD) {
+            update();
+        }
+
+        // makes sure current prices are not zero -- NOT WORKING
+        // require(price1Average > 0 && price0Average > 0, "invalid prices");
+        
+        // use oracle pricing to calculate value in Stablecoin
+        // TEST!!!!!
+        uint256 totalDai;
+        if (_position == 0) {
+            totalDai = _token0 + price1Average.mul(_token1).decode144(); 
+        } else {
+            totalDai = _token1 + price0Average.mul(_token0).decode144();
+        }
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalDai.mul(LPTamt).div(totalLPTokens);  
 
         // call Permit and Transfer
         uint deadline = block.timestamp.add(600); // Hardcoding 10 minutes.
+        // question for chetan
+
 
         transferLPT(msg.sender, LPTamt, deadline, v, r, s);
         
 
-        // map locked tokens to user
+        // map locked tokens to user address
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
         // Call Valuing Contract
@@ -100,22 +153,31 @@ contract LLC_EthDai {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
-        // token0 is DAI, token1 is WETH
-        // COULD REMOVE _token1 and _time. They are not used. But we need to test this first.
+        // Gets reserve values
         (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
-        
-        uint256 totalDai = _token0 * 2; // This is assuming the value of WETH is equal to value in DAI
 
-        // Use Uniswap oracle to compute average of valuations
+        // checks if enough time has passed to update price oracle
+        if (_time - blockTimestampLast >= PERIOD) {
+            update();
+        }
+
+        // makes sure current prices are not zero (DOES NOT WORK)
+        // require(price1Average > 0 && price0Average > 0, "invalid prices");
+        
+        // use oracle pricing to calculate value in Stablecoin
+        // TEST!!!!!
+        uint256 totalDai;
+        if (_position == 0) {
+            totalDai = _token0 + price1Average.mul(_token1).decode144(); 
+        } else {
+            totalDai = _token1 + price0Average.mul(_token0).decode144();
+        }
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalDai.mul(LPTamt).div(totalLPTokens);  
 
-        
-
         transferLPT1(LPTamt);
         
-
         // map locked tokens to user
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
@@ -147,11 +209,27 @@ contract LLC_EthDai {
         
         LPTContract.transfer(msg.sender, LPToken);
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
-        // compute amount to burn based on this
-        // I think with this formula, even if all valuing variables are constant, it is possible that the amount of Udai to burn may be more/less than on Mint.
-
+        
     }
-    
+
+    // Oracle Update Function
+    function update() internal {
+        (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =
+            UniswapV2OracleLibrary.currentCumulativePrices(address(pair));
+        uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
+
+        // ensure that at least one full period has passed since the last update
+        require(timeElapsed >= PERIOD, 'ExampleOracleSimple: PERIOD_NOT_ELAPSED');
+
+        // overflow is desired, casting never truncates
+        // cumulative price is in (uq112x112 price * seconds) units so we simply wrap it after division by time elapsed
+        price0Average = FixedPoint.uq112x112(uint224((price0Cumulative - price0CumulativeLast) / timeElapsed));
+        price1Average = FixedPoint.uq112x112(uint224((price1Cumulative - price1CumulativeLast) / timeElapsed));
+
+        price0CumulativeLast = price0Cumulative;
+        price1CumulativeLast = price1Cumulative;
+        blockTimestampLast = blockTimestamp;
+    }
 
     // onlyOwner Functions
 
