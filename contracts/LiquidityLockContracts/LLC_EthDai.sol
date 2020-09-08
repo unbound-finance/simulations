@@ -4,9 +4,7 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-import '@uniswap/lib/contracts/libraries/FixedPoint.sol';
 
-import "../utils/UniswapV2OracleLibrary.sol";
 
 interface valuingInterface {
     function unboundCreate(uint256 amount, address user, address token) external;
@@ -40,20 +38,17 @@ interface liquidityPoolToken {
 contract LLC_EthDai {
     using SafeMath for uint256;
     using Address for address;
-    using FixedPoint for *;
 
     //Owner Address
     address _owner;
 
     // LPT address
-    address pair;
+    address public pair;
 
     // Oracle Variables
     uint    public price0CumulativeLast;
     uint    public price1CumulativeLast;
-    uint32  public blockTimestampLast;
-    FixedPoint.uq112x112 public price0Average;
-    FixedPoint.uq112x112 public price1Average;
+    uint256  public blockTimestampLast;
 
     uint public constant PERIOD = 60; // set to 60 seconds for easy testing.
 
@@ -110,28 +105,10 @@ contract LLC_EthDai {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
-        // Gets reserve values
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
-
-        // checks if enough time has passed to update price oracle
-        if (_time - blockTimestampLast >= PERIOD) {
-            update();
-        }
-
-        // makes sure current prices are not zero -- NOT WORKING
-        // require(price1Average > 0 && price0Average > 0, "invalid prices");
+        uint256 totalUSD = pricing();
         
-        // use oracle pricing to calculate value in Stablecoin
-        // TEST!!!!!
-        uint256 totalDai;
-        if (_position == 0) {
-            totalDai = _token0 + price1Average.mul(_token1).decode144(); 
-        } else {
-            totalDai = _token1 + price0Average.mul(_token0).decode144();
-        }
-
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
-        uint256 LPTValueInDai = totalDai.mul(LPTamt).div(totalLPTokens);  
+        uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
 
         // call Permit and Transfer
         uint deadline = block.timestamp.add(600); // Hardcoding 10 minutes.
@@ -153,28 +130,11 @@ contract LLC_EthDai {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
-        // Gets reserve values
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
 
-        // checks if enough time has passed to update price oracle
-        if (_time - blockTimestampLast >= PERIOD) {
-            update();
-        }
-
-        // makes sure current prices are not zero (DOES NOT WORK)
-        // require(price1Average > 0 && price0Average > 0, "invalid prices");
-        
-        // use oracle pricing to calculate value in Stablecoin
-        // TEST!!!!!
-        uint256 totalDai;
-        if (_position == 0) {
-            totalDai = _token0 + price1Average.mul(_token1).decode144(); 
-        } else {
-            totalDai = _token1 + price0Average.mul(_token0).decode144();
-        }
+        uint256 totalUSD = pricing();
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
-        uint256 LPTValueInDai = totalDai.mul(LPTamt).div(totalLPTokens);  
+        uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
 
         transferLPT1(LPTamt);
         
@@ -212,23 +172,33 @@ contract LLC_EthDai {
         
     }
 
-    // Oracle Update Function
-    function update() internal {
-        (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =
-            UniswapV2OracleLibrary.currentCumulativePrices(address(pair));
-        uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
+    function pricing() internal returns (uint256 totalDai) {
+        uint256 price0cumulative = LPTContract.price0CumulativeLast();
+        uint256 price1cumulative = LPTContract.price1CumulativeLast();
 
-        // ensure that at least one full period has passed since the last update
-        require(timeElapsed >= PERIOD, 'ExampleOracleSimple: PERIOD_NOT_ELAPSED');
+        // Gets reserve values
+        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
 
-        // overflow is desired, casting never truncates
-        // cumulative price is in (uq112x112 price * seconds) units so we simply wrap it after division by time elapsed
-        price0Average = FixedPoint.uq112x112(uint224((price0Cumulative - price0CumulativeLast) / timeElapsed));
-        price1Average = FixedPoint.uq112x112(uint224((price1Cumulative - price1CumulativeLast) / timeElapsed));
+        // reverts if priceCumul - priceCumulLast = 0
+        require( _time - blockTimestampLast > 0, "need more time");
+        
+        // use oracle pricing to calculate value in Stablecoin
+        // TEST!!!!!
+        if (_position == 0) {
+            // totalDai = _token0 + _token1.mul((price1CumulativeLast.sub(price1cumulative)).div(_time - blockTimestampLast)); 
+            totalDai = _token0 + _token1 * (price1CumulativeLast - price1cumulative) / (_time - blockTimestampLast);
+        } else {
+            // totalDai = _token1 + _token0.mul((price0CumulativeLast.sub(price0cumulative)).div(_time - blockTimestampLast));
+            totalDai = _token1 + _token0 * (price0CumulativeLast - price0cumulative) / (_time - blockTimestampLast);
+        }
 
-        price0CumulativeLast = price0Cumulative;
-        price1CumulativeLast = price1Cumulative;
-        blockTimestampLast = blockTimestamp;
+        // checks if enough time has passed to update price cumulative last
+        if (_time - blockTimestampLast >= PERIOD) {
+            price0CumulativeLast = price0cumulative;
+            price1CumulativeLast = price1cumulative;
+            blockTimestampLast = _time;
+        }
+
     }
 
     // onlyOwner Functions
