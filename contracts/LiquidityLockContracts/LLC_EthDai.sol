@@ -81,14 +81,6 @@ contract LLC_EthDai {
         _position = position;
 
         // ORACLE
-
-        // (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =
-        //     UniswapV2OracleLibrary.currentCumulativePrices(address(pair));
-
-        // price0CumulativeLast = price0Cumulative;
-        // price1CumulativeLast = price1Cumulative;
-        // blockTimestampLast = blockTimestamp;
-
         price0CumulativeLast = LPTContract.price0CumulativeLast(); // fetch the current accumulated price value (1 / 0)
         price1CumulativeLast = LPTContract.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
         uint112 reserve0;
@@ -104,8 +96,9 @@ contract LLC_EthDai {
     function lockLPT (uint256 LPTamt, address uTokenAddr, uint8 v, bytes32 r, bytes32 s) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
-        
-        uint256 totalUSD = pricing();
+        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+        // call Oracle
+        uint256 totalUSD = _token0 * 2; // pricing();
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
@@ -114,10 +107,8 @@ contract LLC_EthDai {
         uint deadline = block.timestamp.add(600); // Hardcoding 10 minutes.
         // question for chetan
 
-
         transferLPT(msg.sender, LPTamt, deadline, v, r, s);
         
-
         // map locked tokens to user address
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
 
@@ -172,6 +163,7 @@ contract LLC_EthDai {
         
     }
 
+    // Oracle logic
     function pricing() internal returns (uint256 totalDai) {
         uint256 price0cumulative = LPTContract.price0CumulativeLast();
         uint256 price1cumulative = LPTContract.price1CumulativeLast();
