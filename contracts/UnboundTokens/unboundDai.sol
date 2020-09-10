@@ -15,6 +15,9 @@ contract UnboundDai is Context, IERC20 {
     using SafeMath for uint256;
     using Address for address;
 
+    event Mint(address user, uint256 newMint);
+    event Burn(address user, uint256 burned);
+
     mapping (address => uint256) private _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
@@ -32,6 +35,15 @@ contract UnboundDai is Context, IERC20 {
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
     mapping(address => uint) public nonces;
+
+    // staking contract address (40%)
+    address public _stakeAddr;
+
+    // Emergency fund (40%)
+    address public _safuAddr;
+
+    // Dev fund (20%)
+    address public _devFundAddr;
 
 
 
@@ -54,12 +66,18 @@ contract UnboundDai is Context, IERC20 {
         _;
     }
 
-    constructor (string memory name, string memory symbol, uint256 chainId_) public {
+    constructor (string memory name, string memory symbol, uint256 chainId_, address Safu, address devFund) public {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
         _owner = msg.sender;
         _totalSupply = 0;
+
+        _safuAddr = Safu;
+        _devFundAddr = devFund;
+
+        // MUST BE MANUALLY CHANGED TO uDai LIQ pool.
+        _stakeAddr = Safu;
 
         // Permit??
         DOMAIN_SEPARATOR = keccak256(abi.encode(
@@ -173,8 +191,8 @@ contract UnboundDai is Context, IERC20 {
     }
 
     
-    // MINT: Only callable by valuing contract
-    function _mint(address account, uint256 amount, uint256 fee, address feeAddr) external virtual {
+    // MINT: Only callable by valuing contract - Now splits fees
+    function _mint(address account, uint256 amount, uint256 fee) external virtual {
         require(account != address(0), "ERC20: mint to the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         // _beforeTokenTransfer(address(0), account, amount);
@@ -184,17 +202,32 @@ contract UnboundDai is Context, IERC20 {
         // The amount the user will receive
         uint256 toMint = amount.sub(feeAmount);
 
+        // Splitting of fees
+        uint256 tenth = feeAmount.div(10);
 
+        // crediting loan to user
         _minted[account] = _minted[account].add(amount);
 
+        // adding total amount of new tokens to totalSupply
         _totalSupply = _totalSupply.add(amount);
+
+        // Credits user with their uDai loan, minus fees
         _balances[account] = _balances[account].add(toMint);
-        _balances[feeAddr] = _balances[feeAddr].add(feeAmount);
-        emit Transfer(address(0), account, amount);
+
+        // sends 40% to staking. MUST SET uDai Liquidity pool first
+        _balances[_stakeAddr] = _balances[_stakeAddr].add(tenth.mul(4));
+
+        // sends 40% to Safu Fund
+        _balances[_safuAddr] = _balances[_safuAddr].add(tenth.mul(4));
+
+        // sends the remaineder to dev fund
+        _balances[_devFundAddr] = _balances[_devFundAddr].add(feeAmount.sub(tenth.mul(8)));
+
+        emit Mint(account, amount);
     }
 
     // BURN function. Only callable from Valuing.
-    function _burn(address account, uint256 toBurn, uint256 fee, address feeAddr) external virtual {
+    function _burn(address account, uint256 toBurn, uint256 fee) external virtual {
         require(account != address(0), "ERC20: burn from the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         require(_minted[account] >= 0, "You have no loan");
@@ -206,21 +239,29 @@ contract UnboundDai is Context, IERC20 {
         // checks if user has enough uDai to cover loan and 0.25% fee
         require(_balances[account] >= totalToRemove, "Insufficient uDai to pay back loan");
 
+        // Splitting of fees
+        uint256 tenth = burnFee.div(10);
+
         // removes the amount of uDai to burn from _minted mapping/
-        // SHOULD THIS INCLUDE THE FEE OR NO??
         _minted[account] = _minted[account].sub(toBurn);
         
         // Removes loan AND fee from user balance
         _balances[account] = _balances[account].sub(totalToRemove, "ERC20: burn amount exceeds balance");
 
-        // Adds burn fee to fee holding address
-        _balances[feeAddr] = _balances[feeAddr].add(burnFee);
+        // sends 40% to staking. MUST SET uDai Liquidity pool first
+        _balances[_stakeAddr] = _balances[_stakeAddr].add(tenth.mul(4));
+
+        // sends 40% to Safu Fund
+        _balances[_safuAddr] = _balances[_safuAddr].add(tenth.mul(4));
+
+        // sends the remaineder to dev fund
+        _balances[_devFundAddr] = _balances[_devFundAddr].add(burnFee.sub(tenth.mul(8)));
 
         // Removes the loan amount of uDai from circulation
         _totalSupply = _totalSupply.sub(toBurn);
 
         // This event could be renamed for easier identification.
-        emit Transfer(account, address(0), toBurn);
+        emit Burn(account, toBurn);
     }
 
     // Checks how much uDai the user has minted (and owes to get liquidity back)
@@ -229,6 +270,22 @@ contract UnboundDai is Context, IERC20 {
     }
     
     // onlyOwner Functions
+
+    // Changes stakingAddr
+    function changeStaking(address newStaking) public onlyOwner {
+        _stakeAddr = newStaking;
+    }
+
+    // Changes safuFund
+    function changeSafuFund(address newSafuFund) public onlyOwner {
+        _safuAddr = newSafuFund;
+    }
+
+    // Changes devFund
+    function changeDevFund(address newDevFund) public onlyOwner {
+        _devFundAddr = newDevFund;
+    }
+
     // Changes Valuator Contract Address
     function changeValuator(address newValuator) public onlyOwner {
         _valuator = newValuator;

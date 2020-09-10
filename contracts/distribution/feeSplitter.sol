@@ -58,33 +58,14 @@ contract feeSplitter /* is IERC223Recipient */ {
 
         // Sets corresponding addresses
         _owner = msg.sender;
-        _stakeAddr = devFundAddr;
+        // _stakeAddr = devFundAddr;
         _eFundAddr = eFundAddr;
         _devFundAddr = devFundAddr;
         _uDaiAddr = uDai;
         
     }
 
-    
-
     // onlyOwner Functions
-
-    // function tokenFallback(address _from, uint _value, bytes memory _data) public override {
-    //     require(_from == _uDaiAddr, "coming from incorrect address");
-
-    //     // to achieve 40/40/20, we will cut _value into fifths.
-    //     // This is hardcoded and cannot be altered. Would require rework to be able to change % distribution.
-    //     uint256 fifth = _value.div(5);
-
-    //     // sends 40%
-    //     uDaiContract.transfer(_stakeAddr, fifth.add(fifth));
-    //     uDaiContract.transfer(_eFundAddr, fifth.add(fifth));
-
-    //     // sends 20%
-    //     // This math is to ensure we do not accidentally create or destroy tokens out of thin air.
-    //     uDaiContract.transfer(_devFundAddr, _value.sum(fifth.mul(4)));
-
-    // }
 
     // This must be called
     function splitFunds() public {

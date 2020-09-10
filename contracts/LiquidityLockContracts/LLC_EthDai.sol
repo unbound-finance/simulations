@@ -45,18 +45,11 @@ contract LLC_EthDai {
     // LPT address
     address public pair;
 
-    // Oracle Variables
-    uint    public price0CumulativeLast;
-    uint    public price1CumulativeLast;
-    uint256  public blockTimestampLast;
-
-    uint public constant PERIOD = 60; // set to 60 seconds for easy testing.
-
     // tokens locked by users
     mapping (address => uint256) public _tokensLocked;
 
     // token position of Stablecoin
-    uint8 _position;
+    uint8 public _position;
 
     // Interfaced Contracts
     valuingInterface private valuingContract;
@@ -79,35 +72,31 @@ contract LLC_EthDai {
         // Set Position of Stablecoin
         require(position == 0 || position == 1, "invalid");
         _position = position;
-
-        // ORACLE
-        price0CumulativeLast = LPTContract.price0CumulativeLast(); // fetch the current accumulated price value (1 / 0)
-        price1CumulativeLast = LPTContract.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
-        uint112 reserve0;
-        uint112 reserve1;
-        (reserve0, reserve1, blockTimestampLast) = LPTContract.getReserves();
-
-        // require(reserve0 != 0 && reserve1 != 0, 'NO_RESERVES'); // ensure that there's liquidity in the pair
     }
 
     // Lock/Unlock functions
     // Mint path
     // tokenNum must be 0 (for now)
-    function lockLPT (uint256 LPTamt, address uTokenAddr, uint8 v, bytes32 r, bytes32 s) public {
+    function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
+
         (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+
         // call Oracle
-        uint256 totalUSD = _token0 * 2; // pricing();
+        uint256 totalUSD;
+        if (_position == 0) {
+            totalUSD = _token0 * 2; // pricing();
+        } else {
+            totalUSD = _token1 * 2;
+        }
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
 
         // call Permit and Transfer
-        uint deadline = block.timestamp.add(600); // Hardcoding 10 minutes.
-        // question for chetan
 
-        transferLPT(msg.sender, LPTamt, deadline, v, r, s);
+        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
         
         // map locked tokens to user address
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
@@ -117,17 +106,24 @@ contract LLC_EthDai {
         
     }
 
-    function lockLPT1 (uint256 LPTamt, address uTokenAddr) public {
+    // Requires approval first
+    function lockLPT (uint256 LPTamt, address uTokenAddr) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
+        
+        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
 
-
-        uint256 totalUSD = pricing();
+        uint256 totalUSD;
+        if (_position == 0) {
+            totalUSD = _token0 * 2; // pricing();
+        } else {
+            totalUSD = _token1 * 2;
+        }
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
 
-        transferLPT1(LPTamt);
+        transferLPT(LPTamt);
         
         // map locked tokens to user
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
@@ -137,13 +133,12 @@ contract LLC_EthDai {
         
     }
 
-    function transferLPT1(uint256 amount) internal {
-        //LPTContract.permit(msg.sender, address(this), amount, deadline, v, r, s);
+    function transferLPT(uint256 amount) internal {
         LPTContract.transferFrom(msg.sender, address(this), amount);
         
     }
 
-    function transferLPT(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
+    function transferLPTPermit(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
         LPTContract.permit(user, address(this), amount, deadline, v, r, s);
         LPTContract.transferFrom(msg.sender, address(this), amount);
         
@@ -161,36 +156,6 @@ contract LLC_EthDai {
         LPTContract.transfer(msg.sender, LPToken);
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
         
-    }
-
-    // Oracle logic
-    function pricing() internal returns (uint256 totalDai) {
-        uint256 price0cumulative = LPTContract.price0CumulativeLast();
-        uint256 price1cumulative = LPTContract.price1CumulativeLast();
-
-        // Gets reserve values
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
-
-        // reverts if priceCumul - priceCumulLast = 0
-        require( _time - blockTimestampLast > 0, "need more time");
-        
-        // use oracle pricing to calculate value in Stablecoin
-        // TEST!!!!!
-        if (_position == 0) {
-            // totalDai = _token0 + _token1.mul((price1CumulativeLast.sub(price1cumulative)).div(_time - blockTimestampLast)); 
-            totalDai = _token0 + _token1 * (price1CumulativeLast - price1cumulative) / (_time - blockTimestampLast);
-        } else {
-            // totalDai = _token1 + _token0.mul((price0CumulativeLast.sub(price0cumulative)).div(_time - blockTimestampLast));
-            totalDai = _token1 + _token0 * (price0CumulativeLast - price0cumulative) / (_time - blockTimestampLast);
-        }
-
-        // checks if enough time has passed to update price cumulative last
-        if (_time - blockTimestampLast >= PERIOD) {
-            price0CumulativeLast = price0cumulative;
-            price1CumulativeLast = price1cumulative;
-            blockTimestampLast = _time;
-        }
-
     }
 
     // onlyOwner Functions
