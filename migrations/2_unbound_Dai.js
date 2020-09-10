@@ -19,7 +19,7 @@ module.exports = function (deployer) {
     return deployer.deploy(valuing, unbound).then((ins) => {
       valuer = ins.address;
       
-      return deployer.deploy(LLC, valuer, "0x1443398Aa8E16E0F289B12ddCf666eeC4215bF46", 0);
+      return deployer.deploy(LLC, valuer, "0x266480906fd0aa3edd7ff64f466ea9684b792179", 0);
       
     });
     
