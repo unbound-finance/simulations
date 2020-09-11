@@ -45,6 +45,10 @@ contract UnboundDai is Context, IERC20 {
     // Dev fund (20%)
     address public _devFundAddr;
 
+    // Dev Fund split
+    uint256 public _stakeShares;
+    uint256 public _safuShares;
+
 
 
     // tracks users who minted. Need or don't need?
@@ -72,9 +76,11 @@ contract UnboundDai is Context, IERC20 {
         _decimals = 18;
         _owner = msg.sender;
         _totalSupply = 0;
-
         _safuAddr = Safu;
         _devFundAddr = devFund;
+
+        _stakeShares = 8;
+        _safuShares = 8;
 
         // MUST BE MANUALLY CHANGED TO uDai LIQ pool.
         _stakeAddr = Safu;
@@ -203,7 +209,7 @@ contract UnboundDai is Context, IERC20 {
         uint256 toMint = amount.sub(feeAmount);
 
         // Splitting of fees
-        uint256 tenth = feeAmount.div(10);
+        uint256 share = feeAmount.div(20);
 
         // crediting loan to user
         _minted[account] = _minted[account].add(amount);
@@ -215,13 +221,13 @@ contract UnboundDai is Context, IERC20 {
         _balances[account] = _balances[account].add(toMint);
 
         // sends 40% to staking. MUST SET uDai Liquidity pool first
-        _balances[_stakeAddr] = _balances[_stakeAddr].add(tenth.mul(4));
+        _balances[_stakeAddr] = _balances[_stakeAddr].add(share.mul(_stakeShares));
 
         // sends 40% to Safu Fund
-        _balances[_safuAddr] = _balances[_safuAddr].add(tenth.mul(4));
+        _balances[_safuAddr] = _balances[_safuAddr].add(share.mul(_safuShares));
 
         // sends the remaineder to dev fund
-        _balances[_devFundAddr] = _balances[_devFundAddr].add(feeAmount.sub(tenth.mul(8)));
+        _balances[_devFundAddr] = _balances[_devFundAddr].add(feeAmount.sub(share.mul(_safuShares.add(_stakeShares))));
 
         emit Mint(account, amount);
     }
@@ -240,7 +246,7 @@ contract UnboundDai is Context, IERC20 {
         require(_balances[account] >= totalToRemove, "Insufficient uDai to pay back loan");
 
         // Splitting of fees
-        uint256 tenth = burnFee.div(10);
+        uint256 share = burnFee.div(20);
 
         // removes the amount of uDai to burn from _minted mapping/
         _minted[account] = _minted[account].sub(toBurn);
@@ -249,13 +255,13 @@ contract UnboundDai is Context, IERC20 {
         _balances[account] = _balances[account].sub(totalToRemove, "ERC20: burn amount exceeds balance");
 
         // sends 40% to staking. MUST SET uDai Liquidity pool first
-        _balances[_stakeAddr] = _balances[_stakeAddr].add(tenth.mul(4));
+        _balances[_stakeAddr] = _balances[_stakeAddr].add(share.mul(_stakeShares));
 
         // sends 40% to Safu Fund
-        _balances[_safuAddr] = _balances[_safuAddr].add(tenth.mul(4));
+        _balances[_safuAddr] = _balances[_safuAddr].add(share.mul(_safuShares));
 
         // sends the remaineder to dev fund
-        _balances[_devFundAddr] = _balances[_devFundAddr].add(burnFee.sub(tenth.mul(8)));
+        _balances[_devFundAddr] = _balances[_devFundAddr].add(burnFee.sub(share.mul(_safuShares.add(_stakeShares))));
 
         // Removes the loan amount of uDai from circulation
         _totalSupply = _totalSupply.sub(toBurn);
@@ -270,6 +276,18 @@ contract UnboundDai is Context, IERC20 {
     }
     
     // onlyOwner Functions
+
+    // change safuShare
+    function changeSafuShare(uint256 rate) public onlyOwner {
+        require(rate <= 20 && rate > 0, "bad input");
+        _safuShares = rate;
+    }
+
+    // change stakeShare
+    function changeStakeShare(uint256 rate) public onlyOwner {
+        require(rate <= 20 && rate > 0, "bad input");
+        _stakeShares = rate;
+    }
 
     // Changes stakingAddr
     function changeStaking(address newStaking) public onlyOwner {

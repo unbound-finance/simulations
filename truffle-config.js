@@ -27,7 +27,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const infuraKey = "a4dcdfe968254cd4a2a30381e3558541";
 
-const mnemonic = process.env.ETH_KEY;
+const mnemonic = "gallery cinnamon equal inform lend perfect kitchen grab today width eager thank";
 
 module.exports = {
   /**
