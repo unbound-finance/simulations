@@ -1,4 +1,4 @@
-pragma solidity =0.6.2;
+pragma solidity =0.5.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -9,10 +9,10 @@ contract TestDai is IERC20 {
     string public constant name = 'TestDai';
     string public constant symbol = 'TDAI';
     uint8 public constant decimals = 18;
-    uint  public override totalSupply;
+    uint  public totalSupply;
     string public constant version = "1";  // From DAI contract
-    mapping(address => uint) public override balanceOf;
-    mapping(address => mapping(address => uint)) public override allowance;
+    mapping(address => uint) public balanceOf;
+    mapping(address => mapping(address => uint)) public allowance;
 
     // PERMIT VARIABLES
     bytes32 public DOMAIN_SEPARATOR;
@@ -62,17 +62,17 @@ contract TestDai is IERC20 {
         emit Transfer(from, to, value);
     }
 
-    function approve(address spender, uint value) external override returns (bool) {
+    function approve(address spender, uint value) external returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
 
-    function transfer(address to, uint value) external override returns (bool) {
+    function transfer(address to, uint value) external returns (bool) {
         _transfer(msg.sender, to, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint value) external override returns (bool) {
+    function transferFrom(address from, address to, uint value) external returns (bool) {
         if (allowance[from][msg.sender] != uint(-1)) {
             allowance[from][msg.sender] = allowance[from][msg.sender].sub(value);
         }

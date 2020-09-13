@@ -1,4 +1,4 @@
-pragma solidity =0.6.2;
+pragma solidity =0.5.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -9,9 +9,9 @@ contract TestEth is IERC20 {
     string public constant name = 'TestEth';
     string public constant symbol = 'TETH';
     uint8 public constant decimals = 18;
-    uint  public override totalSupply;
-    mapping(address => uint) public override balanceOf;
-    mapping(address => mapping(address => uint)) public override allowance;
+    uint  public totalSupply;
+    mapping(address => uint) public balanceOf;
+    mapping(address => mapping(address => uint)) public allowance;
 
 
     event Approval(address indexed owner, address indexed spender, uint value);
@@ -46,17 +46,17 @@ contract TestEth is IERC20 {
         emit Transfer(from, to, value);
     }
 
-    function approve(address spender, uint value) external override returns (bool) {
+    function approve(address spender, uint value) external returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
 
-    function transfer(address to, uint value) external override returns (bool) {
+    function transfer(address to, uint value) external returns (bool) {
         _transfer(msg.sender, to, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint value) external override returns (bool) {
+    function transferFrom(address from, address to, uint value) external returns (bool) {
         if (allowance[from][msg.sender] != uint(-1)) {
             allowance[from][msg.sender] = allowance[from][msg.sender].sub(value);
         }
