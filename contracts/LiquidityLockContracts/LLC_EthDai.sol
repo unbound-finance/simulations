@@ -62,16 +62,27 @@ contract LLC_EthDai {
     }
 
     // Constructor
-    constructor (address valuingAddress, address LPTaddress, uint8 position) public {
+    constructor (address valuingAddress, address LPTaddress, address stableCoin) public {
         _owner = msg.sender;
         
         valuingContract = valuingInterface(valuingAddress);
         LPTContract = liquidityPoolToken(LPTaddress);
         pair = LPTaddress;
 
+        address toke0 = LPTContract.token0();
+        address toke1 = LPTContract.token1();
+
+        require (stableCoin == toke0 || stableCoin == toke1, "invalid");
+        if (stableCoin == toke0) {
+            _position = 0;
+        } else if (stableCoin == toke1) {
+            _position = 1;
+        }
+
         // Set Position of Stablecoin
-        require(position == 0 || position == 1, "invalid");
-        _position = position;
+        //
+        // require(position == 0 || position == 1, "invalid");
+        // _position = position;
     }
 
     // Lock/Unlock functions
