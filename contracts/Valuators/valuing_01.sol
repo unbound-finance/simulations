@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+pragma solidity >=0.4.23 <0.8.0;
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 interface unboundInterface {
     function _mint(address account, uint256 amount, uint256 fee) external;
-    function _burn(address account, uint256 toBurn, uint256 fee) external;
+    function _burn(address account, uint256 toBurn) external;
     function checkLoan(address user) external view returns (uint256 owed);
     function balanceOf(address account) external view returns (uint256); 
 }
@@ -67,7 +67,7 @@ contract Valuing_01 {
         uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
         
 
-        unboundContract._burn(user, toPayInUDai, listOfLLC[msg.sender].feeRate);
+        unboundContract._burn(user, toPayInUDai);
         
     }
 

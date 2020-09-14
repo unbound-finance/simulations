@@ -1,6 +1,6 @@
   
     
-pragma solidity ^0.6.2;
+pragma solidity >=0.4.23 <0.8.0;
 
 /**
  * @dev Interface of the ERC777Token standard as defined in the EIP.
