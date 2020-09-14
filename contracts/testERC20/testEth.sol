@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 pragma solidity =0.5.16;
+=======
+pragma solidity >=0.4.23 <0.8.0;
+>>>>>>> master
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";

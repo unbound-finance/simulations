@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 pragma solidity ^0.5.16;
+=======
+pragma solidity >=0.4.23 <0.8.0;
+>>>>>>> master
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
