@@ -1,6 +1,6 @@
 const uDai = artifacts.require("unboundDai");
 const valuing = artifacts.require("valuing_01");
-const test = artifacts.require("../contracts/testLPT.sol");
+// const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
 // const testDai = artifacts.require("TestDai");
 // const testEth = artifacts.require("TestEth");
@@ -8,7 +8,7 @@ const LLC = artifacts.require("LLC_EthDai");
 const feeSplitter = artifacts.require("feeSplitter");
 const LPTstake = artifacts.require("unboundStaking");
 
-const placeHoldAddr = "0x276673170227Ed4f09d6b9f4Ba9b8F4777d99762";
+const placeHoldAddr = "0x74a084d3c8a6FF8889988aba43BD5EDbd265665A";
 
 module.exports = function (deployer) {
   let unbound, valuer;

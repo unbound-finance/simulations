@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-pragma solidity =0.5.16;
-=======
 pragma solidity >=0.4.23 <0.8.0;
->>>>>>> master
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../openzeppelin/contracts/math/SafeMath.sol";
 
 contract TestEth is IERC20 {
     using SafeMath for uint;
@@ -13,13 +9,13 @@ contract TestEth is IERC20 {
     string public constant name = 'TestEth';
     string public constant symbol = 'TETH';
     uint8 public constant decimals = 18;
-    uint  public totalSupply;
-    mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) public allowance;
+    uint  public override totalSupply;
+    mapping(address => uint) public override balanceOf;
+    mapping(address => mapping(address => uint)) public override allowance;
 
 
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
+    // event Approval(address indexed owner, address indexed spender, uint value);
+    // event Transfer(address indexed from, address indexed to, uint value);
 
     constructor(address tester) public {
         balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000 * (10 ** 18));
@@ -50,17 +46,17 @@ contract TestEth is IERC20 {
         emit Transfer(from, to, value);
     }
 
-    function approve(address spender, uint value) external returns (bool) {
+    function approve(address spender, uint value) external override returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
 
-    function transfer(address to, uint value) external returns (bool) {
+    function transfer(address to, uint value) external override returns (bool) {
         _transfer(msg.sender, to, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint value) external returns (bool) {
+    function transferFrom(address from, address to, uint value) external override returns (bool) {
         if (allowance[from][msg.sender] != uint(-1)) {
             allowance[from][msg.sender] = allowance[from][msg.sender].sub(value);
         }

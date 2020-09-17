@@ -4,7 +4,7 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
 import '@uniswap/lib/contracts/libraries/FixedPoint.sol';
 
-import '../libraries/SafeMath.sol';
+import '../libraries/SafeMath_1.sol';
 import '../libraries/UniswapV2Library.sol';
 import '../libraries/UniswapV2OracleLibrary.sol';
 
@@ -14,7 +14,7 @@ import '../libraries/UniswapV2OracleLibrary.sol';
 // differs from the simple oracle which must be deployed once per pair.
 contract ExampleSlidingWindowOracle {
     using FixedPoint for *;
-    using SafeMath for uint;
+    using SafeMath_1 for uint;
 
     struct Observation {
         uint timestamp;

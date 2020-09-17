@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-<<<<<<< HEAD
-pragma solidity ^0.5.16;
-=======
 pragma solidity >=0.4.23 <0.8.0;
->>>>>>> master
 
-import "@openzeppelin/contracts/GSN/Context.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "../openzeppelin/contracts/GSN/Context.sol";
+import "../openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/contracts/utils/Address.sol";
 
 // import "../utils/IERC223.sol";
 // import "../utils/IERC223Recipient.sol";
@@ -62,7 +58,7 @@ contract UnboundDai is Context, IERC20 {
     address _owner;
 
     //Valuator Contract Address
-    address _valuator;
+    address public _valuator;
 
     modifier onlyOwner() {
         require(isOwner(), "Ownable: caller is not the owner");
@@ -114,12 +110,12 @@ contract UnboundDai is Context, IERC20 {
     }
 
    
-    function totalSupply() public view returns (uint256) {
+    function totalSupply() public override view returns (uint256) {
         return _totalSupply;
     }
 
 
-    function balanceOf(address account) public view returns (uint256) {
+    function balanceOf(address account) public override view returns (uint256) {
         return _balances[account];
     }
 
@@ -150,12 +146,12 @@ contract UnboundDai is Context, IERC20 {
     }
 
     // Transfer and transferFrom
-    function transfer(address recipient, uint256 amount) public returns (bool) {
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, msg.sender, _allowances[sender][msg.sender].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
@@ -172,11 +168,11 @@ contract UnboundDai is Context, IERC20 {
         emit Transfer(sender, recipient, amount);
     }
     
-    function allowance(address owner, address spender) public view returns (uint256) {
+    function allowance(address owner, address spender) public override view returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 amount) public returns (bool) {
+    function approve(address spender, uint256 amount) public override returns (bool) {
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -237,11 +233,7 @@ contract UnboundDai is Context, IERC20 {
     }
 
     // BURN function. Only callable from Valuing.
-<<<<<<< HEAD
-    function _burn(address account, uint256 toBurn, uint256 fee) external {
-=======
     function _burn(address account, uint256 toBurn) external virtual {
->>>>>>> master
         require(account != address(0), "ERC20: burn from the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         require(_minted[account] >= 0, "You have no loan");

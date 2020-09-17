@@ -1,9 +1,9 @@
 pragma solidity =0.6.6;
 
-import '../libraries/SafeMath.sol';
+import '../libraries/SafeMath_1.sol';
 
 contract DeflatingERC20 {
-    using SafeMath for uint;
+    using SafeMath_1 for uint;
 
     string public constant name = 'Deflating Test Token';
     string public constant symbol = 'DTT';

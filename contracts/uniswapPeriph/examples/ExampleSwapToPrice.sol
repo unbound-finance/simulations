@@ -4,13 +4,13 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
 import '@uniswap/lib/contracts/libraries/Babylonian.sol';
 import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
 
-import '../interfaces/IERC20.sol';
+import '../interfaces/IERC20_1.sol';
 import '../interfaces/IUniswapV2Router01.sol';
-import '../libraries/SafeMath.sol';
+import '../libraries/SafeMath_1.sol';
 import '../libraries/UniswapV2Library.sol';
 
 contract ExampleSwapToPrice {
-    using SafeMath for uint256;
+    using SafeMath_1 for uint256;
 
     IUniswapV2Router01 public immutable router;
     address public immutable factory;

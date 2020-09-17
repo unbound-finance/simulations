@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-pragma solidity =0.5.16;
-=======
 pragma solidity >=0.4.23 <0.8.0;
->>>>>>> master
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../openzeppelin/contracts/math/SafeMath.sol";
 
 contract TestDai is IERC20 {
     using SafeMath for uint;
@@ -13,10 +9,10 @@ contract TestDai is IERC20 {
     string public constant name = 'TestDai';
     string public constant symbol = 'TDAI';
     uint8 public constant decimals = 18;
-    uint  public totalSupply;
+    uint  public override totalSupply;
     string public constant version = "1";  // From DAI contract
-    mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) public allowance;
+    mapping(address => uint) public override balanceOf;
+    mapping(address => mapping(address => uint)) public override allowance;
 
     // PERMIT VARIABLES
     bytes32 public DOMAIN_SEPARATOR;
@@ -25,8 +21,8 @@ contract TestDai is IERC20 {
     mapping(address => uint) public nonces;
 
 
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
+    // event Approval(address indexed owner, address indexed spender, uint value);
+    // event Transfer(address indexed from, address indexed to, uint value);
 
     constructor(address tester, uint256 chainId_) public {
         balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000 * (10 ** 18));
@@ -66,17 +62,17 @@ contract TestDai is IERC20 {
         emit Transfer(from, to, value);
     }
 
-    function approve(address spender, uint value) external returns (bool) {
+    function approve(address spender, uint value) external override returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
 
-    function transfer(address to, uint value) external returns (bool) {
+    function transfer(address to, uint value) external override returns (bool) {
         _transfer(msg.sender, to, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint value) external returns (bool) {
+    function transferFrom(address from, address to, uint value) external override returns (bool) {
         if (allowance[from][msg.sender] != uint(-1)) {
             allowance[from][msg.sender] = allowance[from][msg.sender].sub(value);
         }
@@ -103,7 +99,7 @@ contract TestDai is IERC20 {
 
         require(holder != address(0), "invalid-address-0");
         require(holder == ecrecover(digest, v, r, s), "invalid-permit");
-        require(expiry == 0 || now <= expiry, "permit-expired");
+        require(expiry == 0 || block.timestamp <= expiry, "permit-expired");
         require(nonce == nonces[holder]++, "invalid-nonce");           // When does nonces[holder] actually change?
         uint wad = allowed ? uint(-1) : 0;
         allowance[holder][spender] = wad;

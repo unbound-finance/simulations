@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-pragma solidity ^0.5.16;
-=======
 pragma solidity >=0.4.23 <0.8.0;
->>>>>>> master
 // SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "../openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/contracts/utils/Address.sol";
 
 
 
@@ -124,20 +120,23 @@ contract LLC_EthDai {
     // Requires approval first
     function lockLPT (uint256 LPTamt, address uTokenAddr) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
+
+        
+
         uint256 totalLPTokens = LPTContract.totalSupply();
         
         (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
-
+        
         uint256 totalUSD;
         if (_position == 0) {
             totalUSD = _token0 * 2; // pricing();
         } else {
             totalUSD = _token1 * 2;
         }
-
+        
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
-
+        
         transferLPT(LPTamt);
         
         // map locked tokens to user
