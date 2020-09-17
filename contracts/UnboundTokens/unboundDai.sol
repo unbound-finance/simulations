@@ -51,14 +51,14 @@ contract UnboundDai is Context, IERC20 {
 
 
 
-    // tracks users who minted. Need or don't need?
+    // tracks users who minted. 
     mapping (address => uint256) private _minted;
 
     //Owner Address
-    address _owner;
+    address public _owner;
 
     //Valuator Contract Address
-    address _valuator;
+    address public _valuator;
 
     modifier onlyOwner() {
         require(isOwner(), "Ownable: caller is not the owner");
