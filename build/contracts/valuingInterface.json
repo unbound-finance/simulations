@@ -53,9 +53,10 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.6.2+commit.bacdbe57\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"unboundCreate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"toUnlock\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalLocked\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"unboundRemove\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":\"valuingInterface\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":{\"keccak256\":\"0xbf7824d7a0d400bc5a8e237b8da5ade7b331a3bf33bbd3b110c478fba79221fd\",\"urls\":[\"bzz-raw://8cc791f343168879dfa009a47021fd98fd09aac5e8f84aaaa6573e13265088e1\",\"dweb:/ipfs/QmdgKA54B6Va8XTWGW5uWppDBzCfH6ccgAP63kK6gE3r8A\"]},\"@openzeppelin/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x9a9cf02622cd7a64261b10534fc3260449da25c98c9e96d1b4ae8110a20e5806\",\"urls\":[\"bzz-raw://2df142592d1dc267d9549049ee3317fa190d2f87eaa565f86ab05ec83f7ab8f5\",\"dweb:/ipfs/QmSkJtcfWo7c42KnL5hho6GFxK6HRNV91XABx1P7xDtfLV\"]},\"@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0xf5fa8cbdffa5ef8be49b246b5628facc30b71707e78a45d80d93b64eff3fe390\",\"urls\":[\"bzz-raw://774e78a9ff32792cc95db4d2ceaf3a7965bb7f0bea5e6cb7cff182b450d44b37\",\"dweb:/ipfs/QmRRMC4uj7eAcLW7chynA3sNEYULMFazdLwQHKHQPyzAbA\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"unboundCreate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"toUnlock\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalLocked\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"unboundRemove\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":\"valuingInterface\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":{\"keccak256\":\"0xbf7824d7a0d400bc5a8e237b8da5ade7b331a3bf33bbd3b110c478fba79221fd\",\"urls\":[\"bzz-raw://8cc791f343168879dfa009a47021fd98fd09aac5e8f84aaaa6573e13265088e1\",\"dweb:/ipfs/QmdgKA54B6Va8XTWGW5uWppDBzCfH6ccgAP63kK6gE3r8A\"]},\"@openzeppelin/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x9a9cf02622cd7a64261b10534fc3260449da25c98c9e96d1b4ae8110a20e5806\",\"urls\":[\"bzz-raw://2df142592d1dc267d9549049ee3317fa190d2f87eaa565f86ab05ec83f7ab8f5\",\"dweb:/ipfs/QmSkJtcfWo7c42KnL5hho6GFxK6HRNV91XABx1P7xDtfLV\"]},\"@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0xf5fa8cbdffa5ef8be49b246b5628facc30b71707e78a45d80d93b64eff3fe390\",\"urls\":[\"bzz-raw://774e78a9ff32792cc95db4d2ceaf3a7965bb7f0bea5e6cb7cff182b450d44b37\",\"dweb:/ipfs/QmRRMC4uj7eAcLW7chynA3sNEYULMFazdLwQHKHQPyzAbA\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
+  "immutableReferences": {},
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity >=0.4.23 <0.8.0;\r\n// SPDX-License-Identifier: MIT\r\n\r\nimport \"@openzeppelin/contracts/math/SafeMath.sol\";\r\nimport \"@openzeppelin/contracts/utils/Address.sol\";\r\n\r\n\r\n\r\ninterface valuingInterface {\r\n    function unboundCreate(uint256 amount, address user, address token) external;\r\n    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external;\r\n    \r\n}\r\n\r\ninterface liquidityPoolToken {\r\n    function totalSupply() external view returns (uint);\r\n    function balanceOf(address owner) external view returns (uint);\r\n    \r\n    function transfer(address to, uint value) external returns (bool);\r\n    function transferFrom(address from, address to, uint value) external returns (bool);\r\n\r\n    function DOMAIN_SEPARATOR() external view returns (bytes32);\r\n    function PERMIT_TYPEHASH() external pure returns (bytes32);\r\n    function nonces(address owner) external view returns (uint);\r\n\r\n    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;\r\n\r\n    function factory() external view returns (address); // needed?\r\n    function token0() external view returns (address);\r\n    function token1() external view returns (address);\r\n    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);\r\n    function price0CumulativeLast() external view returns (uint);\r\n    function price1CumulativeLast() external view returns (uint);\r\n    function kLast() external view returns (uint);\r\n}\r\n\r\n// Liquidity Lock Contract for ETH/DAI pair\r\ncontract LLC_EthDai {\r\n    using SafeMath for uint256;\r\n    using Address for address;\r\n\r\n    //Owner Address\r\n    address _owner;\r\n\r\n    // LPT address\r\n    address public pair;\r\n\r\n    // tokens locked by users\r\n    mapping (address => uint256) public _tokensLocked;\r\n\r\n    // token position of Stablecoin\r\n    uint8 public _position;\r\n\r\n    // Interfaced Contracts\r\n    valuingInterface private valuingContract;\r\n    liquidityPoolToken private LPTContract;\r\n\r\n    // Modifiers\r\n    modifier onlyOwner() {\r\n        require(isOwner(), \"Ownable: caller is not the owner\");\r\n        _;\r\n    }\r\n\r\n    // Constructor\r\n    constructor (address valuingAddress, address LPTaddress, address stableCoin) public {\r\n        _owner = msg.sender;\r\n        \r\n        valuingContract = valuingInterface(valuingAddress);\r\n        LPTContract = liquidityPoolToken(LPTaddress);\r\n        pair = LPTaddress;\r\n\r\n        address toke0 = LPTContract.token0();\r\n        address toke1 = LPTContract.token1();\r\n\r\n        require (stableCoin == toke0 || stableCoin == toke1, \"invalid\");\r\n        if (stableCoin == toke0) {\r\n            _position = 0;\r\n        } else if (stableCoin == toke1) {\r\n            _position = 1;\r\n        }\r\n\r\n        // Set Position of Stablecoin\r\n        //\r\n        // require(position == 0 || position == 1, \"invalid\");\r\n        // _position = position;\r\n    }\r\n\r\n    // Lock/Unlock functions\r\n    // Mint path\r\n    // tokenNum must be 0 (for now)\r\n    function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {\r\n        require(LPTContract.balanceOf(msg.sender) >= LPTamt, \"insufficient Liquidity\");\r\n        uint256 totalLPTokens = LPTContract.totalSupply();\r\n\r\n        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();\r\n\r\n        // call Oracle\r\n        uint256 totalUSD;\r\n        if (_position == 0) {\r\n            totalUSD = _token0 * 2; // pricing();\r\n        } else {\r\n            totalUSD = _token1 * 2;\r\n        }\r\n        \r\n        // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity\r\n        uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  \r\n\r\n        // call Permit and Transfer\r\n\r\n        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);\r\n        \r\n        // map locked tokens to user address\r\n        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);\r\n\r\n        // Call Valuing Contract\r\n        valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode \"0\" for AAA rating\r\n        \r\n    }\r\n\r\n    // Requires approval first\r\n    function lockLPT (uint256 LPTamt, address uTokenAddr) public {\r\n        require(LPTContract.balanceOf(msg.sender) >= LPTamt, \"insufficient Liquidity\");\r\n        uint256 totalLPTokens = LPTContract.totalSupply();\r\n        \r\n        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();\r\n\r\n        uint256 totalUSD;\r\n        if (_position == 0) {\r\n            totalUSD = _token0 * 2; // pricing();\r\n        } else {\r\n            totalUSD = _token1 * 2;\r\n        }\r\n\r\n        // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity\r\n        uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  \r\n\r\n        transferLPT(LPTamt);\r\n        \r\n        // map locked tokens to user\r\n        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);\r\n\r\n        // Call Valuing Contract\r\n        valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode \"0\" for AAA rating\r\n        \r\n    }\r\n\r\n    function transferLPT(uint256 amount) internal {\r\n        LPTContract.transferFrom(msg.sender, address(this), amount);\r\n        \r\n    }\r\n\r\n    function transferLPTPermit(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {\r\n        LPTContract.permit(user, address(this), amount, deadline, v, r, s);\r\n        LPTContract.transferFrom(msg.sender, address(this), amount);\r\n        \r\n    }\r\n\r\n    // Burn Path\r\n\r\n    // tokenNum must be 0\r\n    function unlockLPT (uint256 LPToken, address uTokenAddr) public {\r\n        require (_tokensLocked[msg.sender] >= LPToken, \"Insufficient liquidity locked\");\r\n\r\n        // Burning of Udai will happen first\r\n        valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);\r\n        \r\n        LPTContract.transfer(msg.sender, LPToken);\r\n        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);\r\n        \r\n    }\r\n\r\n    // onlyOwner Functions\r\n\r\n    // Checks if sender is owner\r\n    function isOwner() public view returns (bool) {\r\n        return msg.sender == _owner;\r\n    }\r\n\r\n    // Changes owner\r\n    function setOwner(address _newOwner) public onlyOwner {\r\n        _owner = _newOwner;\r\n    }\r\n\r\n    // Sets new Valuing Address\r\n    function setValuingAddress (address _newValuing) public onlyOwner {\r\n        valuingContract = valuingInterface(_newValuing);\r\n    }\r\n}",
@@ -96,7 +97,7 @@
         "id": 2,
         "nodeType": "ImportDirective",
         "scope": 582,
-        "sourceUnit": 4611,
+        "sourceUnit": 4650,
         "src": "69:51:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -107,7 +108,7 @@
         "id": 3,
         "nodeType": "ImportDirective",
         "scope": 582,
-        "sourceUnit": 4868,
+        "sourceUnit": 4923,
         "src": "122:51:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -144,6 +145,7 @@
                 {
                   "constant": false,
                   "id": 5,
+                  "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -171,6 +173,7 @@
                 {
                   "constant": false,
                   "id": 7,
+                  "mutability": "mutable",
                   "name": "user",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -199,6 +202,7 @@
                 {
                   "constant": false,
                   "id": 9,
+                  "mutability": "mutable",
                   "name": "token",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -257,6 +261,7 @@
                 {
                   "constant": false,
                   "id": 14,
+                  "mutability": "mutable",
                   "name": "toUnlock",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -284,6 +289,7 @@
                 {
                   "constant": false,
                   "id": 16,
+                  "mutability": "mutable",
                   "name": "totalLocked",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -311,6 +317,7 @@
                 {
                   "constant": false,
                   "id": 18,
+                  "mutability": "mutable",
                   "name": "user",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -339,6 +346,7 @@
                 {
                   "constant": false,
                   "id": 20,
+                  "mutability": "mutable",
                   "name": "token",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -421,6 +429,7 @@
                 {
                   "constant": false,
                   "id": 27,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -472,6 +481,7 @@
                 {
                   "constant": false,
                   "id": 31,
+                  "mutability": "mutable",
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -507,6 +517,7 @@
                 {
                   "constant": false,
                   "id": 34,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -558,6 +569,7 @@
                 {
                   "constant": false,
                   "id": 38,
+                  "mutability": "mutable",
                   "name": "to",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -586,6 +598,7 @@
                 {
                   "constant": false,
                   "id": 40,
+                  "mutability": "mutable",
                   "name": "value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -620,6 +633,7 @@
                 {
                   "constant": false,
                   "id": 43,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -671,6 +685,7 @@
                 {
                   "constant": false,
                   "id": 47,
+                  "mutability": "mutable",
                   "name": "from",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -699,6 +714,7 @@
                 {
                   "constant": false,
                   "id": 49,
+                  "mutability": "mutable",
                   "name": "to",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -727,6 +743,7 @@
                 {
                   "constant": false,
                   "id": 51,
+                  "mutability": "mutable",
                   "name": "value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -761,6 +778,7 @@
                 {
                   "constant": false,
                   "id": 54,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -818,6 +836,7 @@
                 {
                   "constant": false,
                   "id": 59,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -875,6 +894,7 @@
                 {
                   "constant": false,
                   "id": 64,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -926,6 +946,7 @@
                 {
                   "constant": false,
                   "id": 68,
+                  "mutability": "mutable",
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -961,6 +982,7 @@
                 {
                   "constant": false,
                   "id": 71,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1012,6 +1034,7 @@
                 {
                   "constant": false,
                   "id": 75,
+                  "mutability": "mutable",
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1040,6 +1063,7 @@
                 {
                   "constant": false,
                   "id": 77,
+                  "mutability": "mutable",
                   "name": "spender",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1068,6 +1092,7 @@
                 {
                   "constant": false,
                   "id": 79,
+                  "mutability": "mutable",
                   "name": "value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1095,6 +1120,7 @@
                 {
                   "constant": false,
                   "id": 81,
+                  "mutability": "mutable",
                   "name": "deadline",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1122,6 +1148,7 @@
                 {
                   "constant": false,
                   "id": 83,
+                  "mutability": "mutable",
                   "name": "v",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1149,6 +1176,7 @@
                 {
                   "constant": false,
                   "id": 85,
+                  "mutability": "mutable",
                   "name": "r",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1176,6 +1204,7 @@
                 {
                   "constant": false,
                   "id": 87,
+                  "mutability": "mutable",
                   "name": "s",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1239,6 +1268,7 @@
                 {
                   "constant": false,
                   "id": 93,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1297,6 +1327,7 @@
                 {
                   "constant": false,
                   "id": 98,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1355,6 +1386,7 @@
                 {
                   "constant": false,
                   "id": 103,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1413,6 +1445,7 @@
                 {
                   "constant": false,
                   "id": 108,
+                  "mutability": "mutable",
                   "name": "reserve0",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1440,6 +1473,7 @@
                 {
                   "constant": false,
                   "id": 110,
+                  "mutability": "mutable",
                   "name": "reserve1",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1467,6 +1501,7 @@
                 {
                   "constant": false,
                   "id": 112,
+                  "mutability": "mutable",
                   "name": "blockTimestampLast",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1524,6 +1559,7 @@
                 {
                   "constant": false,
                   "id": 117,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1581,6 +1617,7 @@
                 {
                   "constant": false,
                   "id": 122,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1638,6 +1675,7 @@
                 {
                   "constant": false,
                   "id": 127,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -1696,10 +1734,10 @@
               "id": 131,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4610,
+              "referencedDeclaration": 4649,
               "src": "1626:8:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$4610",
+                "typeIdentifier": "t_contract$_SafeMath_$4649",
                 "typeString": "library SafeMath"
               }
             },
@@ -1723,10 +1761,10 @@
               "id": 134,
               "name": "Address",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4867,
+              "referencedDeclaration": 4922,
               "src": "1659:7:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Address_$4867",
+                "typeIdentifier": "t_contract$_Address_$4922",
                 "typeString": "library Address"
               }
             },
@@ -1747,6 +1785,7 @@
           {
             "constant": false,
             "id": 138,
+            "mutability": "mutable",
             "name": "_owner",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -1776,6 +1815,7 @@
             "constant": false,
             "functionSelector": "a8aa1b31",
             "id": 140,
+            "mutability": "mutable",
             "name": "pair",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -1805,6 +1845,7 @@
             "constant": false,
             "functionSelector": "ae51d676",
             "id": 144,
+            "mutability": "mutable",
             "name": "_tokensLocked",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -1852,6 +1893,7 @@
             "constant": false,
             "functionSelector": "a025cd3f",
             "id": 146,
+            "mutability": "mutable",
             "name": "_position",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -1879,6 +1921,7 @@
           {
             "constant": false,
             "id": 148,
+            "mutability": "mutable",
             "name": "valuingContract",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -1908,6 +1951,7 @@
           {
             "constant": false,
             "id": 150,
+            "mutability": "mutable",
             "name": "LPTContract",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -2348,6 +2392,7 @@
                     {
                       "constant": false,
                       "id": 191,
+                      "mutability": "mutable",
                       "name": "toke0",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -2433,6 +2478,7 @@
                     {
                       "constant": false,
                       "id": 197,
+                      "mutability": "mutable",
                       "name": "toke1",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -2920,6 +2966,7 @@
                 {
                   "constant": false,
                   "id": 162,
+                  "mutability": "mutable",
                   "name": "valuingAddress",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -2948,6 +2995,7 @@
                 {
                   "constant": false,
                   "id": 164,
+                  "mutability": "mutable",
                   "name": "LPTaddress",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -2976,6 +3024,7 @@
                 {
                   "constant": false,
                   "id": 166,
+                  "mutability": "mutable",
                   "name": "stableCoin",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -3211,6 +3260,7 @@
                     {
                       "constant": false,
                       "id": 259,
+                      "mutability": "mutable",
                       "name": "totalLPTokens",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -3297,6 +3347,7 @@
                     {
                       "constant": false,
                       "id": 265,
+                      "mutability": "mutable",
                       "name": "_token0",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -3324,6 +3375,7 @@
                     {
                       "constant": false,
                       "id": 267,
+                      "mutability": "mutable",
                       "name": "_token1",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -3351,6 +3403,7 @@
                     {
                       "constant": false,
                       "id": 269,
+                      "mutability": "mutable",
                       "name": "_time",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -3435,6 +3488,7 @@
                     {
                       "constant": false,
                       "id": 275,
+                      "mutability": "mutable",
                       "name": "totalUSD",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -3708,6 +3762,7 @@
                     {
                       "constant": false,
                       "id": 296,
+                      "mutability": "mutable",
                       "name": "LPTValueInDai",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -3802,7 +3857,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4527,
+                          "referencedDeclaration": 4562,
                           "src": "3743:12:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -3831,7 +3886,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4543,
+                      "referencedDeclaration": 4579,
                       "src": "3743:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4165,7 +4220,7 @@
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4450,
+                        "referencedDeclaration": 4482,
                         "src": "3987:29:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4336,6 +4391,7 @@
                 {
                   "constant": false,
                   "id": 234,
+                  "mutability": "mutable",
                   "name": "LPTamt",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -4363,6 +4419,7 @@
                 {
                   "constant": false,
                   "id": 236,
+                  "mutability": "mutable",
                   "name": "uTokenAddr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -4391,6 +4448,7 @@
                 {
                   "constant": false,
                   "id": 238,
+                  "mutability": "mutable",
                   "name": "deadline",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -4418,6 +4476,7 @@
                 {
                   "constant": false,
                   "id": 240,
+                  "mutability": "mutable",
                   "name": "v",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -4445,6 +4504,7 @@
                 {
                   "constant": false,
                   "id": 242,
+                  "mutability": "mutable",
                   "name": "r",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -4472,6 +4532,7 @@
                 {
                   "constant": false,
                   "id": 244,
+                  "mutability": "mutable",
                   "name": "s",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -4706,6 +4767,7 @@
                     {
                       "constant": false,
                       "id": 357,
+                      "mutability": "mutable",
                       "name": "totalLPTokens",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -4792,6 +4854,7 @@
                     {
                       "constant": false,
                       "id": 363,
+                      "mutability": "mutable",
                       "name": "_token0",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -4819,6 +4882,7 @@
                     {
                       "constant": false,
                       "id": 365,
+                      "mutability": "mutable",
                       "name": "_token1",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -4846,6 +4910,7 @@
                     {
                       "constant": false,
                       "id": 367,
+                      "mutability": "mutable",
                       "name": "_time",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -4930,6 +4995,7 @@
                     {
                       "constant": false,
                       "id": 373,
+                      "mutability": "mutable",
                       "name": "totalUSD",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -5203,6 +5269,7 @@
                     {
                       "constant": false,
                       "id": 394,
+                      "mutability": "mutable",
                       "name": "LPTValueInDai",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -5297,7 +5364,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4527,
+                          "referencedDeclaration": 4562,
                           "src": "4842:12:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -5326,7 +5393,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4543,
+                      "referencedDeclaration": 4579,
                       "src": "4842:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -5559,7 +5626,7 @@
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4450,
+                        "referencedDeclaration": 4482,
                         "src": "5002:29:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -5730,6 +5797,7 @@
                 {
                   "constant": false,
                   "id": 340,
+                  "mutability": "mutable",
                   "name": "LPTamt",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -5757,6 +5825,7 @@
                 {
                   "constant": false,
                   "id": 342,
+                  "mutability": "mutable",
                   "name": "uTokenAddr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -5989,6 +6058,7 @@
                 {
                   "constant": false,
                   "id": 432,
+                  "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -6441,6 +6511,7 @@
                 {
                   "constant": false,
                   "id": 450,
+                  "mutability": "mutable",
                   "name": "user",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -6469,6 +6540,7 @@
                 {
                   "constant": false,
                   "id": 452,
+                  "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -6496,6 +6568,7 @@
                 {
                   "constant": false,
                   "id": 454,
+                  "mutability": "mutable",
                   "name": "deadline",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -6523,6 +6596,7 @@
                 {
                   "constant": false,
                   "id": 456,
+                  "mutability": "mutable",
                   "name": "v",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -6550,6 +6624,7 @@
                 {
                   "constant": false,
                   "id": 458,
+                  "mutability": "mutable",
                   "name": "r",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -6577,6 +6652,7 @@
                 {
                   "constant": false,
                   "id": 460,
+                  "mutability": "mutable",
                   "name": "s",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7215,7 +7291,7 @@
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4466,
+                        "referencedDeclaration": 4499,
                         "src": "6088:29:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -7265,6 +7341,7 @@
                 {
                   "constant": false,
                   "id": 493,
+                  "mutability": "mutable",
                   "name": "LPToken",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7292,6 +7369,7 @@
                 {
                   "constant": false,
                   "id": 495,
+                  "mutability": "mutable",
                   "name": "uTokenAddr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7429,6 +7507,7 @@
                 {
                   "constant": false,
                   "id": 546,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7552,6 +7631,7 @@
                 {
                   "constant": false,
                   "id": 556,
+                  "mutability": "mutable",
                   "name": "_newOwner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7719,6 +7799,7 @@
                 {
                   "constant": false,
                   "id": 568,
+                  "mutability": "mutable",
                   "name": "_newValuing",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7802,7 +7883,7 @@
         "id": 2,
         "nodeType": "ImportDirective",
         "scope": 582,
-        "sourceUnit": 4611,
+        "sourceUnit": 4650,
         "src": "69:51:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7813,7 +7894,7 @@
         "id": 3,
         "nodeType": "ImportDirective",
         "scope": 582,
-        "sourceUnit": 4868,
+        "sourceUnit": 4923,
         "src": "122:51:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7850,6 +7931,7 @@
                 {
                   "constant": false,
                   "id": 5,
+                  "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7877,6 +7959,7 @@
                 {
                   "constant": false,
                   "id": 7,
+                  "mutability": "mutable",
                   "name": "user",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7905,6 +7988,7 @@
                 {
                   "constant": false,
                   "id": 9,
+                  "mutability": "mutable",
                   "name": "token",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7963,6 +8047,7 @@
                 {
                   "constant": false,
                   "id": 14,
+                  "mutability": "mutable",
                   "name": "toUnlock",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -7990,6 +8075,7 @@
                 {
                   "constant": false,
                   "id": 16,
+                  "mutability": "mutable",
                   "name": "totalLocked",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8017,6 +8103,7 @@
                 {
                   "constant": false,
                   "id": 18,
+                  "mutability": "mutable",
                   "name": "user",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8045,6 +8132,7 @@
                 {
                   "constant": false,
                   "id": 20,
+                  "mutability": "mutable",
                   "name": "token",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8127,6 +8215,7 @@
                 {
                   "constant": false,
                   "id": 27,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8178,6 +8267,7 @@
                 {
                   "constant": false,
                   "id": 31,
+                  "mutability": "mutable",
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8213,6 +8303,7 @@
                 {
                   "constant": false,
                   "id": 34,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8264,6 +8355,7 @@
                 {
                   "constant": false,
                   "id": 38,
+                  "mutability": "mutable",
                   "name": "to",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8292,6 +8384,7 @@
                 {
                   "constant": false,
                   "id": 40,
+                  "mutability": "mutable",
                   "name": "value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8326,6 +8419,7 @@
                 {
                   "constant": false,
                   "id": 43,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8377,6 +8471,7 @@
                 {
                   "constant": false,
                   "id": 47,
+                  "mutability": "mutable",
                   "name": "from",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8405,6 +8500,7 @@
                 {
                   "constant": false,
                   "id": 49,
+                  "mutability": "mutable",
                   "name": "to",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8433,6 +8529,7 @@
                 {
                   "constant": false,
                   "id": 51,
+                  "mutability": "mutable",
                   "name": "value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8467,6 +8564,7 @@
                 {
                   "constant": false,
                   "id": 54,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8524,6 +8622,7 @@
                 {
                   "constant": false,
                   "id": 59,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8581,6 +8680,7 @@
                 {
                   "constant": false,
                   "id": 64,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8632,6 +8732,7 @@
                 {
                   "constant": false,
                   "id": 68,
+                  "mutability": "mutable",
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8667,6 +8768,7 @@
                 {
                   "constant": false,
                   "id": 71,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8718,6 +8820,7 @@
                 {
                   "constant": false,
                   "id": 75,
+                  "mutability": "mutable",
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8746,6 +8849,7 @@
                 {
                   "constant": false,
                   "id": 77,
+                  "mutability": "mutable",
                   "name": "spender",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8774,6 +8878,7 @@
                 {
                   "constant": false,
                   "id": 79,
+                  "mutability": "mutable",
                   "name": "value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8801,6 +8906,7 @@
                 {
                   "constant": false,
                   "id": 81,
+                  "mutability": "mutable",
                   "name": "deadline",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8828,6 +8934,7 @@
                 {
                   "constant": false,
                   "id": 83,
+                  "mutability": "mutable",
                   "name": "v",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8855,6 +8962,7 @@
                 {
                   "constant": false,
                   "id": 85,
+                  "mutability": "mutable",
                   "name": "r",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8882,6 +8990,7 @@
                 {
                   "constant": false,
                   "id": 87,
+                  "mutability": "mutable",
                   "name": "s",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -8945,6 +9054,7 @@
                 {
                   "constant": false,
                   "id": 93,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9003,6 +9113,7 @@
                 {
                   "constant": false,
                   "id": 98,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9061,6 +9172,7 @@
                 {
                   "constant": false,
                   "id": 103,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9119,6 +9231,7 @@
                 {
                   "constant": false,
                   "id": 108,
+                  "mutability": "mutable",
                   "name": "reserve0",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9146,6 +9259,7 @@
                 {
                   "constant": false,
                   "id": 110,
+                  "mutability": "mutable",
                   "name": "reserve1",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9173,6 +9287,7 @@
                 {
                   "constant": false,
                   "id": 112,
+                  "mutability": "mutable",
                   "name": "blockTimestampLast",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9230,6 +9345,7 @@
                 {
                   "constant": false,
                   "id": 117,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9287,6 +9403,7 @@
                 {
                   "constant": false,
                   "id": 122,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9344,6 +9461,7 @@
                 {
                   "constant": false,
                   "id": 127,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -9402,10 +9520,10 @@
               "id": 131,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4610,
+              "referencedDeclaration": 4649,
               "src": "1626:8:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$4610",
+                "typeIdentifier": "t_contract$_SafeMath_$4649",
                 "typeString": "library SafeMath"
               }
             },
@@ -9429,10 +9547,10 @@
               "id": 134,
               "name": "Address",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4867,
+              "referencedDeclaration": 4922,
               "src": "1659:7:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Address_$4867",
+                "typeIdentifier": "t_contract$_Address_$4922",
                 "typeString": "library Address"
               }
             },
@@ -9453,6 +9571,7 @@
           {
             "constant": false,
             "id": 138,
+            "mutability": "mutable",
             "name": "_owner",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -9482,6 +9601,7 @@
             "constant": false,
             "functionSelector": "a8aa1b31",
             "id": 140,
+            "mutability": "mutable",
             "name": "pair",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -9511,6 +9631,7 @@
             "constant": false,
             "functionSelector": "ae51d676",
             "id": 144,
+            "mutability": "mutable",
             "name": "_tokensLocked",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -9558,6 +9679,7 @@
             "constant": false,
             "functionSelector": "a025cd3f",
             "id": 146,
+            "mutability": "mutable",
             "name": "_position",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -9585,6 +9707,7 @@
           {
             "constant": false,
             "id": 148,
+            "mutability": "mutable",
             "name": "valuingContract",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -9614,6 +9737,7 @@
           {
             "constant": false,
             "id": 150,
+            "mutability": "mutable",
             "name": "LPTContract",
             "nodeType": "VariableDeclaration",
             "overrides": null,
@@ -10054,6 +10178,7 @@
                     {
                       "constant": false,
                       "id": 191,
+                      "mutability": "mutable",
                       "name": "toke0",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -10139,6 +10264,7 @@
                     {
                       "constant": false,
                       "id": 197,
+                      "mutability": "mutable",
                       "name": "toke1",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -10626,6 +10752,7 @@
                 {
                   "constant": false,
                   "id": 162,
+                  "mutability": "mutable",
                   "name": "valuingAddress",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -10654,6 +10781,7 @@
                 {
                   "constant": false,
                   "id": 164,
+                  "mutability": "mutable",
                   "name": "LPTaddress",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -10682,6 +10810,7 @@
                 {
                   "constant": false,
                   "id": 166,
+                  "mutability": "mutable",
                   "name": "stableCoin",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -10917,6 +11046,7 @@
                     {
                       "constant": false,
                       "id": 259,
+                      "mutability": "mutable",
                       "name": "totalLPTokens",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -11003,6 +11133,7 @@
                     {
                       "constant": false,
                       "id": 265,
+                      "mutability": "mutable",
                       "name": "_token0",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -11030,6 +11161,7 @@
                     {
                       "constant": false,
                       "id": 267,
+                      "mutability": "mutable",
                       "name": "_token1",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -11057,6 +11189,7 @@
                     {
                       "constant": false,
                       "id": 269,
+                      "mutability": "mutable",
                       "name": "_time",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -11141,6 +11274,7 @@
                     {
                       "constant": false,
                       "id": 275,
+                      "mutability": "mutable",
                       "name": "totalUSD",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -11414,6 +11548,7 @@
                     {
                       "constant": false,
                       "id": 296,
+                      "mutability": "mutable",
                       "name": "LPTValueInDai",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -11508,7 +11643,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4527,
+                          "referencedDeclaration": 4562,
                           "src": "3743:12:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -11537,7 +11672,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4543,
+                      "referencedDeclaration": 4579,
                       "src": "3743:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -11871,7 +12006,7 @@
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4450,
+                        "referencedDeclaration": 4482,
                         "src": "3987:29:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -12042,6 +12177,7 @@
                 {
                   "constant": false,
                   "id": 234,
+                  "mutability": "mutable",
                   "name": "LPTamt",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -12069,6 +12205,7 @@
                 {
                   "constant": false,
                   "id": 236,
+                  "mutability": "mutable",
                   "name": "uTokenAddr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -12097,6 +12234,7 @@
                 {
                   "constant": false,
                   "id": 238,
+                  "mutability": "mutable",
                   "name": "deadline",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -12124,6 +12262,7 @@
                 {
                   "constant": false,
                   "id": 240,
+                  "mutability": "mutable",
                   "name": "v",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -12151,6 +12290,7 @@
                 {
                   "constant": false,
                   "id": 242,
+                  "mutability": "mutable",
                   "name": "r",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -12178,6 +12318,7 @@
                 {
                   "constant": false,
                   "id": 244,
+                  "mutability": "mutable",
                   "name": "s",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -12412,6 +12553,7 @@
                     {
                       "constant": false,
                       "id": 357,
+                      "mutability": "mutable",
                       "name": "totalLPTokens",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -12498,6 +12640,7 @@
                     {
                       "constant": false,
                       "id": 363,
+                      "mutability": "mutable",
                       "name": "_token0",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -12525,6 +12668,7 @@
                     {
                       "constant": false,
                       "id": 365,
+                      "mutability": "mutable",
                       "name": "_token1",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -12552,6 +12696,7 @@
                     {
                       "constant": false,
                       "id": 367,
+                      "mutability": "mutable",
                       "name": "_time",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -12636,6 +12781,7 @@
                     {
                       "constant": false,
                       "id": 373,
+                      "mutability": "mutable",
                       "name": "totalUSD",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -12909,6 +13055,7 @@
                     {
                       "constant": false,
                       "id": 394,
+                      "mutability": "mutable",
                       "name": "LPTValueInDai",
                       "nodeType": "VariableDeclaration",
                       "overrides": null,
@@ -13003,7 +13150,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4527,
+                          "referencedDeclaration": 4562,
                           "src": "4842:12:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -13032,7 +13179,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4543,
+                      "referencedDeclaration": 4579,
                       "src": "4842:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -13265,7 +13412,7 @@
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4450,
+                        "referencedDeclaration": 4482,
                         "src": "5002:29:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -13436,6 +13583,7 @@
                 {
                   "constant": false,
                   "id": 340,
+                  "mutability": "mutable",
                   "name": "LPTamt",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -13463,6 +13611,7 @@
                 {
                   "constant": false,
                   "id": 342,
+                  "mutability": "mutable",
                   "name": "uTokenAddr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -13695,6 +13844,7 @@
                 {
                   "constant": false,
                   "id": 432,
+                  "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14147,6 +14297,7 @@
                 {
                   "constant": false,
                   "id": 450,
+                  "mutability": "mutable",
                   "name": "user",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14175,6 +14326,7 @@
                 {
                   "constant": false,
                   "id": 452,
+                  "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14202,6 +14354,7 @@
                 {
                   "constant": false,
                   "id": 454,
+                  "mutability": "mutable",
                   "name": "deadline",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14229,6 +14382,7 @@
                 {
                   "constant": false,
                   "id": 456,
+                  "mutability": "mutable",
                   "name": "v",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14256,6 +14410,7 @@
                 {
                   "constant": false,
                   "id": 458,
+                  "mutability": "mutable",
                   "name": "r",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14283,6 +14438,7 @@
                 {
                   "constant": false,
                   "id": 460,
+                  "mutability": "mutable",
                   "name": "s",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14921,7 +15077,7 @@
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4466,
+                        "referencedDeclaration": 4499,
                         "src": "6088:29:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -14971,6 +15127,7 @@
                 {
                   "constant": false,
                   "id": 493,
+                  "mutability": "mutable",
                   "name": "LPToken",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -14998,6 +15155,7 @@
                 {
                   "constant": false,
                   "id": 495,
+                  "mutability": "mutable",
                   "name": "uTokenAddr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -15135,6 +15293,7 @@
                 {
                   "constant": false,
                   "id": 546,
+                  "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -15258,6 +15417,7 @@
                 {
                   "constant": false,
                   "id": 556,
+                  "mutability": "mutable",
                   "name": "_newOwner",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -15425,6 +15585,7 @@
                 {
                   "constant": false,
                   "id": 568,
+                  "mutability": "mutable",
                   "name": "_newValuing",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
@@ -15474,11 +15635,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.6.2+commit.bacdbe57.Emscripten.clang"
+    "version": "0.6.6+commit.6c089d02.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "3.2.3",
-  "updatedAt": "2020-09-14T22:04:07.869Z",
+  "updatedAt": "2020-09-18T20:16:37.200Z",
   "devdoc": {
     "methods": {}
   },
