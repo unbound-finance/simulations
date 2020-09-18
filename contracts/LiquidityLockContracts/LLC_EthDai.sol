@@ -12,7 +12,7 @@ interface valuingInterface {
     
 }
 
-interface liquidityPoolToken {
+interface liqPoolToken {
     function totalSupply() external view returns (uint);
     function balanceOf(address owner) external view returns (uint);
     
@@ -53,7 +53,7 @@ contract LLC_EthDai {
 
     // Interfaced Contracts
     valuingInterface private valuingContract;
-    liquidityPoolToken private LPTContract;
+    liqPoolToken private LPTContract;
 
     // Modifiers
     modifier onlyOwner() {
@@ -66,7 +66,7 @@ contract LLC_EthDai {
         _owner = msg.sender;
         
         valuingContract = valuingInterface(valuingAddress);
-        LPTContract = liquidityPoolToken(LPTaddress);
+        LPTContract = liqPoolToken(LPTaddress);
         pair = LPTaddress;
 
         address toke0 = LPTContract.token0();
@@ -92,7 +92,7 @@ contract LLC_EthDai {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+        (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
         // call Oracle
         uint256 totalUSD;
@@ -125,7 +125,7 @@ contract LLC_EthDai {
 
         uint256 totalLPTokens = LPTContract.totalSupply();
         
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+        (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
         
         uint256 totalUSD;
         if (_position == 0) {

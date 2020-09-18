@@ -55,7 +55,7 @@ contract UnboundDai is Context, IERC20 {
     mapping (address => uint256) private _minted;
 
     //Owner Address
-    address _owner;
+    address public _owner;
 
     //Valuator Contract Address
     address public _valuator;

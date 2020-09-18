@@ -158,7 +158,7 @@ contract unboundStaking {
 
         // mints liquidity
         // Assumes DAI is token0, uDai token1
-        (uint amountA, uint amountB, uint liquidity) = router.addLiquidity(_daiAddr, _uDaiAddr, Dai, uDai, daiMin, uDaiMin, address(this), block.timestamp.add(600));
+        (, , uint liquidity) = router.addLiquidity(_daiAddr, _uDaiAddr, Dai, uDai, daiMin, uDaiMin, address(this), block.timestamp.add(600));
 
 
         // splits pot
