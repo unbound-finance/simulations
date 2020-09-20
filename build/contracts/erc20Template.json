@@ -1,59 +1,51 @@
 {
-  "contractName": "valuingInterface",
+  "contractName": "erc20Template",
   "abi": [
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
-          "name": "amount",
+          "name": "value",
           "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "token",
-          "type": "address"
         }
       ],
-      "name": "unboundCreate",
-      "outputs": [],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "toUnlock",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalLocked",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "token",
+          "name": "owner",
           "type": "address"
         }
       ],
-      "name": "unboundRemove",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"unboundCreate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"toUnlock\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalLocked\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"unboundRemove\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":\"valuingInterface\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":{\"keccak256\":\"0x16176504fec6d09e0479a70ae0f09dd5621b84a02dc60a9c1765e8e2c7b400f6\",\"urls\":[\"bzz-raw://0637fcc4ed3ca0173ccc4ea001051f5ff7aca2ec178f3be660a31b78e1531449\",\"dweb:/ipfs/QmfTgzn2YVQaHHc9MSYt6FMJyMj8CcovmEfUQ5nh9uqsgV\"]},\"/C/Users/sonic/Desktop/Unbound/contracts/openzeppelin/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x6fc2ebf2a8000a4ef06c5d53a43bc63c6b585f7e336640a699149c2ead4779ea\",\"urls\":[\"bzz-raw://0144526881c61ea0c2a3065bc256d092bd81bfb51d127d715a6389566c053899\",\"dweb:/ipfs/QmYPhmBZdeDy5esQid8hsJFtxRNtdyc5dxBTBRXco2dzNm\"]},\"/C/Users/sonic/Desktop/Unbound/contracts/openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0xc015773ed4a697c61a0557b641999fe3b33751a61258e3b1bb79e33fa330ffcc\",\"urls\":[\"bzz-raw://83da64f8e9b2c7c832fa5bc10d94c1196e228bbdfb1ef4eb3e631706e899c3f3\",\"dweb:/ipfs/QmQdTfmWae9B5BkUrA3H3rM2qygWs4111oUuZCZ57VkPoj\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":\"erc20Template\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/C/Users/sonic/Desktop/Unbound/contracts/LiquidityLockContracts/LLC_EthDai.sol\":{\"keccak256\":\"0x16176504fec6d09e0479a70ae0f09dd5621b84a02dc60a9c1765e8e2c7b400f6\",\"urls\":[\"bzz-raw://0637fcc4ed3ca0173ccc4ea001051f5ff7aca2ec178f3be660a31b78e1531449\",\"dweb:/ipfs/QmfTgzn2YVQaHHc9MSYt6FMJyMj8CcovmEfUQ5nh9uqsgV\"]},\"/C/Users/sonic/Desktop/Unbound/contracts/openzeppelin/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x6fc2ebf2a8000a4ef06c5d53a43bc63c6b585f7e336640a699149c2ead4779ea\",\"urls\":[\"bzz-raw://0144526881c61ea0c2a3065bc256d092bd81bfb51d127d715a6389566c053899\",\"dweb:/ipfs/QmYPhmBZdeDy5esQid8hsJFtxRNtdyc5dxBTBRXco2dzNm\"]},\"/C/Users/sonic/Desktop/Unbound/contracts/openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0xc015773ed4a697c61a0557b641999fe3b33751a61258e3b1bb79e33fa330ffcc\",\"urls\":[\"bzz-raw://83da64f8e9b2c7c832fa5bc10d94c1196e228bbdfb1ef4eb3e631706e899c3f3\",\"dweb:/ipfs/QmQdTfmWae9B5BkUrA3H3rM2qygWs4111oUuZCZ57VkPoj\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -17061,7 +17053,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.3",
-  "updatedAt": "2020-09-20T05:02:40.313Z",
+  "updatedAt": "2020-09-20T05:02:40.301Z",
   "devdoc": {
     "methods": {}
   },

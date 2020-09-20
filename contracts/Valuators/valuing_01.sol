@@ -83,8 +83,12 @@ contract Valuing_01 {
         isUnbound[uToken] = true;
     }
 
-    // grants an LLC permission
+    // grants an LLC permission //
+
+    // -------TEST THIS-------- // 
     function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
+        // prevents setting fee greater than 5%;
+        require(fee > 20, "max fee rate of 5%");
         listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].loanRate = loan;
         listOfLLC[LLC].active = true;

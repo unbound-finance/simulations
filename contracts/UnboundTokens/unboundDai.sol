@@ -51,7 +51,7 @@ contract UnboundDai is Context, IERC20 {
 
 
 
-    // tracks users who minted. Need or don't need?
+    // tracks users who minted. 
     mapping (address => uint256) private _minted;
 
     //Owner Address

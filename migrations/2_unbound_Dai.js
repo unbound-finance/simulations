@@ -3,15 +3,15 @@ const valuing = artifacts.require("valuing_01");
 // const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
 
-const uniFactory = artifacts.require("UniswapV2Factory")
-const uniPair = artifacts.require("UniswapV2Pair");
-const router = artifacts.require("UniswapV2Router02");
+// const uniFactory = artifacts.require("UniswapV2Factory")
+// const uniPair = artifacts.require("UniswapV2Pair");
+// const router = artifacts.require("UniswapV2Router02");
 
 const testDai = artifacts.require("TestDai");
 const testEth = artifacts.require("TestEth");
 
-const feeSplitter = artifacts.require("feeSplitter");
-const LPTstake = artifacts.require("unboundStaking");
+// const feeSplitter = artifacts.require("feeSplitter");
+// const LPTstake = artifacts.require("unboundStaking");
 
 const weth = artifacts.require("WETH9");
 
@@ -28,6 +28,7 @@ module.exports = function (deployer) {
 
   deployer.deploy(uDai, "Unbound Dai", "UDAI", 42, placeHoldAddr, placeHoldAddr).then((instance) => {
     unbound = instance.address;
+    UBD = instance;
     return deployer.deploy(valuing, unbound).then((ins) => {
       valuer = ins.address;
       return deployer.deploy(uniFactory, placeHoldAddr).then((res) => {
