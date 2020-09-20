@@ -3,9 +3,9 @@ const valuing = artifacts.require("valuing_01");
 // const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
 
-// const uniFactory = artifacts.require("UniswapV2Factory")
-// const uniPair = artifacts.require("UniswapV2Pair");
-// const router = artifacts.require("UniswapV2Router02");
+const uniFactory = artifacts.require("UniswapV2Factory")
+const uniPair = artifacts.require("UniswapV2Pair");
+const router = artifacts.require("UniswapV2Router02");
 
 const testDai = artifacts.require("TestDai");
 const testEth = artifacts.require("TestEth");

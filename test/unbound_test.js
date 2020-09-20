@@ -36,6 +36,9 @@ const {
     const amount = 0
     const owner0 = _accounts[0];
     const safuDev = _accounts[1];
+    const owner1 = _accounts[2];
+    const owner2 = _accounts[3];
+    const owner3 = _accounts[4];
     
     let unboundDai;
     let valueContract;
@@ -53,7 +56,8 @@ const {
     let lockedTokens;
 
   
-    
+    /////////
+    let stakePair;
   
     //=================
     // Default Functionality
@@ -90,17 +94,17 @@ const {
         
       });
   
-      it("uDai should have 0 as total suply", async () => {
+      it("UND should have 0 as total suply", async () => {
         const retval = await unboundDai.totalSupply.call();
         assert.equal(retval, totalSupply * decimal, "Total suply is not 0");
       });
       
-      it("uDai should have valuator", async () => {
+      it("UND should have valuator", async () => {
         const retval = await unboundDai._valuator.call();
         assert.equal(retval, valueContract.address, "incorrect Valuator");
       });
 
-      it("uDai should not transfer", async () => {
+      it("UND should not transfer", async () => {
         let tester;
         try {
           const retval = await unboundDai.transfer.sendTransaction(safuDev, 5);
@@ -112,7 +116,7 @@ const {
         assert.equal(tester, true, "not supposed to transfer");
       })
 
-      it("uDai should not transferFrom", async () => {
+      it("UND should not transferFrom", async () => {
         let tester;
         try {
           const retval = await unboundDai.transferFrom.sendTransaction(safuDev, owner0, 5);
@@ -143,7 +147,7 @@ const {
       })
 
 
-      it("uDai mint - first", async () => {
+      it("UND mint - first", async () => {
           let LPTbal = await pair.balanceOf.call(owner0);
           let LPtokens = parseInt(LPTbal.words[0] / 4);
           lockedTokens = LPtokens;
@@ -158,7 +162,7 @@ const {
           assert.equal(newBal.words[0], 95000 * 0.995, "valuing incorrect");
       });
 
-      it("uDai check loan", async () => {
+      it("UND check loan", async () => {
         //console.log(unboundDai.checkLoan);
         let tokenBal0 = await unboundDai.checkLoan.call(owner0);
         //console.log(tokenBal0);
@@ -166,9 +170,9 @@ const {
       });
       
 
-      it("uDai mint - second", async () => {
+      it("UND mint - second", async () => {
         let LPTbal = await pair.balanceOf.call(owner0);
-        let LPtokens = parseInt(LPTbal.words[0] / 4);
+        let LPtokens = parseInt(LPTbal.words[0] / 3);
 
         // let tokenBal0 = await unboundDai.balanceOf.call(owner0);
         
@@ -184,7 +188,7 @@ const {
         assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect"); 
       });
 
-      it("uDai burn", async () => {
+      it("UND burn", async () => {
         let uDaiBal = await unboundDai.balanceOf.call(owner0);
         uDaiBal = uDaiBal.words[0];
 
@@ -209,7 +213,7 @@ const {
         assert.equal(newBal.words[0], LPtokens + lockedTokens, "valuing incorrect");
       });
 
-      it("uDai can transfer", async () => {
+      it("UND can transfer", async () => {
         let beforeBal = await unboundDai.balanceOf.call(owner0);
         beforeBal = parseInt(beforeBal.words[0]);
 
@@ -218,6 +222,38 @@ const {
         finalBal = parseInt(finalBal.words[0]);
 
         assert.equal(finalBal, beforeBal - 10, "transfer amounts do not balance");
+      });
+
+      it("LLC can claim tokens", async () => {
+        let sendEth = await tEth.transfer.sendTransaction(lockContract.address, 10);
+        let claim = await lockContract.claimTokens.sendTransaction(tEth.address, owner2);
+        let finalBalance = await tEth.balanceOf.call(owner2);
+
+        assert.equal(10, finalBalance.words[0], "Claim is not working");
+      });
+
+      it("LLC cannot claim from its own Liquidity Pool", async () => {
+        let tester = false;
+        let sendEth = await tEth.transfer.sendTransaction(lockContract.address, 10);
+        try {
+          const retval = await lockContract.claimTokens.sendTransaction(pair.address, owner2);
+          tester = false;
+        } catch (err) {
+          tester = true;
+        }
+        assert.equal(tester, true, "not supposed to be callable");
+      });
+
+      it("valuing - cannot assign fee above 5%", async () => {
+        let tester = false;
+        let sendEth = await tEth.transfer.sendTransaction(lockContract.address, 10);
+        try {
+          const retval = await lockContract.claimTokens.sendTransaction(pair.address, owner2);
+          tester = false;
+        } catch (err) {
+          tester = true;
+        }
+        assert.equal(tester, true, "not supposed to be callable");
       });
    });
 
@@ -237,79 +273,85 @@ const {
         weth = await weth9.deployed();
         route = await router.deployed();
 
-        let approveTdai = await tDai.approve.sendTransaction(route.address, 400000);
-        let approveTeth = await tEth.approve.sendTransaction(route.address, 1000);
-
-        let d = new Date();
-        let time = d.getTime();
-        let addLiq = await route.addLiquidity.sendTransaction(tDai.address, tEth.address, 400000, 1000, 3000, 10, owner0, parseInt(time/1000 + 100));
+        let approveTdai = await tDai.approve.sendTransaction(route.address, 10000);
+        let approveUND = await unboundDai.approve.sendTransaction(route.address, 10000);
 
         let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
-        let stakeAddr = stakePool.logs[0].args.pair;
+        stakePair = await uniPair.at(stakePool.logs[0].args.pair);
+        let d = new Date();
+        let time = d.getTime();
+        let addLiq = await route.addLiquidity.sendTransaction(tDai.address, unboundDai.address, 10000, 10000, 10, 10, owner0, parseInt(time/1000 + 100));
 
-        let setStake = await unboundDai.changeStaking.sendTransaction(stakeAddr);
+
+        let setStake = await unboundDai.changeStaking.sendTransaction(stakePair.address);
       
         
       });
 
-      it("uDai mint - single", async () => {
+      it("mint UND, check if staking LP gets it", async () => {
+        let LPinit = await stakePair.getReserves.call();
+        // console.log(LPinit._reserve0);
+        // console.log(LPinit._reserve1);
 
-
-          let LPTbal = await pair.balanceOf.call(owner0);
-          let LPtokens = parseInt(LPTbal.words[0] / 4);
-          
-          let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-          let minted = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-          let newBal = await pair.balanceOf.call(owner0);
-          
-          
-          
-          assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect");
-      });
-
-      it("uDai double mint", async () => {
         let LPTbal = await pair.balanceOf.call(owner0);
-        let LPtokens = parseInt(LPTbal.words[0] / 4);
-
-        let tokenBal0 = await unboundDai.balanceOf.call(owner0);
+        let LPtokens = parseInt(LPTbal.words[0] / 3);
         
-        // first mint
         let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-        let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-        let tokenBal = await unboundDai.balanceOf.call(owner0);
-        
-        // second mint
-        let approveLP1 = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-        let mint1 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-        let tokenBal1 = await unboundDai.balanceOf.call(owner0);
-        
+        let minted = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
 
         let newBal = await pair.balanceOf.call(owner0);
+
+        let UNDfinal = await unboundDai.balanceOf.call(stakePair.address);
+        // console.log(UNDfinal.words[0]);
         
         
         
-        assert.equal(newBal, LPTbal - LPtokens * 2, "valuing incorrect"); 
+        assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect");
       });
 
-      it("uDai mint and burn", async () => {
-        let LPTbal = await pair.balanceOf.call(owner0);
-        let LPtokens = parseInt(LPTbal.words[0]);
-        let tokenBal0 = await unboundDai.balanceOf.call(owner0);
+      // it("uDai double mint", async () => {
+      //   let LPTbal = await pair.balanceOf.call(owner0);
+      //   let LPtokens = parseInt(LPTbal.words[0] / 4);
+
+      //   let tokenBal0 = await unboundDai.balanceOf.call(owner0);
         
+      //   // first mint
+      //   let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
+      //   let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
+      //   let tokenBal = await unboundDai.balanceOf.call(owner0);
         
-        // mint
-        let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-        let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-        let tokenBal = await unboundDai.balanceOf.call(owner0);
+      //   // second mint
+      //   let approveLP1 = await pair.approve.sendTransaction(lockContract.address, LPtokens);
+      //   let mint1 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
+      //   let tokenBal1 = await unboundDai.balanceOf.call(owner0);
         
 
-        // burn
-        let burn = await lockContract.unlockLPT.sendTransaction(LPtokens, unboundDai.address);
-        let tokenBal1 = await unboundDai.balanceOf.call(owner0);
-        let newBal = await pair.balanceOf.call(owner0);
+      //   let newBal = await pair.balanceOf.call(owner0);
         
-        assert.equal(newBal.words[0], LPTbal.words[0], "valuing incorrect");
-      });
+        
+        
+      //   assert.equal(newBal, LPTbal - LPtokens * 2, "valuing incorrect"); 
+      // });
+
+      // it("uDai mint and burn", async () => {
+      //   let LPTbal = await pair.balanceOf.call(owner0);
+      //   let LPtokens = parseInt(LPTbal.words[0]);
+      //   let tokenBal0 = await unboundDai.balanceOf.call(owner0);
+        
+        
+      //   // mint
+      //   let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
+      //   let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
+      //   let tokenBal = await unboundDai.balanceOf.call(owner0);
+        
+
+      //   // burn
+      //   let burn = await lockContract.unlockLPT.sendTransaction(LPtokens, unboundDai.address);
+      //   let tokenBal1 = await unboundDai.balanceOf.call(owner0);
+      //   let newBal = await pair.balanceOf.call(owner0);
+        
+      //   assert.equal(newBal.words[0], LPTbal.words[0], "valuing incorrect");
+      // });
    });
 
 
