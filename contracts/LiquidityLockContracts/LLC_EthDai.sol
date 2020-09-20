@@ -4,7 +4,10 @@ pragma solidity >=0.4.23 <0.8.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-
+interface erc20Template {
+    function transfer(address to, uint value) external returns (bool);
+    function balanceOf(address owner) external view returns (uint);
+}
 
 interface valuingInterface {
     function unboundCreate(uint256 amount, address user, address token) external;
@@ -92,7 +95,7 @@ contract LLC_EthDai {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+        (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
         // call Oracle
         uint256 totalUSD;
@@ -122,7 +125,7 @@ contract LLC_EthDai {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
-        (uint112 _token0, uint112 _token1, uint32 _time) = LPTContract.getReserves();
+        (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
         uint256 totalUSD;
         if (_position == 0) {
@@ -170,6 +173,15 @@ contract LLC_EthDai {
     }
 
     // onlyOwner Functions
+
+    // Claim - remove any airdropped tokens
+    // currently sends all tokens back
+    // ---- TEST THIS ---------
+    function claimTokens(address _tokenAddr, address to) public onlyOwner {
+        require(_tokenAddr != pair, "Cannot move LP tokens");
+        uint256 tokenBal = erc20Template(_tokenAddr).balanceOf(address(this));
+        erc20Template(_tokenAddr).transfer(to, tokenBal);
+    }
 
     // Checks if sender is owner
     function isOwner() public view returns (bool) {
