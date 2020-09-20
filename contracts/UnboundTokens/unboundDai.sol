@@ -202,12 +202,13 @@ contract UnboundDai is Context, IERC20 {
         require(account != address(0), "ERC20: mint to the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         // _beforeTokenTransfer(address(0), account, amount);
-
+        
+        
         uint256 feeAmount = amount.div(fee); // fee variable should be 400 to produce 0.25%
         
         // The amount the user will receive
         uint256 toMint = amount.sub(feeAmount);
-
+        
         // Splitting of fees
         uint256 share = feeAmount.div(20);
 
@@ -253,15 +254,6 @@ contract UnboundDai is Context, IERC20 {
         
         // Removes loan AND fee from user balance
         _balances[account] = _balances[account].sub(toBurn, "ERC20: burn amount exceeds balance");
-
-        // // sends 40% to staking. MUST SET uDai Liquidity pool first
-        // _balances[_stakeAddr] = _balances[_stakeAddr].add(share.mul(_stakeShares));
-
-        // // sends 40% to Safu Fund
-        // _balances[_safuAddr] = _balances[_safuAddr].add(share.mul(_safuShares));
-
-        // // sends the remaineder to dev fund
-        // _balances[_devFundAddr] = _balances[_devFundAddr].add(burnFee.sub(share.mul(_safuShares.add(_stakeShares))));
 
         // Removes the loan amount of uDai from circulation
         _totalSupply = _totalSupply.sub(toBurn);
