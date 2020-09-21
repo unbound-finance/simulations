@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 interface unboundInterface {
     function _mint(address account, uint256 amount, uint256 fee, address LLCAddr) external;
     function _burn(address account, uint256 toBurn, address LLCAddr) external;
-    function checkLoan(address user) external view returns (uint256 owed);
+    function checkLoan(address user, address lockLocation) external view returns (uint256 owed);
     function balanceOf(address account) external view returns (uint256); 
 }
 
@@ -61,11 +61,11 @@ contract Valuing_01 {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
         unboundInterface unboundContract = unboundInterface(token);
-        uint256 userLoaned = unboundContract.checkLoan(user);
+        uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
         // compute amount of uDai necessary to unlock LPT
         uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
-        require(toPayInUDai != userLoaned, "o kurwa");
+        
 
         unboundContract._burn(user, toPayInUDai, msg.sender);
         

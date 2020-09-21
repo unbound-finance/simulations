@@ -171,7 +171,7 @@ const {
           let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
           let minted = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
           let newBal = await unboundDai.balanceOf.call(owner0);
-          let checkLoan = await unboundDai.checkLoan.call(owner0);
+          // let checkLoan = await unboundDai.checkLoan.call(owner0, lockContract.address);
           
           // console.log(checkLoan);
           
@@ -180,7 +180,7 @@ const {
 
       it("UND check loan", async () => {
         //console.log(unboundDai.checkLoan);
-        let tokenBal0 = await unboundDai.checkLoan.call(owner0);
+        let tokenBal0 = await unboundDai.checkLoan.call(owner0, lockContract.address);
         console.log(tokenBal0);
         assert.equal(tokenBal0.words[0], 95000, "valuing incorrect");
       });
@@ -196,8 +196,10 @@ const {
         let approveLP = await pairLink.approve.sendTransaction(lockContract2.address, LPtokens);
         let mint0 = await lockContract2.lockLPT.sendTransaction(LPtokens, unboundDai.address);
         let tokenBal = await unboundDai.balanceOf.call(owner0);
-        let loan = await unboundDai.checkLoan.call(owner0);
+        let loan = await unboundDai.checkLoan.call(owner0, lockContract2.address);
+        let loanDai = await unboundDai.checkLoan.call(owner0, lockContract.address);
         console.log(loan);
+        console.log(loanDai);
         let newBal = await pairLink.balanceOf.call(owner0);
         
         
@@ -221,10 +223,10 @@ const {
         let uDaiBalFinal = await unboundDai.balanceOf.call(owner0);
         uDaiBalFinal = uDaiBalFinal.words[0];
 
-        console.log(uDaiBal);
-        console.log(LPtokens);
-        console.log(burn);
-        console.log(uDaiBalFinal);
+        // console.log(uDaiBal);
+        // console.log(LPtokens);
+        // console.log(burn);
+        // console.log(uDaiBalFinal);
 
         
         assert.equal(newBal.words[0], LPtokens + lockedTokens, "valuing incorrect");
