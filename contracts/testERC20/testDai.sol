@@ -25,8 +25,8 @@ contract TestDai is IERC20 {
     // event Transfer(address indexed from, address indexed to, uint value);
 
     constructor(address tester, uint256 chainId_) public {
-        balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000 * (10 ** 18));
-        balanceOf[tester] = balanceOf[tester].add(100000000 * (10 ** 18));
+        balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000000 * (10 ** 18));
+        balanceOf[tester] = balanceOf[tester].add(100000000000 * (10 ** 18));
         totalSupply = totalSupply.add(1000000 * (10 ** 18));
 
         // Permit??

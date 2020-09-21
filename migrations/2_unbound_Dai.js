@@ -2,6 +2,7 @@ const uDai = artifacts.require("unboundDai");
 const valuing = artifacts.require("valuing_01");
 // const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
+const LLC1 = artifacts.require("LLC_LinkDai");
 
 const uniFactory = artifacts.require("UniswapV2Factory")
 const uniPair = artifacts.require("UniswapV2Pair");
@@ -9,6 +10,7 @@ const router = artifacts.require("UniswapV2Router02");
 
 const testDai = artifacts.require("TestDai");
 const testEth = artifacts.require("TestEth");
+const testLink = artifacts.require("TestLink");
 
 // const feeSplitter = artifacts.require("feeSplitter");
 // const LPTstake = artifacts.require("unboundStaking");
@@ -35,13 +37,16 @@ module.exports = function (deployer) {
         
         return deployer.deploy(testDai, "0x74a084d3c8a6FF8889988aba43BD5EDbd265665A", "5777").then((resi) => {
           return deployer.deploy(testEth, "0x74a084d3c8a6FF8889988aba43BD5EDbd265665A").then( async (result) => {
-            factory = await uniFactory.deployed();
-            tEth = await testEth.deployed();
-            tDai = await testDai.deployed();
-            return deployer.deploy(weth).then((wrap) => {
-              let wethAddr = wrap.address;
-              return deployer.deploy(router, factory.address, wethAddr);
-              });
+            return deployer.deploy(testLink, "0x74a084d3c8a6FF8889988aba43BD5EDbd265665A").then( async (resi) => {
+              factory = await uniFactory.deployed();
+              tEth = await testEth.deployed();
+              tDai = await testDai.deployed();
+              return deployer.deploy(weth).then((wrap) => {
+                let wethAddr = wrap.address;
+                return deployer.deploy(router, factory.address, wethAddr);
+                });
+              })
+            
             });
             
             // const pairAddr = await factory.createPair.sendTransaction(tEth.address, tDai.address);

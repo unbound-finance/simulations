@@ -65,7 +65,7 @@ contract Valuing_01 {
 
         // compute amount of uDai necessary to unlock LPT
         uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
-        
+        require(toPayInUDai != userLoaned, "o kurwa");
 
         unboundContract._burn(user, toPayInUDai);
         
