@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 
 interface unboundInterface {
-    function _mint(address account, uint256 amount, uint256 fee) external;
-    function _burn(address account, uint256 toBurn) external;
+    function _mint(address account, uint256 amount, uint256 fee, address LLCAddr) external;
+    function _burn(address account, uint256 toBurn, address LLCAddr) external;
     function checkLoan(address user) external view returns (uint256 owed);
     function balanceOf(address account) external view returns (uint256); 
 }
@@ -52,7 +52,7 @@ contract Valuing_01 {
         
         unboundInterface unboundContract = unboundInterface(token);
         uint256 loanAmt = amount.div(listOfLLC[msg.sender].loanRate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
-        unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate);
+        unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, msg.sender);
 
     }
 
@@ -67,7 +67,7 @@ contract Valuing_01 {
         uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
         require(toPayInUDai != userLoaned, "o kurwa");
 
-        unboundContract._burn(user, toPayInUDai);
+        unboundContract._burn(user, toPayInUDai, msg.sender);
         
     }
 
