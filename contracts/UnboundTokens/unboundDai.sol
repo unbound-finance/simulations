@@ -52,7 +52,7 @@ contract UnboundDai is Context, IERC20 {
 
 
     // tracks users who minted. 
-    mapping (address => uint256) private _minted;
+    mapping (address => mapping (address => uint256)) private _minted;
 
     //Owner Address
     address public _owner;
@@ -198,7 +198,7 @@ contract UnboundDai is Context, IERC20 {
 
     
     // MINT: Only callable by valuing contract - Now splits fees
-    function _mint(address account, uint256 amount, uint256 fee) external virtual {
+    function _mint(address account, uint256 amount, uint256 fee, address LLCAddr) external virtual {
         require(account != address(0), "ERC20: mint to the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         // _beforeTokenTransfer(address(0), account, amount);
@@ -212,7 +212,7 @@ contract UnboundDai is Context, IERC20 {
         uint256 share = feeAmount.div(20);
 
         // crediting loan to user
-        _minted[account] = _minted[account].add(amount);
+        _minted[account][LLCAddr] = _minted[account][LLCAddr].add(amount);
 
         // adding total amount of new tokens to totalSupply
         _totalSupply = _totalSupply.add(amount);
@@ -233,10 +233,10 @@ contract UnboundDai is Context, IERC20 {
     }
 
     // BURN function. Only callable from Valuing.
-    function _burn(address account, uint256 toBurn) external virtual {
+    function _burn(address account, uint256 toBurn, address LLCAddr) external virtual {
         require(account != address(0), "ERC20: burn from the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
-        require(_minted[account] >= 0, "You have no loan");
+        require(_minted[account][LLCAddr] >= 0, "You have no loan");
         
         // Computes the 0.25% fee
         // uint256 burnFee = toBurn.div(fee);
@@ -249,7 +249,7 @@ contract UnboundDai is Context, IERC20 {
         // uint256 share = burnFee.div(20);
 
         // removes the amount of uDai to burn from _minted mapping/
-        _minted[account] = _minted[account].sub(toBurn);
+        _minted[account][LLCAddr] = _minted[account][LLCAddr].sub(toBurn);
         
         // Removes loan AND fee from user balance
         _balances[account] = _balances[account].sub(toBurn, "ERC20: burn amount exceeds balance");
@@ -271,8 +271,8 @@ contract UnboundDai is Context, IERC20 {
     }
 
     // Checks how much uDai the user has minted (and owes to get liquidity back)
-    function checkLoan(address user) public view returns (uint256 owed) {
-        owed = _minted[user];
+    function checkLoan(address user, address lockLocation) public view returns (uint256 owed) {
+        owed = _minted[user][lockLocation];
     }
     
     // onlyOwner Functions
