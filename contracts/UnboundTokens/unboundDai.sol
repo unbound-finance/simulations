@@ -26,7 +26,6 @@ contract UnboundDai is Context, IERC20 {
 
     string public _name;
     string public _symbol;
-    string public constant version = "1";  // From DAI contract
     uint8 public _decimals;
 
 
