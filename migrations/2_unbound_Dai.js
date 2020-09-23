@@ -26,7 +26,7 @@ module.exports = async (deployer) => {
   // })
   
   
-  deployer.deploy(uDai, "Unbound Dollar", "UBD", 42, placeHoldAddr, placeHoldAddr).then((instance) => {
+  deployer.deploy(uDai, "Unbound Dollar", "UND", placeHoldAddr, placeHoldAddr).then((instance) => {
     unbound = instance.address;
     UBD = instance;
     return deployer.deploy(valuing, unbound).then((ins) => {

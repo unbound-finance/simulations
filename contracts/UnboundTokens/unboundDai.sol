@@ -70,7 +70,7 @@ contract UnboundDai is Context, IERC20 {
         _;
     }
 
-    constructor (string memory name, string memory symbol, uint256 chainId_, address Safu, address devFund) public {
+    constructor (string memory name, string memory symbol, address Safu, address devFund) public {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
@@ -82,15 +82,21 @@ contract UnboundDai is Context, IERC20 {
         _stakeShares = 8;
         _safuShares = 8;
 
-        // MUST BE MANUALLY CHANGED TO uDai LIQ pool.
+        // MUST BE MANUALLY CHANGED TO UND LIQ pool.
         _stakeAddr = Safu;
 
-        // Permit??
+        uint chainId;
+        // get chainId of the chain, required for permit
+        assembly {
+            chainId := chainid()
+        }
+
+        // To verify permit() signature
         DOMAIN_SEPARATOR = keccak256(abi.encode(
             keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
             keccak256(bytes(name)),
-            keccak256(bytes(version)),
-            chainId_,
+            keccak256(bytes('1')),
+            chainId,
             address(this)
         ));
     }
@@ -129,6 +135,7 @@ contract UnboundDai is Context, IERC20 {
                 keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
             )
         );
+        // check if the data is signed by owner
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress != address(0) && recoveredAddress == owner, 'UnboundDollar: INVALID_SIGNATURE');
         _approve(owner, spender, value);
