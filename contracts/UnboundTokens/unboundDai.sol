@@ -26,7 +26,6 @@ contract UnboundDai is Context, IERC20 {
 
     string public _name;
     string public _symbol;
-    string public constant version = "1";  // From DAI contract
     uint8 public _decimals;
 
 
@@ -70,7 +69,7 @@ contract UnboundDai is Context, IERC20 {
         _;
     }
 
-    constructor (string memory name, string memory symbol, uint256 chainId_, address Safu, address devFund) public {
+    constructor (string memory name, string memory symbol, address Safu, address devFund) public {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
@@ -82,15 +81,21 @@ contract UnboundDai is Context, IERC20 {
         _stakeShares = 8;
         _safuShares = 8;
 
-        // MUST BE MANUALLY CHANGED TO uDai LIQ pool.
+        // MUST BE MANUALLY CHANGED TO UND LIQ pool.
         _stakeAddr = Safu;
 
-        // Permit??
+        uint chainId;
+        // get chainId of the chain, required for permit
+        assembly {
+            chainId := chainid()
+        }
+
+        // To verify permit() signature
         DOMAIN_SEPARATOR = keccak256(abi.encode(
             keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
             keccak256(bytes(name)),
-            keccak256(bytes(version)),
-            chainId_,
+            keccak256(bytes('1')),
+            chainId,
             address(this)
         ));
     }
@@ -120,29 +125,19 @@ contract UnboundDai is Context, IERC20 {
     }
 
     //  PERMIT FUNCTION
-    function permit(address holder, address spender, uint256 nonce, uint256 expiry,
-                    bool allowed, uint8 v, bytes32 r, bytes32 s) external
-    {
-        bytes32 digest =
-            keccak256(abi.encodePacked(
-                "\x19\x01",                    // Do not understand what this is for
-                DOMAIN_SEPARATOR,              
-                keccak256(abi.encode(          // are we just taking a hash of a hash here?
-                    PERMIT_TYPEHASH,
-                    holder,
-                    spender,
-                    nonce,
-                    expiry,
-                    allowed))
-        ));
-
-        require(holder != address(0), "invalid-address-0");
-        require(holder == ecrecover(digest, v, r, s), "invalid-permit");
-        require(expiry == 0 || now <= expiry, "permit-expired");
-        require(nonce == nonces[holder]++, "invalid-nonce");           // When does nonces[holder] actually change?
-        uint wad = allowed ? uint(-1) : 0;
-        _allowances[holder][spender] = wad;
-        emit Approval(holder, spender, wad);
+    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
+        require(deadline >= block.timestamp, 'UnboundDollar: EXPIRED');
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                DOMAIN_SEPARATOR,
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+            )
+        );
+        // check if the data is signed by owner
+        address recoveredAddress = ecrecover(digest, v, r, s);
+        require(recoveredAddress != address(0) && recoveredAddress == owner, 'UnboundDollar: INVALID_SIGNATURE');
+        _approve(owner, spender, value);
     }
 
     // Transfer and transferFrom
