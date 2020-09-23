@@ -25,26 +25,26 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"tokenFallback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{},\"title\":\"Contract that will work with ERC223 tokens.\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/C/Users/sonic/Desktop/Unbound/contracts/utils/IERC223Recipient.sol\":\"IERC223Recipient\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/C/Users/sonic/Desktop/Unbound/contracts/utils/IERC223Recipient.sol\":{\"keccak256\":\"0x9c857f5984386ee76773635dc04a33278c89668e6f506b00c395bd298be10329\",\"urls\":[\"bzz-raw://013b9a33f333ddda6a50e936788c34b053f377222a5f25892a6deccbd044b1b3\",\"dweb:/ipfs/QmWLHkv23jACBcxcVvf5WXxwQCTMHWoiVjgpwWrjivZ1Yc\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.6+commit.6c089d02\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"tokenFallback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{},\"title\":\"Contract that will work with ERC223 tokens.\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/chetan/Documents/work/unbound/UnboundContracts/contracts/utils/IERC223Recipient.sol\":\"IERC223Recipient\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/chetan/Documents/work/unbound/UnboundContracts/contracts/utils/IERC223Recipient.sol\":{\"keccak256\":\"0x368307734bc2820e1fb093cce7255505f9cdea603ff15c452b98a5e22ae98a9f\",\"urls\":[\"bzz-raw://7762527c8b6acddc4eb21dc9fb14a154c9a5c54f29b591dea44cf336b11f1137\",\"dweb:/ipfs/Qmd3Bm65Xqj1bwmBLFqraDn12JZzQUP3ZwkodnV72rnLut\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity >=0.4.22 <0.8.0;\r\n\r\n /**\r\n * @title Contract that will work with ERC223 tokens.\r\n */\r\n \r\ninterface IERC223Recipient { \r\n/*\r\n * @dev Standard ERC223 function that will handle incoming token transfers.\r\n *\r\n * @param _from  Token sender address.\r\n * @param _value Amount of tokens.\r\n * @param _data  Transaction metadata.\r\n */\r\n    function tokenFallback(address _from, uint _value, bytes calldata _data) external;\r\n}",
-  "sourcePath": "C:/Users/sonic/Desktop/Unbound/contracts/utils/IERC223Recipient.sol",
+  "source": "pragma solidity >=0.4.22 <0.8.0;\n\n /**\n * @title Contract that will work with ERC223 tokens.\n */\n \ninterface IERC223Recipient { \n/*\n * @dev Standard ERC223 function that will handle incoming token transfers.\n *\n * @param _from  Token sender address.\n * @param _value Amount of tokens.\n * @param _data  Transaction metadata.\n */\n    function tokenFallback(address _from, uint _value, bytes calldata _data) external;\n}",
+  "sourcePath": "/Users/chetan/Documents/work/unbound/UnboundContracts/contracts/utils/IERC223Recipient.sol",
   "ast": {
-    "absolutePath": "/C/Users/sonic/Desktop/Unbound/contracts/utils/IERC223Recipient.sol",
+    "absolutePath": "/Users/chetan/Documents/work/unbound/UnboundContracts/contracts/utils/IERC223Recipient.sol",
     "exportedSymbols": {
       "IERC223Recipient": [
-        4290
+        4317
       ]
     },
-    "id": 4291,
+    "id": 4318,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4279,
+        "id": 4306,
         "literals": [
           "solidity",
           ">=",
@@ -63,15 +63,15 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 4280,
+          "id": 4307,
           "nodeType": "StructuredDocumentation",
-          "src": "37:63:9",
+          "src": "35:61:9",
           "text": "@title Contract that will work with ERC223 tokens."
         },
         "fullyImplemented": false,
-        "id": 4290,
+        "id": 4317,
         "linearizedBaseContracts": [
-          4290
+          4317
         ],
         "name": "IERC223Recipient",
         "nodeType": "ContractDefinition",
@@ -80,7 +80,7 @@
             "body": null,
             "documentation": null,
             "functionSelector": "c0ee0b8a",
-            "id": 4289,
+            "id": 4316,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -88,18 +88,18 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 4287,
+              "id": 4314,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4282,
+                  "id": 4309,
                   "mutability": "mutable",
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4289,
-                  "src": "369:13:9",
+                  "scope": 4316,
+                  "src": "355:13:9",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -107,10 +107,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4281,
+                    "id": 4308,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "369:7:9",
+                    "src": "355:7:9",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -122,13 +122,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 4284,
+                  "id": 4311,
                   "mutability": "mutable",
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4289,
-                  "src": "384:11:9",
+                  "scope": 4316,
+                  "src": "370:11:9",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -136,10 +136,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4283,
+                    "id": 4310,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "384:4:9",
+                    "src": "370:4:9",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -150,13 +150,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 4286,
+                  "id": 4313,
                   "mutability": "mutable",
                   "name": "_data",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4289,
-                  "src": "397:20:9",
+                  "scope": 4316,
+                  "src": "383:20:9",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -164,10 +164,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4285,
+                    "id": 4312,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "397:5:9",
+                    "src": "383:5:9",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -177,39 +177,39 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "368:50:9"
+              "src": "354:50:9"
             },
             "returnParameters": {
-              "id": 4288,
+              "id": 4315,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "427:0:9"
+              "src": "413:0:9"
             },
-            "scope": 4290,
-            "src": "346:82:9",
+            "scope": 4317,
+            "src": "332:82:9",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 4291,
-        "src": "105:326:9"
+        "scope": 4318,
+        "src": "99:317:9"
       }
     ],
-    "src": "0:431:9"
+    "src": "0:416:9"
   },
   "legacyAST": {
-    "absolutePath": "/C/Users/sonic/Desktop/Unbound/contracts/utils/IERC223Recipient.sol",
+    "absolutePath": "/Users/chetan/Documents/work/unbound/UnboundContracts/contracts/utils/IERC223Recipient.sol",
     "exportedSymbols": {
       "IERC223Recipient": [
-        4290
+        4317
       ]
     },
-    "id": 4291,
+    "id": 4318,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4279,
+        "id": 4306,
         "literals": [
           "solidity",
           ">=",
@@ -228,15 +228,15 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 4280,
+          "id": 4307,
           "nodeType": "StructuredDocumentation",
-          "src": "37:63:9",
+          "src": "35:61:9",
           "text": "@title Contract that will work with ERC223 tokens."
         },
         "fullyImplemented": false,
-        "id": 4290,
+        "id": 4317,
         "linearizedBaseContracts": [
-          4290
+          4317
         ],
         "name": "IERC223Recipient",
         "nodeType": "ContractDefinition",
@@ -245,7 +245,7 @@
             "body": null,
             "documentation": null,
             "functionSelector": "c0ee0b8a",
-            "id": 4289,
+            "id": 4316,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -253,18 +253,18 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 4287,
+              "id": 4314,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4282,
+                  "id": 4309,
                   "mutability": "mutable",
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4289,
-                  "src": "369:13:9",
+                  "scope": 4316,
+                  "src": "355:13:9",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -272,10 +272,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4281,
+                    "id": 4308,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "369:7:9",
+                    "src": "355:7:9",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -287,13 +287,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 4284,
+                  "id": 4311,
                   "mutability": "mutable",
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4289,
-                  "src": "384:11:9",
+                  "scope": 4316,
+                  "src": "370:11:9",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -301,10 +301,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4283,
+                    "id": 4310,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "384:4:9",
+                    "src": "370:4:9",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -315,13 +315,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 4286,
+                  "id": 4313,
                   "mutability": "mutable",
                   "name": "_data",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 4289,
-                  "src": "397:20:9",
+                  "scope": 4316,
+                  "src": "383:20:9",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -329,10 +329,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4285,
+                    "id": 4312,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "397:5:9",
+                    "src": "383:5:9",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -342,34 +342,34 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "368:50:9"
+              "src": "354:50:9"
             },
             "returnParameters": {
-              "id": 4288,
+              "id": 4315,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "427:0:9"
+              "src": "413:0:9"
             },
-            "scope": 4290,
-            "src": "346:82:9",
+            "scope": 4317,
+            "src": "332:82:9",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 4291,
-        "src": "105:326:9"
+        "scope": 4318,
+        "src": "99:317:9"
       }
     ],
-    "src": "0:431:9"
+    "src": "0:416:9"
   },
   "compiler": {
     "name": "solc",
     "version": "0.6.6+commit.6c089d02.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.2.3",
-  "updatedAt": "2020-09-18T20:16:37.351Z",
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-23T19:34:13.064Z",
   "devdoc": {
     "methods": {},
     "title": "Contract that will work with ERC223 tokens."
