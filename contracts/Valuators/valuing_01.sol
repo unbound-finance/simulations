@@ -12,6 +12,19 @@ interface unboundInterface {
     function balanceOf(address account) external view returns (uint256); 
 }
 
+// ---------------------------------------------------------------------------------------
+//                                   Unbound Valuing Contract
+//         
+//                                     By: Unbound Finance
+// ---------------------------------------------------------------------------------------
+// This contract contains the logic of applying the LTV rate to the stablecoin value of 
+// the provided liquidity. The fee to be deducted from the user is also stored here, and 
+// passed to the UND mint function.
+// 
+// Each LLC must be registered with this contract, and assigned fee and LTV rates. The user
+// can only call this function via the LLC.
+// ----------------------------------------------------------------------------------------
+
 contract Valuing_01 {
     using SafeMath for uint256;
     using Address for address;
@@ -50,8 +63,13 @@ contract Valuing_01 {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
         
+        
         unboundInterface unboundContract = unboundInterface(token);
+
+        // computes loan amount
         uint256 loanAmt = amount.div(listOfLLC[msg.sender].loanRate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
+
+        // calls mint 
         unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, msg.sender);
 
     }
@@ -60,13 +78,15 @@ contract Valuing_01 {
     function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
+
+        // obtains amount of loan user owes (in UND)
         unboundInterface unboundContract = unboundInterface(token);
         uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
         // compute amount of uDai necessary to unlock LPT
         uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
         
-
+        // calls burn
         unboundContract._burn(user, toPayInUDai, msg.sender);
         
     }
@@ -85,8 +105,8 @@ contract Valuing_01 {
 
     // grants an LLC permission //
     function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
-        // // prevents setting fee greater than 5%;
-        // require(fee > 20, "max fee rate of 5%");
+        // prevents setting fee greater than 5%;
+        require(fee > 20, "max fee rate of 5%");
         listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].loanRate = loan;
         listOfLLC[LLC].active = true;

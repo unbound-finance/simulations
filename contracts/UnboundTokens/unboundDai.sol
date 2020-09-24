@@ -7,8 +7,21 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-// import "../utils/IERC223.sol";
-// import "../utils/IERC223Recipient.sol";
+// ---------------------------------------------------------------------------------------
+//                                   Unbound Dollar (UND)
+//         
+//                                     By: Unbound Finance
+// ---------------------------------------------------------------------------------------
+// This contract holds the erc20 token call UND. This is the token we will be issuing
+// our loans in. This contract contains custom mint and burn functions, only callable from
+// an authorized valuing contract. As this contract will be first to be deployed, the 
+// valuing contract must be authorized by owner.
+//
+// The loan fee is computed on minting, and the amount distributed to the UND liquidity pool 
+// (as a reward for liquidity holders), the SAFU fund, and the dev fund. Initial split is 
+// determined in the constructor. The UND liquidity pool address must be updated on this 
+// contract by owner once it is created from the uniswap factory.
+// ----------------------------------------------------------------------------------------
 
 
 contract UnboundDai is Context, IERC20 {
@@ -78,6 +91,7 @@ contract UnboundDai is Context, IERC20 {
         _safuAddr = Safu;
         _devFundAddr = devFund;
 
+        // we will use 40/40/20 split of fees
         _stakeShares = 8;
         _safuShares = 8;
 

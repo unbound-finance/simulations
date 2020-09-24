@@ -36,8 +36,28 @@ interface liquidityPoolToken {
     function price1CumulativeLast() external view returns (uint);
     function kLast() external view returns (uint);
 }
-
-// Liquidity Lock Contract for ETH/DAI pair
+// ---------------------------------------------------------------------------------------
+//                                Liquidity Lock Contract V1
+//         
+//                                     for ETH/DAI pair  
+// ---------------------------------------------------------------------------------------
+// This contract enables the user to take out a loan using their existing liquidity 
+// pool tokens as collateral. The loan is issued in the form of the UND token which 
+// carries a peg to the Dai. 
+// 
+// This contract can be used as a factory to enable multiple liquidity pools access 
+// to mint UND. At this time, the Unbound protocol requires one of the reserve tokens 
+// in the liquidity pool to be a stablecoin. 
+// 
+// In V1, we offer the ability to take out a loan after giving permission to the LLC
+// to "transferFrom", as well as an option utilizing the permit() function from within
+// the uniswap liquidity pool contract
+//
+// This is the main contract that the user will interact with. It is connected to Valuing, 
+// and then the UND mint functions. Upon deployment of the LLC, its address must first be 
+// registered with the valuing contract. This can only be completed by the owner (or 
+// eventually a DAO).
+// ----------------------------------------------------------------------------------------
 contract LLC_EthDai {
     using SafeMath for uint256;
     using Address for address;
@@ -122,6 +142,7 @@ contract LLC_EthDai {
         
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
+        // calculates value of pool in stablecoin
         uint256 totalUSD;
         if (_position == 0) {
             totalUSD = _token0 * 2; // pricing();
@@ -142,11 +163,13 @@ contract LLC_EthDai {
         
     }
 
+    // calls transfer only, for use with non-permit lock function
     function transferLPT(uint256 amount) internal {
         LPTContract.transferFrom(msg.sender, address(this), amount);
         
     }
 
+    // calls permit, then transfer
     function transferLPTPermit(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
         LPTContract.permit(user, address(this), amount, deadline, v, r, s);
         LPTContract.transferFrom(msg.sender, address(this), amount);
@@ -162,7 +185,10 @@ contract LLC_EthDai {
         // Burning of Udai will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
         
+        // send LP tokens back to user
         LPTContract.transfer(msg.sender, LPToken);
+
+        // update mapping
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
         
     }
@@ -171,7 +197,6 @@ contract LLC_EthDai {
 
     // Claim - remove any airdropped tokens
     // currently sends all tokens back
-    // ---- TEST THIS ---------
     function claimTokens(address _tokenAddr, address to) public onlyOwner {
         require(_tokenAddr != pair, "Cannot move LP tokens");
         uint256 tokenBal = erc20Template(_tokenAddr).balanceOf(address(this));
