@@ -75,29 +75,24 @@ contract LLC_EthDai {
         address toke0 = LPTContract.token0();
         address toke1 = LPTContract.token1();
 
+        // assigns which token in the pair is a stablecoin
         require (stableCoin == toke0 || stableCoin == toke1, "invalid");
         if (stableCoin == toke0) {
             _position = 0;
         } else if (stableCoin == toke1) {
             _position = 1;
         }
-
-        // Set Position of Stablecoin
-        //
-        // require(position == 0 || position == 1, "invalid");
-        // _position = position;
     }
 
     // Lock/Unlock functions
     // Mint path
-    // tokenNum must be 0 (for now)
     function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
-        // call Oracle
+        // obtain total USD value
         uint256 totalUSD;
         if (_position == 0) {
             totalUSD = _token0 * 2; // pricing();

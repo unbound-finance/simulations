@@ -233,30 +233,14 @@ contract UnboundDai is Context, IERC20 {
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         require(_minted[account][LLCAddr] >= 0, "You have no loan");
         
-        // Computes the 0.25% fee
-        // uint256 burnFee = toBurn.div(fee);
-        // uint256 totalToRemove = toBurn.add(burnFee);
-
         // checks if user has enough uDai to cover loan and 0.25% fee
         require(_balances[account] >= toBurn, "Insufficient uDai to pay back loan");
-
-        // Splitting of fees
-        // uint256 share = burnFee.div(20);
 
         // removes the amount of uDai to burn from _minted mapping/
         _minted[account][LLCAddr] = _minted[account][LLCAddr].sub(toBurn);
         
         // Removes loan AND fee from user balance
         _balances[account] = _balances[account].sub(toBurn, "ERC20: burn amount exceeds balance");
-
-        // // sends 40% to staking. MUST SET uDai Liquidity pool first
-        // _balances[_stakeAddr] = _balances[_stakeAddr].add(share.mul(_stakeShares));
-
-        // // sends 40% to Safu Fund
-        // _balances[_safuAddr] = _balances[_safuAddr].add(share.mul(_safuShares));
-
-        // // sends the remaineder to dev fund
-        // _balances[_devFundAddr] = _balances[_devFundAddr].add(burnFee.sub(share.mul(_safuShares.add(_stakeShares))));
 
         // Removes the loan amount of uDai from circulation
         _totalSupply = _totalSupply.sub(toBurn);
