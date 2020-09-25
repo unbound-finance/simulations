@@ -122,13 +122,12 @@ contract LLC_EthDai {
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
-
-        // call Permit and Transfer
-
-        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
         
         // map locked tokens to user address
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // call Permit and Transfer
+        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
@@ -152,11 +151,12 @@ contract LLC_EthDai {
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
-
-        transferLPT(LPTamt);
         
         // map locked tokens to user
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // transfer LPT to the address
+        transferLPT(LPTamt);
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
@@ -182,14 +182,14 @@ contract LLC_EthDai {
     function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
+        // update mapping
+        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
+
         // Burning of Udai will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
         
         // send LP tokens back to user
         LPTContract.transfer(msg.sender, LPToken);
-
-        // update mapping
-        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
         
     }
 
