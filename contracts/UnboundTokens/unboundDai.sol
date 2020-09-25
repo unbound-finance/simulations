@@ -245,7 +245,7 @@ contract UnboundDai is Context, IERC20 {
     function _burn(address account, uint256 toBurn, address LLCAddr) external virtual {
         require(account != address(0), "ERC20: burn from the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
-        require(_minted[account][LLCAddr] >= 0, "You have no loan");
+        require(_minted[account][LLCAddr] > 0, "You have no loan");
         
         // checks if user has enough uDai to cover loan and 0.25% fee
         require(_balances[account] >= toBurn, "Insufficient uDai to pay back loan");
