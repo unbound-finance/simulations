@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 interface erc20Template {
     function transfer(address to, uint value) external returns (bool);
     function balanceOf(address owner) external view returns (uint);
+    function decimals() external view returns (uint8);
 }
 
 interface valuingInterface {
@@ -74,9 +75,13 @@ contract LLC_EthDai {
     // token position of Stablecoin
     uint8 public _position;
 
+    // set this in constructor, tracks decimals of stablecoin
+    uint8 public stablecoinDecimal;
+
     // Interfaced Contracts
     valuingInterface private valuingContract;
     liquidityPoolToken private LPTContract;
+    erc20Template private stableCoinErc20;
 
     // Modifiers
     modifier onlyOwner() {
@@ -88,12 +93,19 @@ contract LLC_EthDai {
     constructor (address valuingAddress, address LPTaddress, address stableCoin) public {
         _owner = msg.sender;
         
+        // initiates interfacing contracts
         valuingContract = valuingInterface(valuingAddress);
         LPTContract = liquidityPoolToken(LPTaddress);
+        stableCoinErc20 = erc20Template(stableCoin);
+
+        // set LPT address
         pair = LPTaddress;
 
         address toke0 = LPTContract.token0();
         address toke1 = LPTContract.token1();
+
+        // sets the decimals value of the stablecoin
+        stablecoinDecimal = stableCoinErc20.decimals();
 
         // assigns which token in the pair is a stablecoin
         require (stableCoin == toke0 || stableCoin == toke1, "invalid");
@@ -118,6 +130,32 @@ contract LLC_EthDai {
             totalUSD = _token0 * 2; // pricing();
         } else {
             totalUSD = _token1 * 2;
+        }
+
+        // this should only happen if stablecoin decimals is NOT 18.
+        if (stablecoinDecimal != 18) {
+            
+            // calculate difference in decimals
+            uint8 difference = 18 - stablecoinDecimal; // overflow is desired here. should NEVER be 0
+
+            // first case: tokenDecimal is smaller than 18, difference is positive
+            // for stablecoins with less than 18 decimals
+            if (difference > 0) {
+
+                // adds decimals to match 18
+                totalUSD = totalUSD * (10 ** difference);
+            }
+
+            // second case: tokenDecimal is greater than 18, difference is negative
+            // for tokens with more than 18 decimals (this should be very rare)
+            else if (difference < 0) {
+
+                // flips the sign of difference (because it is current negative)
+                difference = difference * (-1);
+
+                // removes decimals to match 18
+                totalUSD = totalUSD / (10 ** difference);
+            }
         }
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
@@ -147,6 +185,32 @@ contract LLC_EthDai {
             totalUSD = _token0 * 2; // pricing();
         } else {
             totalUSD = _token1 * 2;
+        }
+
+        // this should only happen if stablecoin decimals is NOT 18.
+        if (stablecoinDecimal != 18) {
+            
+            // calculate difference in decimals
+            uint8 difference = 18 - stablecoinDecimal; // overflow is desired here. should NEVER be 0
+
+            // first case: tokenDecimal is smaller than 18, difference is positive
+            // for stablecoins with less than 18 decimals
+            if (difference > 0) {
+
+                // adds decimals to match 18
+                totalUSD = totalUSD * (10 ** uint256(difference));
+            }
+
+            // second case: tokenDecimal is greater than 18, difference is negative
+            // for tokens with more than 18 decimals (this should be very rare)
+            else if (difference < 0) {
+
+                // flips the sign of difference (because it is current negative)
+                difference = difference * (-1);
+
+                // removes decimals to match 18
+                totalUSD = totalUSD / (10 ** uint256(difference));
+            }
         }
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
