@@ -107,7 +107,7 @@ contract LLC_EthDai {
     // Lock/Unlock functions
     // Mint path
     function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {
-        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
+        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
@@ -122,13 +122,12 @@ contract LLC_EthDai {
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
-
-        // call Permit and Transfer
-
-        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
         
         // map locked tokens to user address
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // call Permit and Transfer
+        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
@@ -137,7 +136,7 @@ contract LLC_EthDai {
 
     // Requires approval first
     function lockLPT (uint256 LPTamt, address uTokenAddr) public {
-        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
+        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
@@ -152,11 +151,12 @@ contract LLC_EthDai {
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
-
-        transferLPT(LPTamt);
         
         // map locked tokens to user
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // transfer LPT to the address
+        transferLPT(LPTamt);
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
@@ -165,14 +165,14 @@ contract LLC_EthDai {
 
     // calls transfer only, for use with non-permit lock function
     function transferLPT(uint256 amount) internal {
-        LPTContract.transferFrom(msg.sender, address(this), amount);
-        
+        require(LPTContract.transferFrom(msg.sender, address(this), amount), "LLC: Trasfer From failed");
+
     }
 
     // calls permit, then transfer
     function transferLPTPermit(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
         LPTContract.permit(user, address(this), amount, deadline, v, r, s);
-        LPTContract.transferFrom(msg.sender, address(this), amount);
+        require(LPTContract.transferFrom(msg.sender, address(this), amount), "LLC: Transfer From failed");
         
     }
 
@@ -182,14 +182,14 @@ contract LLC_EthDai {
     function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
+        // update mapping
+        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
+
         // Burning of Udai will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
         
         // send LP tokens back to user
-        LPTContract.transfer(msg.sender, LPToken);
-
-        // update mapping
-        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
+        require(LPTContract.transfer(msg.sender, LPToken), "LLC: Transfer Failed");
         
     }
 
@@ -200,7 +200,7 @@ contract LLC_EthDai {
     function claimTokens(address _tokenAddr, address to) public onlyOwner {
         require(_tokenAddr != pair, "Cannot move LP tokens");
         uint256 tokenBal = erc20Template(_tokenAddr).balanceOf(address(this));
-        erc20Template(_tokenAddr).transfer(to, tokenBal);
+        require(erc20Template(_tokenAddr).transfer(to, tokenBal), "LLC: Transfer Failed");
     }
 
     // Checks if sender is owner
