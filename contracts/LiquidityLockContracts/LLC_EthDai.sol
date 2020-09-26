@@ -135,26 +135,28 @@ contract LLC_EthDai {
         // this should only happen if stablecoin decimals is NOT 18.
         if (stablecoinDecimal != 18) {
             
-            // calculate difference in decimals
-            uint8 difference = 18 - stablecoinDecimal; // overflow is desired here. should NEVER be 0
+            uint8 difference;
 
-            // first case: tokenDecimal is smaller than 18, difference is positive
+            // first case: tokenDecimal is smaller than 18
             // for stablecoins with less than 18 decimals
-            if (difference > 0) {
+            if (stablecoinDecimal < 18 && stablecoinDecimal >= 0) {
+
+                // calculate amount of decimals under 18
+                difference = 18 - stablecoinDecimal;
 
                 // adds decimals to match 18
-                totalUSD = totalUSD * (10 ** difference);
+                totalUSD = totalUSD * (10 ** uint256(difference));
             }
 
-            // second case: tokenDecimal is greater than 18, difference is negative
-            // for tokens with more than 18 decimals (this should be very rare)
-            else if (difference < 0) {
+            // second case: tokenDecimal is greater than 18
+            // for tokens with more than 18 decimals 
+            else if (stablecoinDecimal > 18) {
 
-                // flips the sign of difference (because it is current negative)
-                difference = difference * (-1);
+                // caclulate amount of decimals over 18
+                difference = stablecoinDecimal - 18;
 
                 // removes decimals to match 18
-                totalUSD = totalUSD / (10 ** difference);
+                totalUSD = totalUSD / (10 ** uint256(difference));
             }
         }
         
@@ -190,23 +192,25 @@ contract LLC_EthDai {
         // this should only happen if stablecoin decimals is NOT 18.
         if (stablecoinDecimal != 18) {
             
-            // calculate difference in decimals
-            uint8 difference = 18 - stablecoinDecimal; // overflow is desired here. should NEVER be 0
+            uint8 difference;
 
-            // first case: tokenDecimal is smaller than 18, difference is positive
+            // first case: tokenDecimal is smaller than 18
             // for stablecoins with less than 18 decimals
-            if (difference > 0) {
+            if (stablecoinDecimal < 18 && stablecoinDecimal >= 0) {
+
+                // calculate amount of decimals under 18
+                difference = 18 - stablecoinDecimal;
 
                 // adds decimals to match 18
                 totalUSD = totalUSD * (10 ** uint256(difference));
             }
 
-            // second case: tokenDecimal is greater than 18, difference is negative
-            // for tokens with more than 18 decimals (this should be very rare)
-            else if (difference < 0) {
+            // second case: tokenDecimal is greater than 18
+            // for tokens with more than 18 decimals 
+            else if (stablecoinDecimal > 18) {
 
-                // flips the sign of difference (because it is current negative)
-                difference = difference * (-1);
+                // caclulate amount of decimals over 18
+                difference = stablecoinDecimal - 18;
 
                 // removes decimals to match 18
                 totalUSD = totalUSD / (10 ** uint256(difference));
