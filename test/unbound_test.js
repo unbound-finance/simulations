@@ -151,11 +151,11 @@ const {
           let LPTbal = await pair.balanceOf.call(owner0);
           let LPtokens = parseInt(LPTbal.words[0] / 4);
           lockedTokens = LPtokens;
-
+          
           let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
           let minted = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
           let newBal = await unboundDai.balanceOf.call(owner0);
-          let checkLoan = await unboundDai.checkLoan.call(owner0);
+          let checkLoan = await unboundDai.checkLoan.call(owner0, lockContract.address);
           // console.log(newBal);
           // console.log(checkLoan);
           
@@ -164,8 +164,8 @@ const {
 
       it("UND check loan", async () => {
         //console.log(unboundDai.checkLoan);
-        let tokenBal0 = await unboundDai.checkLoan.call(owner0);
-        //console.log(tokenBal0);
+        let tokenBal0 = await unboundDai.checkLoan.call(owner0, lockContract.address);
+        
         assert.equal(tokenBal0.words[0], 95000, "valuing incorrect");
       });
       
@@ -191,6 +191,9 @@ const {
       it("UND burn", async () => {
         let uDaiBal = await unboundDai.balanceOf.call(owner0);
         uDaiBal = uDaiBal.words[0];
+        let tokenBal4 = await unboundDai.checkLoan.call(owner0, lockContract.address);
+        
+
 
         let LPTbal = await pair.balanceOf.call(owner0);
         let LPtokens = parseInt(LPTbal.words[0]);
@@ -215,13 +218,18 @@ const {
 
       it("UND can transfer", async () => {
         let beforeBal = await unboundDai.balanceOf.call(owner0);
+        let beforeSafu = await unboundDai.balanceOf.call(safuDev)
         beforeBal = parseInt(beforeBal.words[0]);
+        beforeSafu = parseInt(beforeSafu.words[0]);
 
         let theTransfer = await unboundDai.transfer.sendTransaction(safuDev, 10);
         let finalBal = await unboundDai.balanceOf.call(owner0);
+        let safuBal = await unboundDai.balanceOf.call(safuDev);
         finalBal = parseInt(finalBal.words[0]);
+        safuBal = parseInt(safuBal.words[0]);
 
-        assert.equal(finalBal, beforeBal - 10, "transfer amounts do not balance");
+        assert.equal(safuBal, beforeSafu + 10, "receiver balance incorrect")
+        assert.equal(finalBal, beforeBal - 10, "sender balance incorrect");
       });
 
       it("LLC can claim tokens", async () => {
@@ -255,8 +263,42 @@ const {
         }
         assert.equal(tester, true, "not supposed to be callable");
       });
-   });
 
+      it("LLC - other user can't pay off someone elses loan", async () => {
+        let LPTbal = await pair.balanceOf.call(owner0);
+        let LPtokens = parseInt(LPTbal.words[0] / 3);
+
+        // let tokenBal0 = await unboundDai.balanceOf.call(owner0);
+        
+        // first mint
+        let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
+        let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
+
+        // user A balance before
+        let tokenBal = await unboundDai.balanceOf.call(owner0);
+        tokenBal = parseInt(tokenBal.words[0] / 4);
+
+        // user B balance before
+        let beforeSafuBal = await unboundDai.balanceOf.call(safuDev);
+        beforeSafuBal = beforeSafuBal.words[0];
+        
+        
+        // transfer funds to other user
+        let moveUND = await unboundDai.transfer.sendTransaction(safuDev, tokenBal);
+
+       
+        // Trys to unlockLPT with User B
+        let correct = false;
+        try {
+          const payFromSafu = await lockContract.unlockLPT.sendTransaction(LPtokens, unboundDai.address, { from: safuDev });
+          console.log(payFromSafu);
+        } catch {
+          correct = true;
+        }
+
+        assert.equal(correct, true, "??");
+      });
+   });
 
     //=================
     // Test Staking Pool
