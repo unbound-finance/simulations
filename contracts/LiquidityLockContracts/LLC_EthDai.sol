@@ -182,11 +182,11 @@ contract LLC_EthDai {
     function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
-        // update mapping
-        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
-
         // Burning of Udai will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
+
+        // update mapping
+        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
         
         // send LP tokens back to user
         require(LPTContract.transfer(msg.sender, LPToken), "LLC: Transfer Failed");
