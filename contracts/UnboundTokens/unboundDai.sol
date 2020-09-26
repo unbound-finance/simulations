@@ -7,8 +7,21 @@ import "../openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../openzeppelin/contracts/math/SafeMath.sol";
 import "../openzeppelin/contracts/utils/Address.sol";
 
-// import "../utils/IERC223.sol";
-// import "../utils/IERC223Recipient.sol";
+// ---------------------------------------------------------------------------------------
+//                                   Unbound Dollar (UND)
+//         
+//                                     By: Unbound Finance
+// ---------------------------------------------------------------------------------------
+// This contract holds the erc20 token call UND. This is the token we will be issuing
+// our loans in. This contract contains custom mint and burn functions, only callable from
+// an authorized valuing contract. As this contract will be first to be deployed, the 
+// valuing contract must be authorized by owner.
+//
+// The loan fee is computed on minting, and the amount distributed to the UND liquidity pool 
+// (as a reward for liquidity holders), the SAFU fund, and the dev fund. Initial split is 
+// determined in the constructor. The UND liquidity pool address must be updated on this 
+// contract by owner once it is created from the uniswap factory.
+// ----------------------------------------------------------------------------------------
 
 
 contract UnboundDai is Context, IERC20 {
@@ -26,7 +39,6 @@ contract UnboundDai is Context, IERC20 {
 
     string public _name;
     string public _symbol;
-    string public constant version = "1";  // From DAI contract
     uint8 public _decimals;
 
 
@@ -70,7 +82,7 @@ contract UnboundDai is Context, IERC20 {
         _;
     }
 
-    constructor (string memory name, string memory symbol, uint256 chainId_, address Safu, address devFund) public {
+    constructor (string memory name, string memory symbol, address Safu, address devFund) public {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
@@ -79,18 +91,25 @@ contract UnboundDai is Context, IERC20 {
         _safuAddr = Safu;
         _devFundAddr = devFund;
 
+        // we will use 40/40/20 split of fees
         _stakeShares = 8;
         _safuShares = 8;
 
-        // MUST BE MANUALLY CHANGED TO uDai LIQ pool.
+        // MUST BE MANUALLY CHANGED TO UND LIQ pool.
         _stakeAddr = Safu;
 
-        // Permit??
+        uint chainId;
+        // get chainId of the chain, required for permit
+        assembly {
+            chainId := chainid()
+        }
+
+        // To verify permit() signature
         DOMAIN_SEPARATOR = keccak256(abi.encode(
             keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
             keccak256(bytes(name)),
-            keccak256(bytes(version)),
-            chainId_,
+            keccak256(bytes('1')),
+            chainId,
             address(this)
         ));
     }
@@ -120,29 +139,19 @@ contract UnboundDai is Context, IERC20 {
     }
 
     //  PERMIT FUNCTION
-    function permit(address holder, address spender, uint256 nonce, uint256 expiry,
-                    bool allowed, uint8 v, bytes32 r, bytes32 s) external
-    {
-        bytes32 digest =
-            keccak256(abi.encodePacked(
-                "\x19\x01",                    // Do not understand what this is for
-                DOMAIN_SEPARATOR,              
-                keccak256(abi.encode(          // are we just taking a hash of a hash here?
-                    PERMIT_TYPEHASH,
-                    holder,
-                    spender,
-                    nonce,
-                    expiry,
-                    allowed))
-        ));
-
-        require(holder != address(0), "invalid-address-0");
-        require(holder == ecrecover(digest, v, r, s), "invalid-permit");
-        require(expiry == 0 || now <= expiry, "permit-expired");
-        require(nonce == nonces[holder]++, "invalid-nonce");           // When does nonces[holder] actually change?
-        uint wad = allowed ? uint(-1) : 0;
-        _allowances[holder][spender] = wad;
-        emit Approval(holder, spender, wad);
+    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
+        require(deadline >= block.timestamp, 'UnboundDollar: EXPIRED');
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                DOMAIN_SEPARATOR,
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+            )
+        );
+        // check if the data is signed by owner
+        address recoveredAddress = ecrecover(digest, v, r, s);
+        require(recoveredAddress != address(0) && recoveredAddress == owner, 'UnboundDollar: INVALID_SIGNATURE');
+        _approve(owner, spender, value);
     }
 
     // Transfer and transferFrom
@@ -237,17 +246,10 @@ contract UnboundDai is Context, IERC20 {
     function _burn(address account, uint256 toBurn, address LLCAddr) external virtual {
         require(account != address(0), "ERC20: burn from the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
-        require(_minted[account][LLCAddr] >= 0, "You have no loan");
+        require(_minted[account][LLCAddr] > 0, "You have no loan");
         
-        // Computes the 0.25% fee
-        // uint256 burnFee = toBurn.div(fee);
-        // uint256 totalToRemove = toBurn.add(burnFee);
-
         // checks if user has enough uDai to cover loan and 0.25% fee
         require(_balances[account] >= toBurn, "Insufficient uDai to pay back loan");
-
-        // Splitting of fees
-        // uint256 share = burnFee.div(20);
 
         // removes the amount of uDai to burn from _minted mapping/
         _minted[account][LLCAddr] = _minted[account][LLCAddr].sub(toBurn);

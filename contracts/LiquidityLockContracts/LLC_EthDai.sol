@@ -36,8 +36,28 @@ interface liqPoolToken {
     function price1CumulativeLast() external view returns (uint);
     function kLast() external view returns (uint);
 }
-
-// Liquidity Lock Contract for ETH/DAI pair
+// ---------------------------------------------------------------------------------------
+//                                Liquidity Lock Contract V1
+//         
+//                                     for ETH/DAI pair  
+// ---------------------------------------------------------------------------------------
+// This contract enables the user to take out a loan using their existing liquidity 
+// pool tokens as collateral. The loan is issued in the form of the UND token which 
+// carries a peg to the Dai. 
+// 
+// This contract can be used as a factory to enable multiple liquidity pools access 
+// to mint UND. At this time, the Unbound protocol requires one of the reserve tokens 
+// in the liquidity pool to be a stablecoin. 
+// 
+// In V1, we offer the ability to take out a loan after giving permission to the LLC
+// to "transferFrom", as well as an option utilizing the permit() function from within
+// the uniswap liquidity pool contract
+//
+// This is the main contract that the user will interact with. It is connected to Valuing, 
+// and then the UND mint functions. Upon deployment of the LLC, its address must first be 
+// registered with the valuing contract. This can only be completed by the owner (or 
+// eventually a DAO).
+// ----------------------------------------------------------------------------------------
 contract LLC_EthDai {
     using SafeMath for uint256;
     using Address for address;
@@ -75,29 +95,24 @@ contract LLC_EthDai {
         address toke0 = LPTContract.token0();
         address toke1 = LPTContract.token1();
 
+        // assigns which token in the pair is a stablecoin
         require (stableCoin == toke0 || stableCoin == toke1, "invalid");
         if (stableCoin == toke0) {
             _position = 0;
         } else if (stableCoin == toke1) {
             _position = 1;
         }
-
-        // Set Position of Stablecoin
-        //
-        // require(position == 0 || position == 1, "invalid");
-        // _position = position;
     }
 
     // Lock/Unlock functions
     // Mint path
-    // tokenNum must be 0 (for now)
     function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {
-        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
+        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
 
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
-        // call Oracle
+        // obtain total USD value
         uint256 totalUSD;
         if (_position == 0) {
             totalUSD = _token0 * 2; // pricing();
@@ -107,13 +122,12 @@ contract LLC_EthDai {
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
-
-        // call Permit and Transfer
-
-        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
         
         // map locked tokens to user address
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // call Permit and Transfer
+        transferLPTPermit(msg.sender, LPTamt, deadline, v, r, s);
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
@@ -122,14 +136,12 @@ contract LLC_EthDai {
 
     // Requires approval first
     function lockLPT (uint256 LPTamt, address uTokenAddr) public {
-        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "insufficient Liquidity");
-
-        
-
+        require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
-        
+
+        // calculates value of pool in stablecoin
         uint256 totalUSD;
         if (_position == 0) {
             totalUSD = _token0 * 2; // pricing();
@@ -140,24 +152,27 @@ contract LLC_EthDai {
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
         uint256 LPTValueInDai = totalUSD.mul(LPTamt).div(totalLPTokens);  
         
-        transferLPT(LPTamt);
-        
         // map locked tokens to user
         _tokensLocked[msg.sender] = _tokensLocked[msg.sender].add(LPTamt);
+
+        // transfer LPT to the address
+        transferLPT(LPTamt);
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
         
     }
 
+    // calls transfer only, for use with non-permit lock function
     function transferLPT(uint256 amount) internal {
-        LPTContract.transferFrom(msg.sender, address(this), amount);
-        
+        require(LPTContract.transferFrom(msg.sender, address(this), amount), "LLC: Trasfer From failed");
+
     }
 
+    // calls permit, then transfer
     function transferLPTPermit(address user, uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) internal {
         LPTContract.permit(user, address(this), amount, deadline, v, r, s);
-        LPTContract.transferFrom(msg.sender, address(this), amount);
+        require(LPTContract.transferFrom(msg.sender, address(this), amount), "LLC: Transfer From failed");
         
     }
 
@@ -167,11 +182,14 @@ contract LLC_EthDai {
     function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
+        // update mapping
+        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
+
         // Burning of Udai will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
         
-        LPTContract.transfer(msg.sender, LPToken);
-        _tokensLocked[msg.sender] = _tokensLocked[msg.sender].sub(LPToken);
+        // send LP tokens back to user
+        require(LPTContract.transfer(msg.sender, LPToken), "LLC: Transfer Failed");
         
     }
 
@@ -179,11 +197,10 @@ contract LLC_EthDai {
 
     // Claim - remove any airdropped tokens
     // currently sends all tokens back
-    // ---- TEST THIS ---------
     function claimTokens(address _tokenAddr, address to) public onlyOwner {
         require(_tokenAddr != pair, "Cannot move LP tokens");
         uint256 tokenBal = erc20Template(_tokenAddr).balanceOf(address(this));
-        erc20Template(_tokenAddr).transfer(to, tokenBal);
+        require(erc20Template(_tokenAddr).transfer(to, tokenBal), "LLC: Transfer Failed");
     }
 
     // Checks if sender is owner

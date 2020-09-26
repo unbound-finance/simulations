@@ -24,11 +24,7 @@ const placeHoldAddr = "0x8cda3c099F0f262e794Ea71E533E881538767001";
 module.exports = function (deployer) {
   let unbound, valuer, factory, tEth, tDai, route;
   
-  // deployer.deploy(LLC, "0x6f0B90B7D6CB0BFca427475F18C34d30EE99fC14", "0x266480906fd0aa3edd7ff64f466ea9684b792179", "0xc30d0164Fb4c013dB62E32d48f81BeD92735d97a");
-
-  // deployer.deploy(LLC, "0x32c660Ce65b5751433f98d0Fe0f94E94F4CC972E", "0x1443398Aa8E16E0F289B12ddCf666eeC4215bF46", 0);
-
-  deployer.deploy(uDai, "Unbound Dai", "UDAI", 42, placeHoldAddr, placeHoldAddr).then((instance) => {
+  deployer.deploy(uDai, "Unbound Dollar", "UND", placeHoldAddr, placeHoldAddr).then((instance) => {
     unbound = instance.address;
     UBD = instance;
     return deployer.deploy(valuing, unbound).then((ins) => {
