@@ -34,15 +34,16 @@ contract Valuing_01 {
 
      // Liquidity Lock Contract structs - contains fee and loan rate
     struct LiquidityLock {
-        uint256 feeRate;
-        uint256 loanRate;
-        bool active;
+        uint256 feeRate; // this will contain the number by which the raw loan value is divided by to obtain desired %
+        uint256 loanRate; // i.e. for 50%, this value would be 2, because 100.div(2) will return 50% of the original number
+
+        bool active; // bool that indicates if address is allowed for use.
     }
 
-    //Approved Contracts
+    // mapping of Approved LLC Contract structs
     mapping (address => LiquidityLock) listOfLLC;
 
-    // Approved unbound tokens
+    // mapping of Approved unbound token address
     mapping (address => bool) isUnbound;
 
     // Modifiers
@@ -52,13 +53,15 @@ contract Valuing_01 {
     }
 
     // Constructor
-    constructor (address uDai) public {
-        isUnbound[uDai] = true;
+    constructor (address UND) public {
+        isUnbound[UND] = true;
         _owner = msg.sender;
     }
 
-    // Token Creation Functions
-
+    // Token Creation Function - only called from LLC
+    //
+    // receives the total value (in stablecoin) of the locked liquidity from LLC,
+    // calculates loan amount in UND using loanRate variable from struct
     function unboundCreate(uint256 amount, address user, address token) external {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
@@ -74,7 +77,7 @@ contract Valuing_01 {
 
     }
 
-    // Token Burning Function
+    // Loan repayment Intermediary - only called from LLC
     function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
@@ -83,7 +86,7 @@ contract Valuing_01 {
         unboundInterface unboundContract = unboundInterface(token);
         uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
-        // compute amount of uDai necessary to unlock LPT
+        // compute amount of UND necessary to unlock LPT
         uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
         
         // calls burn
@@ -91,6 +94,7 @@ contract Valuing_01 {
         
     }
 
+    // returns the fee and loanrate variables attached to an LLC
     function getLLCStruct(address LLC) public view returns (uint256 fee, uint256 loanrate) {
         fee = listOfLLC[LLC].feeRate;
         loanrate = listOfLLC[LLC].loanRate;

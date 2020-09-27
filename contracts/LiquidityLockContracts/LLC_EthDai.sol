@@ -39,12 +39,12 @@ interface liquidityPoolToken {
 }
 // ---------------------------------------------------------------------------------------
 //                                Liquidity Lock Contract V1
-//         
-//                                     for ETH/DAI pair  
+//                                          
+//                                for stablecoin/erc20 pairs  
 // ---------------------------------------------------------------------------------------
 // This contract enables the user to take out a loan using their existing liquidity 
-// pool tokens as collateral. The loan is issued in the form of the UND token which 
-// carries a peg to the Dai. 
+// pool tokens (from the associated liquidity pool) as collateral. The loan is issued 
+// in the form of the UND token which carries a peg to the Dai.
 // 
 // This contract can be used as a factory to enable multiple liquidity pools access 
 // to mint UND. At this time, the Unbound protocol requires one of the reserve tokens 
@@ -52,7 +52,8 @@ interface liquidityPoolToken {
 // 
 // In V1, we offer the ability to take out a loan after giving permission to the LLC
 // to "transferFrom", as well as an option utilizing the permit() function from within
-// the uniswap liquidity pool contract
+// the uniswap liquidity pool contract. At this time, Unbound.finance can only support
+// liquidity pools which contain a USD stablecoin (i.e. DAI-ETH, USDC-UNI, etc),
 //
 // This is the main contract that the user will interact with. It is connected to Valuing, 
 // and then the UND mint functions. Upon deployment of the LLC, its address must first be 
@@ -89,7 +90,8 @@ contract LLC_EthDai {
         _;
     }
 
-    // Constructor
+    // Constructor - must provide valuing contract address, the associated Liquidity pool address (i.e. eth/dai uniswap pool token address),
+    //               and the address of the stablecoin in the uniswap pair.
     constructor (address valuingAddress, address LPTaddress, address stableCoin) public {
         _owner = msg.sender;
         
@@ -101,6 +103,7 @@ contract LLC_EthDai {
         // set LPT address
         pair = LPTaddress;
 
+        // saves pair token addresses to memory
         address toke0 = LPTContract.token0();
         address toke1 = LPTContract.token1();
 
@@ -121,7 +124,8 @@ contract LLC_EthDai {
     function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
-
+        
+        // obtain amounts of tokens in both reserves.
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
         // obtain total USD value
@@ -132,6 +136,14 @@ contract LLC_EthDai {
             totalUSD = _token1 * 2;
         }
 
+        // Token Decimal Normalization
+        //
+        // The following block ensures that all stablecoin valuations follow consistency with decimals
+        // and match the 18 decimals used by UND. This block also solves a potential vulnerability,
+        // where a stablecoin pair which contains beyond 18 decimals could be used to calculate significantly
+        // more UND (by orders of 10). Likewise, stablecoins such as USDC or USDT with 6 decimals would also 
+        // in far less UND being minted than desired.
+        //
         // this should only happen if stablecoin decimals is NOT 18.
         if (stablecoinDecimal != 18) {
             
@@ -174,21 +186,33 @@ contract LLC_EthDai {
         
     }
 
-    // Requires approval first
+    // Requires approval first (permit excluded for simplicity)
     function lockLPT (uint256 LPTamt, address uTokenAddr) public {
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
+        // obtain amounts of tokens in both reserves.
         (uint112 _token0, uint112 _token1, ) = LPTContract.getReserves();
 
         // calculates value of pool in stablecoin
         uint256 totalUSD;
+
+        // checks which of the reserve tokens is stablecoin
+        // assumes stablecoin amount is equal to erc20 value
         if (_position == 0) {
-            totalUSD = _token0 * 2; // pricing();
+            totalUSD = _token0 * 2; 
         } else {
             totalUSD = _token1 * 2;
         }
 
+        // Token Decimal Normalization
+        //
+        // The following block ensures that all stablecoin valuations follow consistency with decimals
+        // and match the 18 decimals used by UND. This block also solves a potential vulnerability,
+        // where a stablecoin pair which contains beyond 18 decimals could be used to calculate significantly
+        // more UND (by orders of 10). Likewise, stablecoins such as USDC or USDT with 6 decimals would also 
+        // in far less UND being minted than desired.
+        //
         // this should only happen if stablecoin decimals is NOT 18.
         if (stablecoinDecimal != 18) {
             
@@ -245,8 +269,8 @@ contract LLC_EthDai {
     }
 
     // Burn Path
-
-    // tokenNum must be 0
+    // 
+    // allows for partial loan payment by using the ratio of LPtokens to unlock and total LPtokens locked
     function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
 
@@ -264,7 +288,7 @@ contract LLC_EthDai {
     // onlyOwner Functions
 
     // Claim - remove any airdropped tokens
-    // currently sends all tokens back
+    // currently sends all tokens to "to" address (in param)
     function claimTokens(address _tokenAddr, address to) public onlyOwner {
         require(_tokenAddr != pair, "Cannot move LP tokens");
         uint256 tokenBal = erc20Template(_tokenAddr).balanceOf(address(this));

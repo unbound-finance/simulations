@@ -57,13 +57,16 @@ contract UnboundDai is Context, IERC20 {
     // Dev fund (20%)
     address public _devFundAddr;
 
-    // Dev Fund split
+    // Dev Fund split variables
+    // the raw fee is divided by 20 to compute a share equal to 5% of the raw fee
+    // these variables are multiplied by this share, to produce %s of the raw fee in multiples of 5.
+    // i.e. a value of 8 corresponds to 40% of raw value. 8 * 5% = 40%
     uint256 public _stakeShares;
     uint256 public _safuShares;
 
 
 
-    // tracks users who minted. 
+    // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _minted;
 
     //Owner Address
@@ -236,6 +239,7 @@ contract UnboundDai is Context, IERC20 {
         _balances[_safuAddr] = _balances[_safuAddr].add(share.mul(_safuShares));
 
         // sends the remaineder to dev fund
+        // this formula is to ensure remainders dropped by integer division are not accidentally burned
         _balances[_devFundAddr] = _balances[_devFundAddr].add(feeAmount.sub(share.mul(_safuShares.add(_stakeShares))));
 
         emit Mint(account, amount);
