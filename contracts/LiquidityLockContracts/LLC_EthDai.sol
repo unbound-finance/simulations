@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 interface erc20Template {
     function transfer(address to, uint value) external returns (bool);
     function balanceOf(address owner) external view returns (uint);
+    function decimals() external view returns (uint8);
 }
 
 interface valuingInterface {
@@ -74,9 +75,13 @@ contract LLC_EthDai {
     // token position of Stablecoin
     uint8 public _position;
 
+    // set this in constructor, tracks decimals of stablecoin
+    uint8 public stablecoinDecimal;
+
     // Interfaced Contracts
     valuingInterface private valuingContract;
     liquidityPoolToken private LPTContract;
+    erc20Template private stableCoinErc20;
 
     // Modifiers
     modifier onlyOwner() {
@@ -88,12 +93,19 @@ contract LLC_EthDai {
     constructor (address valuingAddress, address LPTaddress, address stableCoin) public {
         _owner = msg.sender;
         
+        // initiates interfacing contracts
         valuingContract = valuingInterface(valuingAddress);
         LPTContract = liquidityPoolToken(LPTaddress);
+        stableCoinErc20 = erc20Template(stableCoin);
+
+        // set LPT address
         pair = LPTaddress;
 
         address toke0 = LPTContract.token0();
         address toke1 = LPTContract.token1();
+
+        // sets the decimals value of the stablecoin
+        stablecoinDecimal = stableCoinErc20.decimals();
 
         // assigns which token in the pair is a stablecoin
         require (stableCoin == toke0 || stableCoin == toke1, "invalid");
@@ -118,6 +130,34 @@ contract LLC_EthDai {
             totalUSD = _token0 * 2; // pricing();
         } else {
             totalUSD = _token1 * 2;
+        }
+
+        // this should only happen if stablecoin decimals is NOT 18.
+        if (stablecoinDecimal != 18) {
+            
+            uint8 difference;
+
+            // first case: tokenDecimal is smaller than 18
+            // for stablecoins with less than 18 decimals
+            if (stablecoinDecimal < 18 && stablecoinDecimal >= 0) {
+
+                // calculate amount of decimals under 18
+                difference = 18 - stablecoinDecimal;
+
+                // adds decimals to match 18
+                totalUSD = totalUSD * (10 ** uint256(difference));
+            }
+
+            // second case: tokenDecimal is greater than 18
+            // for tokens with more than 18 decimals 
+            else if (stablecoinDecimal > 18) {
+
+                // caclulate amount of decimals over 18
+                difference = stablecoinDecimal - 18;
+
+                // removes decimals to match 18
+                totalUSD = totalUSD / (10 ** uint256(difference));
+            }
         }
         
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
@@ -147,6 +187,34 @@ contract LLC_EthDai {
             totalUSD = _token0 * 2; // pricing();
         } else {
             totalUSD = _token1 * 2;
+        }
+
+        // this should only happen if stablecoin decimals is NOT 18.
+        if (stablecoinDecimal != 18) {
+            
+            uint8 difference;
+
+            // first case: tokenDecimal is smaller than 18
+            // for stablecoins with less than 18 decimals
+            if (stablecoinDecimal < 18 && stablecoinDecimal >= 0) {
+
+                // calculate amount of decimals under 18
+                difference = 18 - stablecoinDecimal;
+
+                // adds decimals to match 18
+                totalUSD = totalUSD * (10 ** uint256(difference));
+            }
+
+            // second case: tokenDecimal is greater than 18
+            // for tokens with more than 18 decimals 
+            else if (stablecoinDecimal > 18) {
+
+                // caclulate amount of decimals over 18
+                difference = stablecoinDecimal - 18;
+
+                // removes decimals to match 18
+                totalUSD = totalUSD / (10 ** uint256(difference));
+            }
         }
 
         // This should compute % value of Liq pool in Dai. Cannot have decimals in Solidity
