@@ -65,7 +65,7 @@ contract LLC_EthDai {
     using Address for address;
 
     //Owner Address
-    address _owner;
+    address private _owner;
 
     // LPT address
     address public pair;
