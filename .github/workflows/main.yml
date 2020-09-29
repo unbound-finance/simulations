@@ -1,0 +1,31 @@
+name: truffle-test
+
+on: [push]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+      - name: setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+          registry-url: 'https://registry.npmjs.org'
+      - name: install modules
+        run: npm install
+      - name: install ganache
+        run: npm install ganache-cli
+      - name: start ganache
+        run: node_modules/.bin/ganache-cli --port 7545 -a 100 &
+      - name: install truffle
+        run: |
+          npm i truffle
+          node_modules/.bin/truffle version
+      - name: exec truffle test
+        run: |
+          cd src
+          ../node_modules/.bin/truffle test --network test
