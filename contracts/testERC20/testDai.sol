@@ -1,7 +1,7 @@
 pragma solidity >=0.4.23 <0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/token/ERC20/IERC20.sol";
+import "../openzeppelin/math/SafeMath.sol";
 
 contract TestDai is IERC20 {
     using SafeMath for uint;
@@ -21,12 +21,12 @@ contract TestDai is IERC20 {
     mapping(address => uint) public nonces;
 
 
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
+    // event Approval(address indexed owner, address indexed spender, uint value);
+    // event Transfer(address indexed from, address indexed to, uint value);
 
     constructor(address tester, uint256 chainId_) public {
-        balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000 * (10 ** 18));
-        balanceOf[tester] = balanceOf[tester].add(100000000 * (10 ** 18));
+        balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000000 * (10 ** 18));
+        balanceOf[tester] = balanceOf[tester].add(100000000000 * (10 ** 18));
         totalSupply = totalSupply.add(1000000 * (10 ** 18));
 
         // Permit??
@@ -99,7 +99,7 @@ contract TestDai is IERC20 {
 
         require(holder != address(0), "invalid-address-0");
         require(holder == ecrecover(digest, v, r, s), "invalid-permit");
-        require(expiry == 0 || now <= expiry, "permit-expired");
+        require(expiry == 0 || block.timestamp <= expiry, "permit-expired");
         require(nonce == nonces[holder]++, "invalid-nonce");           // When does nonces[holder] actually change?
         uint wad = allowed ? uint(-1) : 0;
         allowance[holder][spender] = wad;

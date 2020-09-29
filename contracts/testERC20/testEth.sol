@@ -1,7 +1,7 @@
 pragma solidity >=0.4.23 <0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/token/ERC20/IERC20.sol";
+import "../openzeppelin/math/SafeMath.sol";
 
 contract TestEth is IERC20 {
     using SafeMath for uint;
@@ -14,8 +14,8 @@ contract TestEth is IERC20 {
     mapping(address => mapping(address => uint)) public override allowance;
 
 
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
+    // event Approval(address indexed owner, address indexed spender, uint value);
+    // event Transfer(address indexed from, address indexed to, uint value);
 
     constructor(address tester) public {
         balanceOf[msg.sender] = balanceOf[msg.sender].add(100000000 * (10 ** 18));
