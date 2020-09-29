@@ -13,7 +13,6 @@ interface erc20Template {
 interface valuingInterface {
     function unboundCreate(uint256 amount, address user, address token) external;
     function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external;
-    
 }
 
 interface liqPoolToken {
