@@ -2,10 +2,10 @@
 
 pragma solidity >=0.4.23 <0.8.0;
 
-import "../openzeppelin/contracts/GSN/Context.sol";
-import "../openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../openzeppelin/contracts/math/SafeMath.sol";
-import "../openzeppelin/contracts/utils/Address.sol";
+import "../openzeppelin/GSN/Context.sol";
+import "../openzeppelin/token/ERC20/IERC20.sol";
+import "../openzeppelin/math/SafeMath.sol";
+import "../openzeppelin/utils/Address.sol";
 
 // ---------------------------------------------------------------------------------------
 //                                   Unbound Dollar (UND)

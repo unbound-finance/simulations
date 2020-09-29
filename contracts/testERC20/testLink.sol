@@ -1,7 +1,7 @@
 pragma solidity >=0.4.23 <0.8.0;
 
-import "../openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../openzeppelin/contracts/math/SafeMath.sol";
+import "../openzeppelin/token/ERC20/IERC20.sol";
+import "../openzeppelin/math/SafeMath.sol";
 
 contract TestLink is IERC20 {
     using SafeMath for uint;
