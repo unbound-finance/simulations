@@ -2,10 +2,10 @@
 
 pragma solidity >=0.4.23 <0.8.0;
 
-import "@openzeppelin/contracts/GSN/Context.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "../openzeppelin/GSN/Context.sol";
+import "../openzeppelin/token/ERC20/IERC20.sol";
+import "../openzeppelin/math/SafeMath.sol";
+import "../openzeppelin/utils/Address.sol";
 
 // ---------------------------------------------------------------------------------------
 //                                   Unbound Dollar (UND)
@@ -132,12 +132,12 @@ contract UnboundDai is Context, IERC20 {
     }
 
    
-    function totalSupply() public view override returns (uint256) {
+    function totalSupply() public override view returns (uint256) {
         return _totalSupply;
     }
 
 
-    function balanceOf(address account) public view override returns (uint256) {
+    function balanceOf(address account) public override view returns (uint256) {
         return _balances[account];
     }
 
@@ -158,18 +158,18 @@ contract UnboundDai is Context, IERC20 {
     }
 
     // Transfer and transferFrom
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-        _transfer(_msgSender(), recipient, amount);
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
+        _transfer(msg.sender, recipient, amount);
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
         _transfer(sender, recipient, amount);
-        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+        _approve(sender, msg.sender, _allowances[sender][msg.sender].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
 
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual {
+    function _transfer(address sender, address recipient, uint256 amount) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -180,16 +180,16 @@ contract UnboundDai is Context, IERC20 {
         emit Transfer(sender, recipient, amount);
     }
     
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    function allowance(address owner, address spender) public override view returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        _approve(_msgSender(), spender, amount);
+    function approve(address spender, uint256 amount) public override returns (bool) {
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
-    function _approve(address owner, address spender, uint256 amount) internal virtual {
+    function _approve(address owner, address spender, uint256 amount) internal {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -197,14 +197,14 @@ contract UnboundDai is Context, IERC20 {
         emit Approval(owner, spender, amount);
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
+    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+        _approve(msg.sender, spender, _allowances[msg.sender][spender].add(addedValue));
         return true;
     }
 
     
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
+    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
+        _approve(msg.sender, spender, _allowances[msg.sender][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
     }
 
@@ -214,12 +214,13 @@ contract UnboundDai is Context, IERC20 {
         require(account != address(0), "ERC20: mint to the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         // _beforeTokenTransfer(address(0), account, amount);
-
+        
+        
         uint256 feeAmount = amount.div(fee); // fee variable should be 400 to produce 0.25%
         
         // The amount the user will receive
         uint256 toMint = amount.sub(feeAmount);
-
+        
         // Splitting of fees
         uint256 share = feeAmount.div(20);
 
@@ -252,6 +253,7 @@ contract UnboundDai is Context, IERC20 {
         require(_minted[account][LLCAddr] > 0, "You have no loan");
         
         // checks if user has enough uDai to cover loan and 0.25% fee
+        require(toBurn != _minted[account][LLCAddr], "Dupa");
         require(_balances[account] >= toBurn, "Insufficient uDai to pay back loan");
 
         // removes the amount of uDai to burn from _minted mapping/

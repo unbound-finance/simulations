@@ -1,8 +1,8 @@
 pragma solidity >=0.4.23 <0.8.0;
 // SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "../openzeppelin/math/SafeMath.sol";
+import "../openzeppelin/utils/Address.sol";
 
 interface erc20Template {
     function transfer(address to, uint value) external returns (bool);
@@ -13,10 +13,9 @@ interface erc20Template {
 interface valuingInterface {
     function unboundCreate(uint256 amount, address user, address token) external;
     function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external;
-    
 }
 
-interface liquidityPoolToken {
+interface liqPoolToken {
     function totalSupply() external view returns (uint);
     function balanceOf(address owner) external view returns (uint);
     
@@ -81,7 +80,7 @@ contract LLC_EthDai {
 
     // Interfaced Contracts
     valuingInterface private valuingContract;
-    liquidityPoolToken private LPTContract;
+    liqPoolToken private LPTContract;
     erc20Template private stableCoinErc20;
 
     // Modifiers
@@ -97,7 +96,7 @@ contract LLC_EthDai {
         
         // initiates interfacing contracts
         valuingContract = valuingInterface(valuingAddress);
-        LPTContract = liquidityPoolToken(LPTaddress);
+        LPTContract = liqPoolToken(LPTaddress);
         stableCoinErc20 = erc20Template(stableCoin);
 
         // set LPT address
