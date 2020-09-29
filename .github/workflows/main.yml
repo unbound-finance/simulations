@@ -26,6 +26,4 @@ jobs:
           npm i truffle
           node_modules/.bin/truffle version
       - name: exec truffle test
-        run: |
-          cd src
-          ../node_modules/.bin/truffle test --network test
+        run: node_modules/.bin/truffle test --network test
