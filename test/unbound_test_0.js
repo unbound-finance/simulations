@@ -116,7 +116,7 @@ const {
       });
       
       it("UND should have valuator", async () => {
-        const retval = await unboundDai._valuator.call();
+        const retval = await unboundDai.valuator.call();
         assert.equal(retval, valueContract.address, "incorrect Valuator");
       });
 
