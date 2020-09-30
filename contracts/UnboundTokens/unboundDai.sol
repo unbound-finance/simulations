@@ -253,7 +253,6 @@ contract UnboundDai is Context, IERC20 {
         require(_minted[account][LLCAddr] > 0, "You have no loan");
         
         // checks if user has enough uDai to cover loan and 0.25% fee
-        require(toBurn != _minted[account][LLCAddr], "Dupa");
         require(_balances[account] >= toBurn, "Insufficient uDai to pay back loan");
 
         // removes the amount of uDai to burn from _minted mapping/
