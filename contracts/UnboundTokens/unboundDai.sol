@@ -35,11 +35,11 @@ contract UnboundDai is Context, IERC20 {
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
-    uint256 public _totalSupply;
+    uint256 _totalSupply;
 
-    string public _name;
-    string public _symbol;
-    uint8 public _decimals;
+    string _name;
+    string _symbol;
+    uint8 _decimals;
 
 
     // PERMIT VARIABLES
@@ -49,20 +49,20 @@ contract UnboundDai is Context, IERC20 {
     mapping(address => uint) public nonces;
 
     // staking contract address (40%)
-    address public _stakeAddr;
+    address _stakeAddr;
 
     // Emergency fund (40%)
-    address public _safuAddr;
+    address _safuAddr;
 
     // Dev fund (20%)
-    address public _devFundAddr;
+    address _devFundAddr;
 
     // Dev Fund split variables
     // the raw fee is divided by 20 to compute a share equal to 5% of the raw fee
     // these variables are multiplied by this share, to produce %s of the raw fee in multiples of 5.
     // i.e. a value of 8 corresponds to 40% of raw value. 8 * 5% = 40%
-    uint256 public _stakeShares;
-    uint256 public _safuShares;
+    uint256 _stakeShares;
+    uint256 _safuShares;
 
 
 
@@ -70,10 +70,10 @@ contract UnboundDai is Context, IERC20 {
     mapping (address => mapping (address => uint256)) private _minted;
 
     //Owner Address
-    address public _owner;
+    address _owner;
 
     //Valuator Contract Address
-    address public _valuator;
+    address _valuator;
 
     modifier onlyOwner() {
         require(isOwner(), "Ownable: caller is not the owner");
@@ -139,6 +139,30 @@ contract UnboundDai is Context, IERC20 {
 
     function balanceOf(address account) public override view returns (uint256) {
         return _balances[account];
+    }
+
+    function stakeAddr() public view returns(address) {
+        return _stakeAddr;
+    }
+
+    function safuAddr() public view returns(address) {
+        return _safuAddr;
+    }
+
+    function devFundAddr() public view returns(address) {
+        return _devFundAddr;
+    }
+
+    function stakeShares() public view returns(uint256) {
+        return _stakeShares;
+    }
+
+    function safuShares() public view returns(uint256) {
+        return _safuShares;
+    }
+
+    function valuator() public view returns(address) {
+        return _valuator;
     }
 
     //  PERMIT FUNCTION
