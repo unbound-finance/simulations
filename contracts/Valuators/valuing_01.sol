@@ -129,13 +129,11 @@ contract Valuing_01 {
 
     // changes loanRate only
     function changeLoanRate (address LLC, uint256 loan) public onlyOwner {
-        require(listOfLLC[LLC].active, "LLC not active");
         listOfLLC[LLC].loanRate = loan;
     }
 
     // changes feeRate only
     function changeFeeRate (address LLC, uint256 fee) public onlyOwner {
-        require(listOfLLC[LLC].active, "LLC not active");
         listOfLLC[LLC].feeRate = fee;
     }
 

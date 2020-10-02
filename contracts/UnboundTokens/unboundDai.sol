@@ -65,7 +65,7 @@ contract UnboundDai is Context, IERC20 {
     uint256 _safuShares;
 
     // number of decimals by which to divide fee multiple by.
-    uint256 public rateBalance = (10 ** 6);
+    uint256 public rateBalance = 100;
 
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _minted;
@@ -318,15 +318,12 @@ contract UnboundDai is Context, IERC20 {
     // onlyOwner Functions
 
     // change safuShare
-    function changeSafuShare(uint256 rate) public onlyOwner {
-        // require(rate <= 20 && rate > 0, "bad input");
-        _safuShares = rate;
-    }
 
-    // change stakeShare
-    function changeStakeShare(uint256 rate) public onlyOwner {
-        // require(rate <= 20 && rate > 0, "bad input");
-        _stakeShares = rate;
+    // change both safu and stake shares, to ensure their sum stays below 100.
+    function changeFeeSplit(uint256 _safu, uint256 _stake) public onlyOwner {
+        require(_safu.add(_stake) <= 100, "UND: fee split invalid");
+        _safuShares = _safu;
+        _stakeShares = _stake;
     }
 
     // Changes stakingAddr
