@@ -64,7 +64,8 @@ contract UnboundDai is Context, IERC20 {
     uint256 _stakeShares;
     uint256 _safuShares;
 
-
+    // number of decimals by which to divide fee multiple by.
+    uint256 public rateBalance = 10**6;
 
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _minted;
@@ -95,8 +96,8 @@ contract UnboundDai is Context, IERC20 {
         _devFundAddr = devFund;
 
         // we will use 40/40/20 split of fees
-        _stakeShares = 8;
-        _safuShares = 8;
+        _stakeShares = 40;
+        _safuShares = 40;
 
         // MUST BE MANUALLY CHANGED TO UND LIQ pool.
         _stakeAddr = Safu;
@@ -239,33 +240,50 @@ contract UnboundDai is Context, IERC20 {
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         // _beforeTokenTransfer(address(0), account, amount);
         
+         // computes fee if applicable
         
-        uint256 feeAmount = amount.div(fee); // fee variable should be 400 to produce 0.25%
-        
-        // The amount the user will receive
-        uint256 toMint = amount.sub(feeAmount);
-        
-        // Splitting of fees
-        uint256 share = feeAmount.div(20);
+        if (fee == 0) {
 
-        // crediting loan to user
-        _minted[account][LLCAddr] = _minted[account][LLCAddr].add(amount);
+            // Credits user with their uDai loan, minus fees
+            _balances[account] = _balances[account].add(amount);
+
+        } else {
+            require(amount.mul(fee) >= rateBalance, "amount is too small");
+            uint256 feeAmount = amount.mul(fee).div(rateBalance); 
+
+            // The amount the user will receive
+            uint256 toMint = amount.sub(feeAmount);
+            
+            // amount of fee for staking
+            uint256 stakeShare = feeAmount.mul(_stakeShares).div(100);
+
+            // amount of fee for safu
+            uint256 safuShare = feeAmount.mul(_safuShares).div(100);
+
+            // Credits user with their uDai loan, minus fees
+            _balances[account] = _balances[account].add(toMint);
+
+            // sends 40% to staking. MUST SET uDai Liquidity pool first
+            _balances[_stakeAddr] = _balances[_stakeAddr].add(stakeShare);
+
+            // sends 40% to Safu Fund
+            _balances[_safuAddr] = _balances[_safuAddr].add(safuShare);
+
+            // sends the remaineder to dev fund
+            // this formula is to ensure remainders dropped by integer division are not accidentally burned
+            _balances[_devFundAddr] = _balances[_devFundAddr].add(feeAmount.sub(stakeShare.add(safuShare)));
+
+        }
 
         // adding total amount of new tokens to totalSupply
         _totalSupply = _totalSupply.add(amount);
 
-        // Credits user with their uDai loan, minus fees
-        _balances[account] = _balances[account].add(toMint);
-
-        // sends 40% to staking. MUST SET uDai Liquidity pool first
-        _balances[_stakeAddr] = _balances[_stakeAddr].add(share.mul(_stakeShares));
-
-        // sends 40% to Safu Fund
-        _balances[_safuAddr] = _balances[_safuAddr].add(share.mul(_safuShares));
-
-        // sends the remaineder to dev fund
-        // this formula is to ensure remainders dropped by integer division are not accidentally burned
-        _balances[_devFundAddr] = _balances[_devFundAddr].add(feeAmount.sub(share.mul(_safuShares.add(_stakeShares))));
+        // crediting loan to user
+        _minted[account][LLCAddr] = _minted[account][LLCAddr].add(amount);
+        
+        
+        
+        
 
         emit Mint(account, amount);
     }
@@ -300,15 +318,12 @@ contract UnboundDai is Context, IERC20 {
     // onlyOwner Functions
 
     // change safuShare
-    function changeSafuShare(uint256 rate) public onlyOwner {
-        require(rate <= 20 && rate > 0, "bad input");
-        _safuShares = rate;
-    }
 
-    // change stakeShare
-    function changeStakeShare(uint256 rate) public onlyOwner {
-        require(rate <= 20 && rate > 0, "bad input");
-        _stakeShares = rate;
+    // change both safu and stake shares, to ensure their sum stays below 100.
+    function changeFeeSplit(uint256 _safu, uint256 _stake) public onlyOwner {
+        require(_safu.add(_stake) <= 100, "UND: fee split invalid");
+        _safuShares = _safu;
+        _stakeShares = _stake;
     }
 
     // Changes stakingAddr

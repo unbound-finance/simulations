@@ -46,6 +46,9 @@ contract Valuing_01 {
     // mapping of Approved unbound token address
     mapping (address => bool) isUnbound;
 
+    // number of decimals by which to divide fee multiple by.
+    uint256 public rateBalance = (10 ** 6);
+
     // Modifiers
     modifier onlyOwner() {
         require(isOwner(), "Ownable: caller is not the owner");
@@ -63,6 +66,7 @@ contract Valuing_01 {
     // receives the total value (in stablecoin) of the locked liquidity from LLC,
     // calculates loan amount in UND using loanRate variable from struct
     function unboundCreate(uint256 amount, address user, address token) external {
+        require (amount > 0, "Cannot valuate nothing");
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
         
@@ -70,8 +74,15 @@ contract Valuing_01 {
         unboundInterface unboundContract = unboundInterface(token);
 
         // computes loan amount
-        uint256 loanAmt = amount.div(listOfLLC[msg.sender].loanRate); // Currently, this method will be difficult to accomodate certain % numbers like 50.5% for example
+        uint256 loanAmt;
+        if (listOfLLC[msg.sender].loanRate == 0) {
+            loanAmt = amount;
+        } else {
+            loanAmt = amount.mul(listOfLLC[msg.sender].loanRate).div(rateBalance);
+            require (loanAmt > 0, "value too small"); 
+        }
 
+    
         // calls mint 
         unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, msg.sender);
 
@@ -109,11 +120,21 @@ contract Valuing_01 {
 
     // grants an LLC permission //
     function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
-        // prevents setting fee greater than 5%;
-        // require(fee > 20, "max fee rate of 5%");
+        
+        // Enter 2500 for 0.25%, 250 for 2.5%, and 25 for 25%.
         listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].loanRate = loan;
         listOfLLC[LLC].active = true;
+    }
+
+    // changes loanRate only
+    function changeLoanRate (address LLC, uint256 loan) public onlyOwner {
+        listOfLLC[LLC].loanRate = loan;
+    }
+
+    // changes feeRate only
+    function changeFeeRate (address LLC, uint256 fee) public onlyOwner {
+        listOfLLC[LLC].feeRate = fee;
     }
 
     // Disables an LLC:
