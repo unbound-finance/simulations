@@ -65,7 +65,7 @@ contract UnboundDai is Context, IERC20 {
     uint256 _safuShares;
 
     // number of decimals by which to divide fee multiple by.
-    uint256 public rateBalance = 100;
+    uint256 public rateBalance = 10**6;
 
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _minted;
@@ -255,10 +255,10 @@ contract UnboundDai is Context, IERC20 {
             uint256 toMint = amount.sub(feeAmount);
             
             // amount of fee for staking
-            uint256 stakeShare = feeAmount.mul(_stakeShares).div(rateBalance);
+            uint256 stakeShare = feeAmount.mul(_stakeShares).div(100);
 
             // amount of fee for safu
-            uint256 safuShare = feeAmount.mul(_safuShares).div(rateBalance);
+            uint256 safuShare = feeAmount.mul(_safuShares).div(100);
 
             // Credits user with their uDai loan, minus fees
             _balances[account] = _balances[account].add(toMint);
