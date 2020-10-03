@@ -34,8 +34,8 @@ contract Valuing_01 {
 
      // Liquidity Lock Contract structs - contains fee and loan rate
     struct LiquidityLock {
-        uint256 feeRate; // this will contain the number by which the raw loan value is divided by to obtain desired %
-        uint256 loanRate; // i.e. for 50%, this value would be 2, because 100.div(2) will return 50% of the original number
+        uint256 feeRate; // this will contain the number by obtained by multiplying the rate by 10 ^ 6
+        uint256 loanRate; // i.e. for 50%, this value would be 500000, because 100.mul(500000).div(10**6) will return 50% of the original number
 
         bool active; // bool that indicates if address is allowed for use.
     }
@@ -122,8 +122,8 @@ contract Valuing_01 {
     function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
         
         // Enter 2500 for 0.25%, 250 for 2.5%, and 25 for 25%.
-        listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].loanRate = loan;
+        listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].active = true;
     }
 

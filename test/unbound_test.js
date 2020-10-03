@@ -38,7 +38,12 @@ contract("unboundSystem", function (_accounts) {
   const safu = _accounts[1];
   const devFund = _accounts[2];
   const user = _accounts[3];
-  const fee = 200;
+  const daiAmount = 400000;
+  const rateBalance = 10 ** 6;
+  const loanRate = 500000;
+  const feeRate = 5000;
+  const stakeSharesPercent = 40;
+  const safuSharesPercent = 40;
 
   let unboundDai;
   let valueContract;
@@ -87,8 +92,8 @@ contract("unboundSystem", function (_accounts) {
 
       let permissionLLC = await valueContract.addLLC.sendTransaction(
         lockContract.address,
-        2,
-        fee
+        loanRate,
+        feeRate
       );
       let permissionUdai = await valueContract.allowToken.sendTransaction(
         unboundDai.address
@@ -109,7 +114,7 @@ contract("unboundSystem", function (_accounts) {
       let addLiq = await route.addLiquidity.sendTransaction(
         tDai.address,
         tEth.address,
-        400000,
+        daiAmount,
         1000,
         3000,
         10,
@@ -176,11 +181,11 @@ contract("unboundSystem", function (_accounts) {
 
     //=== LLC ===//
     it("valuator has correct LLC", async () => {
-      const firstLoanRate = 2;
       let LLCstruct = await valueContract.getLLCStruct.call(
         lockContract.address
       );
-      assert.equal(LLCstruct.loanrate.words[0], firstLoanRate, "incorrect");
+      assert.equal(LLCstruct.loanrate.words[0], loanRate, "incorrect loanRate");
+      assert.equal(LLCstruct.fee.words[0], feeRate, "incorrect feeRate");
     });
 
     it("cannot call unboundCreate() on valuator", async () => {
@@ -206,15 +211,15 @@ contract("unboundSystem", function (_accounts) {
     });
 
     it("UND mint - first", async () => {
-      const totalAmount = 95000;
-      const stakeShares = 8;
-      const safuShares = 8;
-      const feeAmount = parseInt(totalAmount / fee);
-      const share = parseInt(feeAmount / 20);
-
-      let LPTbal = await pair.balanceOf.call(owner);
-      let LPtokens = parseInt(LPTbal.words[0] / 4);
+      let LPTbal = parseInt(await pair.balanceOf.call(owner));
+      let LPtokens = parseInt(LPTbal / 4); // Amount of token to be lock
       lockedTokens = LPtokens;
+
+      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
+      const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
+      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
+      const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
+      const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
 
       let approveLP = await pair.approve.sendTransaction(
         lockContract.address,
@@ -231,22 +236,25 @@ contract("unboundSystem", function (_accounts) {
 
       assert.equal(
         ownerBal.words[0],
-        totalAmount - feeAmount,
+        loanAmount - feeAmount,
         "owner balance incorrect"
       );
       assert.equal(
         stakingBal.words[0],
-        share * stakeShares,
+        parseInt((feeAmount * stakeSharesPercent) / 100),
         "staking balance incorrect"
       );
       assert.equal(
         safuBal.words[0],
-        share * safuShares,
+        parseInt((feeAmount * safuSharesPercent) / 100),
         "safu balance incorrect"
       );
       assert.equal(
         devFundBal.words[0],
-        feeAmount - share * (stakeShares + safuShares),
+        feeAmount -
+          parseInt(
+            (feeAmount * (stakeSharesPercent + safuSharesPercent)) / 100
+          ),
         "dev balance incorrect"
       );
     });
@@ -314,19 +322,31 @@ contract("unboundSystem", function (_accounts) {
 
     it("UND can transfer", async () => {
       let beforeBal = await unboundDai.balanceOf.call(owner);
-      let beforeSafu = await unboundDai.balanceOf.call(user);
+      let beforeUser = await unboundDai.balanceOf.call(user);
       beforeBal = parseInt(beforeBal.words[0]);
-      beforeSafu = parseInt(beforeSafu.words[0]);
+      beforeUser = parseInt(beforeUser.words[0]);
 
       let theTransfer = await unboundDai.transfer.sendTransaction(user, 10);
       let finalBal = await unboundDai.balanceOf.call(owner);
-      let safuBal = await unboundDai.balanceOf.call(user);
+      let userBal = await unboundDai.balanceOf.call(user);
       finalBal = parseInt(finalBal.words[0]);
-      safuBal = parseInt(safuBal.words[0]);
+      userBal = parseInt(userBal.words[0]);
 
-      assert.equal(safuBal, beforeSafu + 10, "receiver balance incorrect");
+      assert.equal(userBal, beforeUser + 10, "receiver balance incorrect");
       assert.equal(finalBal, beforeBal - 10, "sender balance incorrect");
     });
+
+    // it("UND can distribute the fee to safu and devFund", async () => {
+    //   let beforeSafuBal = await unboundDai.balanceOf.call(safu);
+    //   let beforeDevFundBal = await unboundDai.balanceOf.call(devFund);
+    //   let beforeStoredFee = await unboundDai.storedFee.call();
+
+    //   await unboundDai.distributeFee({ from: user });
+
+    //   let safuBal = await unboundDai.balanceOf.call(safu);
+    //   let devFundBal = await unboundDai.balanceOf.call(devFund);
+    //   let storedFee = await unboundDai.storedFee.call();
+    // });
 
     it("LLC can claim tokens", async () => {
       let sendEth = await tEth.transfer.sendTransaction(
