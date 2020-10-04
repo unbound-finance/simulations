@@ -88,9 +88,9 @@ contract UnboundDai is Context, IERC20 {
         _safuAddr = Safu;
         _devFundAddr = devFund;
 
-        // we will use 40/40/20 split of fees
-        stakeShares = 40;
-        safuSharesOfStoredFee = 67;
+        // we will use 50/25/25 split of fees
+        stakeShares = 50;
+        safuSharesOfStoredFee = 50;
 
         // MUST BE MANUALLY CHANGED TO UND LIQ pool.
         _stakeAddr = Safu;

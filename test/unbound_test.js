@@ -42,8 +42,8 @@ contract("unboundSystem", function (_accounts) {
   const rateBalance = 10 ** 6;
   const loanRate = 500000;
   const feeRate = 5000;
-  const stakeSharesPercent = 40;
-  const safuSharesPercent = 67;
+  const stakeSharesPercent = 50;
+  const safuSharesPercent = 50;
 
   let unboundDai;
   let valueContract;
