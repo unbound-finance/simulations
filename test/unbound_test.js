@@ -228,8 +228,6 @@ contract("unboundSystem", function (_accounts) {
       );
       let ownerBal = await unboundDai.balanceOf.call(owner);
       let stakingBal = await unboundDai.balanceOf.call(stakePair.address);
-      // let safuBal = await unboundDai.balanceOf.call(safu);
-      // let devFundBal = await unboundDai.balanceOf.call(devFund);
 
       assert.equal(
         ownerBal.words[0],
@@ -242,19 +240,6 @@ contract("unboundSystem", function (_accounts) {
         "staking balance incorrect"
       );
       storedFee += feeAmount - parseInt((feeAmount * stakeSharesPercent) / 100);
-      // assert.equal(
-      //   safuBal.words[0],
-      //   parseInt((feeAmount * safuSharesPercent) / 100),
-      //   "safu balance incorrect"
-      // );
-      // assert.equal(
-      //   devFundBal.words[0],
-      //   feeAmount -
-      //     parseInt(
-      //       (feeAmount * (stakeSharesPercent + safuSharesPercent)) / 100
-      //     ),
-      //   "dev balance incorrect"
-      // );
     });
 
     it("UND check loan", async () => {
@@ -276,7 +261,7 @@ contract("unboundSystem", function (_accounts) {
       const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
       const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
 
-      // first mint
+      // second mint
       let approveLP = await pair.approve.sendTransaction(
         lockContract.address,
         LPtokens
