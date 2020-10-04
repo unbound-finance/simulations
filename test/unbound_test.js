@@ -43,7 +43,7 @@ contract("unboundSystem", function (_accounts) {
   const loanRate = 500000;
   const feeRate = 5000;
   const stakeSharesPercent = 40;
-  const safuSharesPercent = 66;
+  const safuSharesPercent = 67;
 
   let unboundDai;
   let valueContract;
@@ -207,6 +207,25 @@ contract("unboundSystem", function (_accounts) {
       );
     });
 
+    it("cannot call lockLPT() small amount", async () => {
+      const mintAmount = 1;
+
+      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
+      const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
+      const LPTValueInDai = parseInt((totalUSD * mintAmount) / totalLPTokens); //% value of Liq pool in Dai
+      const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
+      const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
+
+      let approveLP = await pair.approve.sendTransaction(
+        lockContract.address,
+        mintAmount
+      );
+      await expectRevert(
+        lockContract.lockLPT.sendTransaction(mintAmount, unboundDai.address),
+        "amount is too small"
+      );
+    });
+
     it("UND mint - first", async () => {
       let LPTbal = parseInt(await pair.balanceOf.call(owner));
       let LPtokens = parseInt(LPTbal / 4); // Amount of token to be lock
@@ -217,6 +236,7 @@ contract("unboundSystem", function (_accounts) {
       const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
       const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
       const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
+      const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
 
       let approveLP = await pair.approve.sendTransaction(
         lockContract.address,
@@ -236,9 +256,10 @@ contract("unboundSystem", function (_accounts) {
       );
       assert.equal(
         stakingBal.words[0],
-        parseInt((feeAmount * stakeSharesPercent) / 100),
+        stakingAmount,
         "staking balance incorrect"
       );
+      console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - parseInt((feeAmount * stakeSharesPercent) / 100);
     });
 
@@ -260,6 +281,7 @@ contract("unboundSystem", function (_accounts) {
       const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
       const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
       const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
+      const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
 
       // second mint
       let approveLP = await pair.approve.sendTransaction(
@@ -272,7 +294,7 @@ contract("unboundSystem", function (_accounts) {
       );
       let newBal = await pair.balanceOf.call(owner);
       assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect");
-
+      console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - parseInt((feeAmount * stakeSharesPercent) / 100);
     });
 
@@ -326,8 +348,8 @@ contract("unboundSystem", function (_accounts) {
       const beforeStoredFee = parseInt(await unboundDai.storedFee.call());
       assert.equal(beforeStoredFee, storedFee, "incorrect before stored fee");
 
-      const beforeSafuBal = await unboundDai.balanceOf.call(safu);
-      const beforeDevFundBal = await unboundDai.balanceOf.call(devFund);
+      const beforeSafuBal = parseInt(await unboundDai.balanceOf.call(safu));
+      const beforeDevFundBal = parseInt(await unboundDai.balanceOf.call(devFund));
       const safuShare = parseInt((storedFee * safuSharesPercent) / 100);
 
       await unboundDai.distributeFee({ from: user });
@@ -341,11 +363,13 @@ contract("unboundSystem", function (_accounts) {
         beforeSafuBal + safuShare,
         "incorrect safu balance"
       );
+      console.log(`safa: ${safuShare}`);
       assert.equal(
         afterDevFundBal,
         beforeDevFundBal + storedFee - safuShare,
         "incorrect dev fund balance"
       );
+      console.log(`devFund: ${storedFee - safuShare}`);
       storedFee = 0;
       assert.equal(
         afterStoredFee,
