@@ -34,8 +34,8 @@ contract Valuing_01 {
 
      // Liquidity Lock Contract structs - contains fee and loan rate
     struct LiquidityLock {
-        uint256 feeRate; // this will contain the number by which the raw loan value is divided by to obtain desired %
-        uint256 loanRate; // i.e. for 50%, this value would be 2, because 100.div(2) will return 50% of the original number
+        uint256 feeRate; // this will contain the number by obtained by multiplying the rate by 10 ^ 6
+        uint256 loanRate; // i.e. for 50%, this value would be 500000, because 100.mul(500000).div(10**6) will return 50% of the original number
 
         bool active; // bool that indicates if address is allowed for use.
     }
@@ -47,7 +47,7 @@ contract Valuing_01 {
     mapping (address => bool) isUnbound;
 
     // number of decimals by which to divide fee multiple by.
-    uint256 public rateBalance = (10 ** 6);
+    uint256 public constant rateBalance = (10 ** 6);
 
     // Modifiers
     modifier onlyOwner() {
@@ -82,9 +82,16 @@ contract Valuing_01 {
             require (loanAmt > 0, "value too small"); 
         }
 
+        // computes fee amount
+        uint256 feeAmt;
+        if (listOfLLC[msg.sender].feeRate != 0) {
+            require(loanAmt.mul(listOfLLC[msg.sender].feeRate) >= rateBalance, "amount is too small");
+            feeAmt = loanAmt.mul(listOfLLC[msg.sender].feeRate).div(rateBalance);
+        }
+
     
         // calls mint 
-        unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, msg.sender);
+        unboundContract._mint(user, loanAmt, feeAmt, msg.sender);
 
     }
 
@@ -122,8 +129,8 @@ contract Valuing_01 {
     function addLLC (address LLC, uint256 loan, uint256 fee) public onlyOwner {
         
         // Enter 2500 for 0.25%, 250 for 2.5%, and 25 for 25%.
-        listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].loanRate = loan;
+        listOfLLC[LLC].feeRate = fee;
         listOfLLC[LLC].active = true;
     }
 
