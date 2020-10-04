@@ -311,13 +311,13 @@ contract UnboundDai is Context, IERC20 {
 
     // change safuShare
     function changeSafuShare(uint256 rate) public onlyOwner {
-        require(rate <= 20, "bad input");
+        require(rate <= 100, "bad input");
         safuSharesOfStoredFee = rate;
     }
 
     // change stakeShare
     function changeStakeShare(uint256 rate) public onlyOwner {
-        require(rate <= 20, "bad input");
+        require(rate <= 100, "bad input");
         stakeShares = rate;
     }
 
