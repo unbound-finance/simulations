@@ -32,7 +32,6 @@ contract UnboundDai is Context, IERC20 {
     event Burn(address user, uint256 burned);
 
     mapping (address => uint256) private _balances;
-
     mapping (address => mapping (address => uint256)) private _allowances;
 
     uint256 _totalSupply;
@@ -40,7 +39,6 @@ contract UnboundDai is Context, IERC20 {
     string _name;
     string _symbol;
     uint8 _decimals;
-
 
     // PERMIT VARIABLES
     bytes32 public DOMAIN_SEPARATOR;
@@ -61,9 +59,6 @@ contract UnboundDai is Context, IERC20 {
     uint256 public stakeShares;// % of staking to total fee
     uint256 public safuSharesOfStoredFee;// % of safu to stored fee
     uint256 public storedFee;
-
-    // number of decimals by which to divide fee multiple by.
-    uint256 public rateBalance = 10**6;
 
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _minted;
@@ -225,30 +220,20 @@ contract UnboundDai is Context, IERC20 {
 
     
     // MINT: Only callable by valuing contract - Now splits fees
-    function _mint(address account, uint256 amount, uint256 fee, address LLCAddr) external virtual {
+    function _mint(address account, uint256 loanAmount, uint256 feeAmount, address LLCAddr) external virtual {
         require(account != address(0), "ERC20: mint to the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
-        // _beforeTokenTransfer(address(0), account, amount);
         
-         // computes fee if applicable
-        
-        if (fee == 0) {
-
+        if (feeAmount == 0) {
             // Credits user with their uDai loan, minus fees
-            _balances[account] = _balances[account].add(amount);
+            _balances[account] = _balances[account].add(loanAmount);
 
         } else {
-            require(amount.mul(fee) >= rateBalance, "amount is too small");
-            uint256 feeAmount = amount.mul(fee).div(rateBalance); 
-
-            // The amount the user will receive
-            uint256 toMint = amount.sub(feeAmount);
-            
             // amount of fee for staking
             uint256 stakeShare = feeAmount.mul(stakeShares).div(100);
 
             // Credits user with their uDai loan, minus fees
-            _balances[account] = _balances[account].add(toMint);
+            _balances[account] = _balances[account].add(loanAmount.sub(feeAmount));
 
             // sends 40% to staking. MUST SET uDai Liquidity pool first
             _balances[_stakeAddr] = _balances[_stakeAddr].add(stakeShare);
@@ -258,12 +243,12 @@ contract UnboundDai is Context, IERC20 {
         }
 
         // adding total amount of new tokens to totalSupply
-        _totalSupply = _totalSupply.add(amount);
+        _totalSupply = _totalSupply.add(loanAmount);
 
         // crediting loan to user
-        _minted[account][LLCAddr] = _minted[account][LLCAddr].add(amount);
+        _minted[account][LLCAddr] = _minted[account][LLCAddr].add(loanAmount);
         
-        emit Mint(account, amount);
+        emit Mint(account, loanAmount);
     }
 
     // BURN function. Only callable from Valuing.

@@ -47,7 +47,7 @@ contract Valuing_01 {
     mapping (address => bool) isUnbound;
 
     // number of decimals by which to divide fee multiple by.
-    uint256 public rateBalance = (10 ** 6);
+    uint256 public constant rateBalance = (10 ** 6);
 
     // Modifiers
     modifier onlyOwner() {
@@ -82,9 +82,16 @@ contract Valuing_01 {
             require (loanAmt > 0, "value too small"); 
         }
 
+        // computes fee amount
+        uint256 feeAmt;
+        if (listOfLLC[msg.sender].feeRate != 0) {
+            require(loanAmt.mul(listOfLLC[msg.sender].feeRate) >= rateBalance, "amount is too small");
+            feeAmt = loanAmt.mul(listOfLLC[msg.sender].feeRate).div(rateBalance);
+        }
+
     
         // calls mint 
-        unboundContract._mint(user, loanAmt, listOfLLC[msg.sender].feeRate, msg.sender);
+        unboundContract._mint(user, loanAmt, feeAmt, msg.sender);
 
     }
 
