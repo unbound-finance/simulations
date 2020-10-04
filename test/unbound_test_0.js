@@ -41,6 +41,7 @@ const {
     const owner1 = _accounts[2];
     const owner2 = _accounts[3];
     const owner3 = _accounts[4];
+    const loanRate = 500000;
     
     let unboundDai;
     let valueContract;
@@ -91,8 +92,8 @@ const {
         lockContract = await LLC.new(valueContract.address, pairAddr.logs[0].args.pair, tDai.address);
         lockContract2 = await LLC1.new(valueContract.address, pairAddr1.logs[0].args.pair, tDai.address);
         
-        let permissionLLC = await valueContract.addLLC.sendTransaction(lockContract.address, 2, 200);
-        let permissionLLC1 = await valueContract.addLLC.sendTransaction(lockContract2.address, 2, 400);
+        let permissionLLC = await valueContract.addLLC.sendTransaction(lockContract.address, loanRate, 5000);
+        let permissionLLC1 = await valueContract.addLLC.sendTransaction(lockContract2.address, loanRate, 2500);
 
         let permissionUdai = await valueContract.allowToken.sendTransaction(unboundDai.address);
 
@@ -147,7 +148,7 @@ const {
       it("valuator has correct LLC", async () => {
         let LLCstruct = await valueContract.getLLCStruct.call(lockContract.address);
         // console.log(LLCstruct.loanrate.words[0]);
-        assert.equal(LLCstruct.loanrate.words[0], 2, "incorrect");
+        assert.equal(LLCstruct.loanrate.words[0], loanRate, "incorrect");
       });
 
       it("cannot call unboundCreate() on valuator", async () => {
