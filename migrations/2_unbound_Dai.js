@@ -2,7 +2,6 @@ const uDai = artifacts.require("UnboundDai");
 const valuing = artifacts.require("Valuing_01");
 // const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
-const LLC1 = artifacts.require("LLC_LinkDai");
 
 const uniFactory = artifacts.require("UniswapV2Factory");
 const uniPair = artifacts.require("UniswapV2Pair");

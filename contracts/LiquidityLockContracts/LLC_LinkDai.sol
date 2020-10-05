@@ -1,8 +1,8 @@
 pragma solidity >=0.4.23 <0.8.0;
 // SPDX-License-Identifier: MIT
 
-import "../openzeppelin/math/SafeMath.sol";
-import "../openzeppelin/utils/Address.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 interface erc20Template {
     function transfer(address to, uint value) external returns (bool);
