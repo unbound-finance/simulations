@@ -4,38 +4,12 @@ pragma solidity >=0.4.23 <0.8.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-interface erc20Template {
-    function transfer(address to, uint value) external returns (bool);
-    function balanceOf(address owner) external view returns (uint);
-    function decimals() external view returns (uint8);
-}
+// Interfaces
+import "../Interfaces/IUniswapV2Pair.sol";
+import "../Interfaces/IValuing_01.sol";
+import "../Interfaces/IERC20.sol";
 
-interface valuingInterface {
-    function unboundCreate(uint256 amount, address user, address token) external;
-    function unboundRemove(uint256 toUnlock, uint256 totalLocked, address user, address token) external;
-}
 
-interface liqPoolToken {
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-    function factory() external view returns (address); // needed?
-    function token0() external view returns (address);
-    function token1() external view returns (address);
-    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-}
 // ---------------------------------------------------------------------------------------
 //                                Liquidity Lock Contract V1
 //                                          
@@ -79,9 +53,9 @@ contract LLC_EthDai {
     uint8 public stablecoinDecimal;
 
     // Interfaced Contracts
-    valuingInterface private valuingContract;
-    liqPoolToken private LPTContract;
-    erc20Template private stableCoinErc20;
+    IValuing_01 private valuingContract;
+    IUniswapV2Pair_0 private LPTContract;
+    IERC20_2 private stableCoinErc20;
 
     // Modifiers
     modifier onlyOwner() {
@@ -95,9 +69,9 @@ contract LLC_EthDai {
         _owner = msg.sender;
         
         // initiates interfacing contracts
-        valuingContract = valuingInterface(valuingAddress);
-        LPTContract = liqPoolToken(LPTaddress);
-        stableCoinErc20 = erc20Template(stableCoin);
+        valuingContract = IValuing_01(valuingAddress);
+        LPTContract = IUniswapV2Pair_0(LPTaddress);
+        stableCoinErc20 = IERC20_2(stableCoin);
 
         // set LPT address
         pair = LPTaddress;
@@ -295,8 +269,8 @@ contract LLC_EthDai {
     // currently sends all tokens to "to" address (in param)
     function claimTokens(address _tokenAddr, address to) public onlyOwner {
         require(_tokenAddr != pair, "Cannot move LP tokens");
-        uint256 tokenBal = erc20Template(_tokenAddr).balanceOf(address(this));
-        require(erc20Template(_tokenAddr).transfer(to, tokenBal), "LLC: Transfer Failed");
+        uint256 tokenBal = IERC20_2(_tokenAddr).balanceOf(address(this));
+        require(IERC20_2(_tokenAddr).transfer(to, tokenBal), "LLC: Transfer Failed");
     }
 
     // Checks if sender is owner
@@ -311,6 +285,6 @@ contract LLC_EthDai {
 
     // Sets new Valuing Address
     function setValuingAddress (address _newValuing) public onlyOwner {
-        valuingContract = valuingInterface(_newValuing);
+        valuingContract =IValuing_01(_newValuing);
     }
 }
