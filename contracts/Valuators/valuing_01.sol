@@ -70,17 +70,14 @@ contract Valuing_01 {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
         
-        
         unboundInterface unboundContract = unboundInterface(token);
 
         // computes loan amount
-        uint256 loanAmt;
-        if (listOfLLC[msg.sender].loanRate == 0) {
-            loanAmt = amount;
-        } else {
+        uint256 loanAmt = amount;
+        if (listOfLLC[msg.sender].loanRate != 0) {
             loanAmt = amount.mul(listOfLLC[msg.sender].loanRate).div(rateBalance);
             require (loanAmt > 0, "value too small"); 
-        }
+        } 
 
         // computes fee amount
         uint256 feeAmt;
@@ -105,10 +102,10 @@ contract Valuing_01 {
         uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
         // compute amount of UND necessary to unlock LPT
-        uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
+        uint256 toPayInUND = userLoaned.mul(toUnlock).div(totalLocked);
         
         // calls burn
-        unboundContract._burn(user, toPayInUDai, msg.sender);
+        unboundContract._burn(user, toPayInUND, msg.sender);
         
     }
 

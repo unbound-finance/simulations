@@ -61,7 +61,7 @@ contract UnboundDai is Context, IERC20 {
     uint256 public storedFee;
 
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
-    mapping (address => mapping (address => uint256)) private _minted;
+    mapping (address => mapping (address => uint256)) private _loaned;
 
     //Owner Address
     address _owner;
@@ -225,17 +225,17 @@ contract UnboundDai is Context, IERC20 {
         require(msg.sender == _valuator, "Call does not originate from Valuator");
         
         if (feeAmount == 0) {
-            // Credits user with their uDai loan, minus fees
+            // Credits user with their UND loan, minus fees
             _balances[account] = _balances[account].add(loanAmount);
 
         } else {
             // amount of fee for staking
             uint256 stakeShare = feeAmount.mul(stakeShares).div(100);
 
-            // Credits user with their uDai loan, minus fees
+            // Credits user with their UND loan, minus fees
             _balances[account] = _balances[account].add(loanAmount.sub(feeAmount));
 
-            // sends 40% to staking. MUST SET uDai Liquidity pool first
+            // sends 40% to staking. MUST SET UND Liquidity pool first
             _balances[_stakeAddr] = _balances[_stakeAddr].add(stakeShare);
 
             // store remaining of fee
@@ -246,7 +246,7 @@ contract UnboundDai is Context, IERC20 {
         _totalSupply = _totalSupply.add(loanAmount);
 
         // crediting loan to user
-        _minted[account][LLCAddr] = _minted[account][LLCAddr].add(loanAmount);
+        _loaned[account][LLCAddr] = _loaned[account][LLCAddr].add(loanAmount);
         
         emit Mint(account, loanAmount);
     }
@@ -255,27 +255,27 @@ contract UnboundDai is Context, IERC20 {
     function _burn(address account, uint256 toBurn, address LLCAddr) external virtual {
         require(account != address(0), "ERC20: burn from the zero address");
         require(msg.sender == _valuator, "Call does not originate from Valuator");
-        require(_minted[account][LLCAddr] > 0, "You have no loan");
+        require(_loaned[account][LLCAddr] > 0, "You have no loan");
         
-        // checks if user has enough uDai to cover loan and 0.25% fee
-        require(_balances[account] >= toBurn, "Insufficient uDai to pay back loan");
+        // checks if user has enough UND to cover loan and 0.25% fee
+        require(_balances[account] >= toBurn, "Insufficient UND to pay back loan");
 
-        // removes the amount of uDai to burn from _minted mapping/
-        _minted[account][LLCAddr] = _minted[account][LLCAddr].sub(toBurn);
+        // removes the amount of UND to burn from _loaned mapping/
+        _loaned[account][LLCAddr] = _loaned[account][LLCAddr].sub(toBurn);
         
         // Removes loan AND fee from user balance
         _balances[account] = _balances[account].sub(toBurn, "ERC20: burn amount exceeds balance");
 
-        // Removes the loan amount of uDai from circulation
+        // Removes the loan amount of UND from circulation
         _totalSupply = _totalSupply.sub(toBurn);
 
         // This event could be renamed for easier identification.
         emit Burn(account, toBurn);
     }
 
-    // Checks how much uDai the user has minted (and owes to get liquidity back)
+    // Checks how much UND the user has minted (and owes to get liquidity back)
     function checkLoan(address user, address lockLocation) public view returns (uint256 owed) {
-        owed = _minted[user][lockLocation];
+        owed = _loaned[user][lockLocation];
     }
 
     function distributeFee() external {
