@@ -70,7 +70,7 @@ contract LLC_EthDai {
     address public pair;
 
     // tokens locked by users
-    mapping (address => uint256) public _tokensLocked;
+    mapping (address => uint256) _tokensLocked;
 
     // token position of Stablecoin
     uint8 public _position;
@@ -283,6 +283,10 @@ contract LLC_EthDai {
         // send LP tokens back to user
         require(LPTContract.transfer(msg.sender, LPToken), "LLC: Transfer Failed");
         
+    }
+    
+    function tokensLocked(address account) public view returns (uint256) {
+        return _tokensLocked[account];
     }
 
     // onlyOwner Functions
