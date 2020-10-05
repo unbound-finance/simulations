@@ -18,9 +18,8 @@ const {
  */
 const uDai = artifacts.require("UnboundDai");
 const valuing = artifacts.require("Valuing_01");
-//  const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
-const testDai = artifacts.require("TestDai");
+const testDai = artifacts.require("TestDai13");
 const testEth = artifacts.require("TestEth");
 const uniFactory = artifacts.require("UniswapV2Factory");
 const uniPair = artifacts.require("UniswapV2Pair");
@@ -29,10 +28,11 @@ const weth9 = artifacts.require("WETH9");
 
 const router = artifacts.require("UniswapV2Router02");
 
-contract("unboundSystem", function (_accounts) {
+contract("unboundSystem decimals13", function (_accounts) {
   // Initial settings
   const totalSupply = 0;
   const decimal = 10 ** 18;
+  const stablecoinDecimal = 10 ** 13;
   const amount = 0;
   const owner = _accounts[0];
   const safu = _accounts[1];
@@ -207,33 +207,35 @@ contract("unboundSystem", function (_accounts) {
       );
     });
 
-    it("cannot call lockLPT() small amount", async () => {
-      const mintAmount = 1;
+    // This never happen in 13 decimals
+    // it("cannot call lockLPT() small amount", async () => {
+    //   const mintAmount = 1;
 
-      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
-      const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
-      const LPTValueInDai = parseInt((totalUSD * mintAmount) / totalLPTokens); //% value of Liq pool in Dai
-      const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
-      const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
+    //   const totalUSD = daiAmount * 2; // Total value in Liquidity pool
+    //   const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
+    //   const LPTValueInDai = parseInt((totalUSD * mintAmount) / totalLPTokens); //% value of Liq pool in Dai
+    //   const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
+    //   const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
 
-      let approveLP = await pair.approve.sendTransaction(
-        lockContract.address,
-        mintAmount
-      );
-      await expectRevert(
-        lockContract.lockLPT.sendTransaction(mintAmount, unboundDai.address),
-        "amount is too small"
-      );
-    });
+    //   let approveLP = await pair.approve.sendTransaction(
+    //     lockContract.address,
+    //     mintAmount
+    //   );
+    //   await expectRevert(
+    //     lockContract.lockLPT.sendTransaction(mintAmount, unboundDai.address),
+    //     "amount is too small"
+    //   );
+    // });
 
     it("UND mint - first", async () => {
       let LPTbal = parseInt(await pair.balanceOf.call(owner));
       let LPtokens = parseInt(LPTbal / 4); // Amount of token to be lock
       lockedTokens = LPtokens;
-
+      // console.log(LPtokens);
       const totalUSD = daiAmount * 2; // Total value in Liquidity pool
+
       const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
-      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
+      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens * (decimal/stablecoinDecimal)); //% value of Liq pool in Dai
       const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
       const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
       const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
@@ -261,15 +263,13 @@ contract("unboundSystem", function (_accounts) {
       );
       console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - stakingAmount;
-    });
 
-    it("UND check loan", async () => {
-      let tokenBal0 = await unboundDai.checkLoan.call(
+      let tokenBal0 = parseInt(await unboundDai.checkLoan.call(
         owner,
         lockContract.address
-      );
+      ));
 
-      assert.equal(tokenBal0.words[0], 95000, "valuing incorrect");
+      assert.equal(tokenBal0, loanAmount, "loan amount incorrect");
     });
 
     it("UND mint - second", async () => {
@@ -278,7 +278,7 @@ contract("unboundSystem", function (_accounts) {
 
       const totalUSD = daiAmount * 2; // Total value in Liquidity pool
       const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
-      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
+      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens * (decimal/stablecoinDecimal)); //% value of Liq pool in Dai
       const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
       const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
       const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
@@ -316,13 +316,10 @@ contract("unboundSystem", function (_accounts) {
         unboundDai.address
       );
       let tokenBal1 = await unboundDai.balanceOf.call(owner);
-      let newBal = await pair.balanceOf.call(owner);
-
-      let uDaiBalFinal = await unboundDai.balanceOf.call(owner);
-      uDaiBalFinal = uDaiBalFinal.words[0];
+      let newBal = parseInt(await pair.balanceOf.call(owner));
 
       assert.equal(
-        newBal.words[0],
+        newBal,
         LPtokens + lockedTokens,
         "valuing incorrect"
       );
@@ -442,13 +439,6 @@ contract("unboundSystem", function (_accounts) {
   });
 
   //=================
-  // Test basic functions
-  //=================
-  describe("Test basic functions", () => {
-    it("UND can change staking address", () => {});
-  });
-
-  //=================
   // Test Staking Pool
   //=================
   describe("Test Staking Function", () => {
@@ -513,48 +503,8 @@ contract("unboundSystem", function (_accounts) {
       let newBal = await pair.balanceOf.call(owner);
 
       let UNDfinal = await unboundDai.balanceOf.call(stakePair.address);
-      // console.log(UNDfinal.words[0]);
 
       assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect");
     });
-
-    // it("uDai double mint", async () => {
-    //   let LPTbal = await pair.balanceOf.call(owner);
-    //   let LPtokens = parseInt(LPTbal.words[0] / 4);
-
-    //   let tokenBal0 = await unboundDai.balanceOf.call(owner);
-
-    //   // first mint
-    //   let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-    //   let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal = await unboundDai.balanceOf.call(owner);
-
-    //   // second mint
-    //   let approveLP1 = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-    //   let mint1 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal1 = await unboundDai.balanceOf.call(owner);
-
-    //   let newBal = await pair.balanceOf.call(owner);
-
-    //   assert.equal(newBal, LPTbal - LPtokens * 2, "valuing incorrect");
-    // });
-
-    // it("uDai mint and burn", async () => {
-    //   let LPTbal = await pair.balanceOf.call(owner);
-    //   let LPtokens = parseInt(LPTbal.words[0]);
-    //   let tokenBal0 = await unboundDai.balanceOf.call(owner);
-
-    //   // mint
-    //   let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-    //   let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal = await unboundDai.balanceOf.call(owner);
-
-    //   // burn
-    //   let burn = await lockContract.unlockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal1 = await unboundDai.balanceOf.call(owner);
-    //   let newBal = await pair.balanceOf.call(owner);
-
-    //   assert.equal(newBal.words[0], LPTbal.words[0], "valuing incorrect");
-    // });
   });
 });
