@@ -272,6 +272,7 @@ contract LLC_EthDai {
     // allows for partial loan payment by using the ratio of LPtokens to unlock and total LPtokens locked
     function unlockLPT (uint256 LPToken, address uTokenAddr) public {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
+        require (LPToken > 0, "Cannot unlock nothing");
 
         // Burning of Udai will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
