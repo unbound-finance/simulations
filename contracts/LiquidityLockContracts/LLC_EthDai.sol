@@ -274,7 +274,7 @@ contract LLC_EthDai {
         require (_tokensLocked[msg.sender] >= LPToken, "Insufficient liquidity locked");
         require (LPToken > 0, "Cannot unlock nothing");
 
-        // Burning of Udai will happen first
+        // Burning of UND will happen first
         valuingContract.unboundRemove(LPToken, _tokensLocked[msg.sender], msg.sender, uTokenAddr);
 
         // update mapping

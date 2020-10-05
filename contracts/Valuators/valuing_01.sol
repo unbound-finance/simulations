@@ -102,10 +102,10 @@ contract Valuing_01 {
         uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
         // compute amount of UND necessary to unlock LPT
-        uint256 toPayInUDai = userLoaned.mul(toUnlock).div(totalLocked);
+        uint256 toPayInUND = userLoaned.mul(toUnlock).div(totalLocked);
         
         // calls burn
-        unboundContract._burn(user, toPayInUDai, msg.sender);
+        unboundContract._burn(user, toPayInUND, msg.sender);
         
     }
 
