@@ -279,6 +279,8 @@ contract UnboundDollar is Context, IERC20 {
     }
 
     function distributeFee() external {
+        require (storedFee > 0, "There is nothing to distribute");
+
         // amount of fee for safu
         uint256 safuShare = storedFee.mul(safuSharesOfStoredFee).div(100);
 
