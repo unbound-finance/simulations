@@ -9,6 +9,8 @@ const uniPair = artifacts.require("UniswapV2Pair");
 const router = artifacts.require("UniswapV2Router02");
 
 const testDai = artifacts.require("TestDai");
+const testDai13 = artifacts.require("TestDai13");
+const testDai19 = artifacts.require("TestDai19");
 const testEth = artifacts.require("TestEth");
 const testLink = artifacts.require("TestLink");
 
@@ -31,6 +33,8 @@ module.exports = async (deployer, network, accounts) => {
   await deployer.deploy(uDai, "Unbound Dollar", "UND", safu, devFund);
   await deployer.deploy(valuing, uDai.address);
   await deployer.deploy(testDai, tester, "5777");
+  await deployer.deploy(testDai13, tester, "5777");
+  await deployer.deploy(testDai19, tester, "5777");
   await deployer.deploy(testEth, tester);
   await deployer.deploy(testLink, tester);
   if (network == "development" || network == "test") {
