@@ -1,4 +1,4 @@
-const uDai = artifacts.require("UnboundDai");
+const uDai = artifacts.require("UnboundDollar");
 const valuing = artifacts.require("Valuing_01");
 // const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");

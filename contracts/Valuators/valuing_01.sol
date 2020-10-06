@@ -4,13 +4,8 @@ pragma solidity >=0.4.23 <0.8.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+import "../Interfaces/IUnboundDollar.sol";
 
-interface unboundInterface {
-    function _mint(address account, uint256 amount, uint256 fee, address LLCAddr) external;
-    function _burn(address account, uint256 toBurn, address LLCAddr) external;
-    function checkLoan(address user, address lockLocation) external view returns (uint256 owed);
-    function balanceOf(address account) external view returns (uint256); 
-}
 
 // ---------------------------------------------------------------------------------------
 //                                   Unbound Valuing Contract
@@ -70,7 +65,7 @@ contract Valuing_01 {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
         
-        unboundInterface unboundContract = unboundInterface(token);
+        IUnboundDollar unboundContract = IUnboundDollar(token);
 
         // computes loan amount
         uint256 loanAmt = amount;
@@ -98,7 +93,7 @@ contract Valuing_01 {
         require (isUnbound[token], "invalid unbound contract");
 
         // obtains amount of loan user owes (in UND)
-        unboundInterface unboundContract = unboundInterface(token);
+        IUnboundDollar unboundContract = IUnboundDollar(token);
         uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
         // compute amount of UND necessary to unlock LPT
