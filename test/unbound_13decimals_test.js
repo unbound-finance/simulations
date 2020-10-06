@@ -16,7 +16,7 @@ const {
  *  Tests of public & external functions in Tier1a contract
  *  ========================================================
  */
-const uDai = artifacts.require("UnboundDai");
+const uDai = artifacts.require("UnboundDollar");
 const valuing = artifacts.require("Valuing_01");
 const LLC = artifacts.require("LLC_EthDai");
 const testDai = artifacts.require("TestDai13");

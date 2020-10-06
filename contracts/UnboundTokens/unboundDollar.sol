@@ -24,7 +24,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 // ----------------------------------------------------------------------------------------
 
 
-contract UnboundDai is Context, IERC20 {
+contract UnboundDollar is Context, IERC20 {
     using SafeMath for uint256;
     using Address for address;
 
@@ -279,6 +279,8 @@ contract UnboundDai is Context, IERC20 {
     }
 
     function distributeFee() external {
+        require (storedFee > 0, "There is nothing to distribute");
+
         // amount of fee for safu
         uint256 safuShare = storedFee.mul(safuSharesOfStoredFee).div(100);
 
