@@ -39,6 +39,7 @@ contract("unboundSystem", function (_accounts) {
   const safu = _accounts[1];
   const devFund = _accounts[2];
   const user = _accounts[3];
+  const user2 = _accounts[4];
   const daiAmount = 400000;
   const rateBalance = 10 ** 6;
   const loanRate = 500000;
@@ -101,11 +102,11 @@ contract("unboundSystem", function (_accounts) {
         valueContract.address
       );
 
-      let approveTdai = await tDai.approve.sendTransaction(
+      let approveTdai1 = await tDai.approve.sendTransaction(
         route.address,
         1000000000
       );
-      let approveTeth = await tEth.approve.sendTransaction(route.address, 10000000);
+      let approveTeth1 = await tEth.approve.sendTransaction(route.address, 10000000);
 
       let d = new Date();
       let time = d.getTime();
@@ -127,12 +128,6 @@ contract("unboundSystem", function (_accounts) {
       stakePair = await uniPair.at(stakePool.logs[0].args.pair);
 
       await unboundDai.changeStaking.sendTransaction(stakePair.address);
-    });
-
-    //=== UnboundDai ===//
-    it("test swap", async () => {
-      // const retval = await unboundDai.totalSupply.call();
-      // assert.equal(retval, totalSupply * decimal, "Total suply is not 0");
 
       let ethBalBefore = await tEth.balanceOf.call(owner);
       let daiBalBefore = await tDai.balanceOf.call(owner);
@@ -141,67 +136,185 @@ contract("unboundSystem", function (_accounts) {
       //console.log(ethBalBefore);
       
       let initialLiq = await pair.getReserves.call()
-      let daiBefore = initialLiq._reserve0.words[0];
-      let ethBefore = initialLiq._reserve1.words[0];
+      let daiBefore = initialLiq._reserve0.toString();
+      let ethBefore = initialLiq._reserve1.toString();
 
       console.log(daiBefore);
       console.log(ethBefore);
       console.log(priceOfEthBefore);
       
       //console.log(ethBefore);
-
-      let approveTdai = await tDai.approve.sendTransaction(
+      let randAmt = parseInt((Math.random() * 10000) + 500);
+      console.log(randAmt);
+      let approveTdai = await tEth.approve.sendTransaction(
         route.address,
-        100000
+        randAmt, 
+        {from: user2}
       );
 
-      let d = new Date();
-      let time = d.getTime();
-      let simpleSwap = await route.swapExactTokensForTokens.sendTransaction(10000, 100, [tDai.address, tEth.address], owner, parseInt(time / 1000 + 100));
+      let d1 = new Date();
+      let time1 = d1.getTime();
+
+      let getMin = await route.getAmountsOut.call(randAmt, [tEth.address, tDai.address]);
+      let ethMin = getMin[1].toString();
+      let simpleSwap = await route.swapExactTokensForTokens.sendTransaction(
+        randAmt, 
+        ethMin, 
+        [tEth.address, tDai.address], 
+        owner, 
+        parseInt(time1 / 1000 + 100), 
+        {from: user2}
+      );
       
       let afterLiq = await pair.getReserves.call();
       //console.log(afterLiq._reserve0.words[0]);
       //console.log(afterLiq._reserve1.words[0]);
 
-      let ethBalAfter = await tEth.balanceOf.call(owner);
-      ethBalAfter = ethBalAfter.words[0];
+      let ethBalAfter = await tEth.balanceOf.call(user2);
+      ethBalAfter = ethBalAfter.toString();
       //console.log(ethBalAfter);
       //console.log(ethBefore - afterLiq._reserve1.words[0])
       //console.log(ethBalAfter - ethBalBefore.words[0]);
 
       //assert.equal(ethBefore - afterLiq._reserve1.words[0], ethBalAfter - ethBalBefore.words[0], "something wrong");
 
-      
+      let priceBefore;
+      let price = priceOfEthBefore;
 
-      for (let i = 0; i <= 100; i++) {
-        let approveTdai1 = await tDai.approve.sendTransaction(
-          route.address,
-          100000
-        );
-        
-        let d1 = new Date();
-        let time1 = d1.getTime();
-        let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(10000, 100, [tDai.address, tEth.address], owner, parseInt(time1 / 1000 + 100));
-        
-        let ethBalFinal = await tEth.balanceOf.call(owner);
-        if(i % 5 == 0) {
-          console.log(ethBalFinal.words[0] - ethBalAfter);
+      if (daiBefore <= ethBefore) {
+        priceBefore = ethBefore/daiBefore; 
+      } else {
+        priceBefore = daiBefore/ethBefore;
+      }
+
+      let i = 0;
+      // set price change to test. 1.05 is 5%
+      while (price > priceBefore * 0.431) {
+
+        let buyOrSell = parseInt((Math.random() * 1000)+ 1);
+        if (buyOrSell < 980) {
+          let randAmt1 = parseInt((Math.random() * 10000) + 500);
+
+          let approveTdai1 = await tEth.approve.sendTransaction(
+            route.address,
+            randAmt1,
+            {from: user2}
+          );
+
+          let getMin1 = await route.getAmountsOut.call(randAmt1, [tEth.address, tDai.address]);
+          let ethMin1 = getMin1[1].toString();
+          
+          let d2 = new Date();
+          let time2 = d2.getTime();
+          let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(randAmt1, ethMin1, [tEth.address, tDai.address], owner, parseInt(time2 / 1000 + 100), {from: user2});
+          
+          let finalLiq = await pair.getReserves.call();
+          let daiAfter = finalLiq._reserve0.toString();
+          let ethAfter = finalLiq._reserve1.toString();
+          
+          
+          if (daiBefore <= ethBefore) {
+            price = ethAfter / daiAfter;
+          } else {
+            price = daiAfter / ethAfter;
+          }
+          i++;
+          if (i % 20 == 0) {
+            console.log(i);
+            console.log(price);
+          }
+        } else {
+          let randAmt1 = parseInt((Math.random() * 10000) + 500);
+
+          let approveTdai1 = await tDai.approve.sendTransaction(
+            route.address,
+            randAmt1,
+            {from: user2}
+          );
+
+          let getMin1 = await route.getAmountsOut.call(randAmt1, [tDai.address, tEth.address]);
+          let ethMin1 = getMin1[1].toString();
+          
+          let d2 = new Date();
+          let time2 = d2.getTime();
+          let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(randAmt1, ethMin1, [tDai.address, tEth.address], owner, parseInt(time2 / 1000 + 100), {from: user2});
+          
+          let finalLiq = await pair.getReserves.call();
+          let daiAfter = finalLiq._reserve0.toString();
+          let ethAfter = finalLiq._reserve1.toString();
+          
+          
+          if (daiBefore <= ethBefore) {
+            price = ethAfter / daiAfter;
+          } else {
+            price = daiAfter / ethAfter;
+          }
+          i++;
+          if (i % 20 == 0) {
+            console.log(i);
+            console.log(price);
+          }
         }
+
         
-        ethBalAfter = ethBalFinal.words[0];
       }
       
-      let finalLiq = await pair.getReserves.call()
-      let daiAfter = finalLiq._reserve0.words[0];
-      let ethAfter = finalLiq._reserve1.words[0];
+      
       console.log(" --- ");
       console.log(daiBefore);
       console.log(ethBefore);
+      if (daiBefore <= ethBefore) {
+        console.log(ethBefore/daiBefore);
+        console.log(ethBefore * 2)
+      } else {
+        console.log(daiBefore/ethBefore);
+        console.log(daiBefore * 2)
+      }
+      
+      
+
+      let finalLiq1 = await pair.getReserves.call();
+      let daiAfter1 = finalLiq1._reserve0.toString();
+      let ethAfter1 = finalLiq1._reserve1.toString();
+
       console.log(" --- ");
-      console.log(daiAfter);
-      console.log(ethAfter);
+      console.log(daiAfter1);
+      console.log(ethAfter1);
+
+      if (daiBefore <= ethBefore) {
+        let newPrice = ethAfter1/daiAfter1;
+        console.log(newPrice);
+        let newValue = parseFloat(newPrice) * parseInt(daiAfter1) + parseInt(ethAfter1);
+        let potentialValue = parseFloat(newPrice) * parseInt(daiBefore) + parseInt(ethBefore);
+        console.log(newValue);
+        console.log(potentialValue);
+        console.log(newValue / potentialValue);
+      } else {
+        let newPrice = daiAfter1/ethAfter1;
+        console.log(newPrice);
+        let newValue = parseFloat(newPrice) * parseInt(ethAfter1) + parseInt(daiAfter1);
+        let potentialValue = parseFloat(newPrice) * parseInt(ethBefore) + parseInt(daiBefore);
+        console.log(newValue);
+        console.log(potentialValue);
+        console.log(newValue / potentialValue);
+      }
+    });
+
+    //=== UnboundDai ===//
+    it("test swap", async () => {
+      // const retval = await unboundDai.totalSupply.call();
+      // assert.equal(retval, totalSupply * decimal, "Total suply is not 0");
+
+      
 
     });
 
   });
 });
+
+// 1 billion dai
+// 10 million ETH
+
+// initial value: 
+// 2 billion USD
+

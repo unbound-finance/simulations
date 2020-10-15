@@ -18,7 +18,7 @@ const testLink = artifacts.require("TestLink");
 
 const weth = artifacts.require("WETH9");
 
-const tester = "0x74a084d3c8a6FF8889988aba43BD5EDbd265665A";
+const tester = "0x8559c741Ae422fD3CA9209112c5d477C5392B170";
 
 module.exports = async (deployer, network, accounts) => {
   let safu = "0x";
@@ -31,11 +31,11 @@ module.exports = async (deployer, network, accounts) => {
 
   await deployer.deploy(uDai, "Unbound Dollar", "UND", safu, devFund);
   await deployer.deploy(valuing, uDai.address);
-  await deployer.deploy(testDai, tester, "5777");
+  await deployer.deploy(testDai, accounts[4], "5777");
   await deployer.deploy(testDai13, tester, "5777");
   await deployer.deploy(testDai19, tester, "5777");
-  await deployer.deploy(testEth, tester);
-  await deployer.deploy(testLink, tester);
+  await deployer.deploy(testEth, accounts[4]);
+  await deployer.deploy(testLink, accounts[4]);
   if (network == "development" || network == "test") {
     const feeToSetter = accounts[0];
     await deployer.deploy(uniFactory, feeToSetter);
