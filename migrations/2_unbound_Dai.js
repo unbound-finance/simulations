@@ -47,11 +47,11 @@ module.exports = async (deployer, network, accounts) => {
 const totalSupply = 0;
 const decimal = 10 ** 18;
 const amount = 0;
-const owner = "0xA1E3cB9780364cF97e86172Df95948002738AC9a";
-const safu = "0x113Bf77cc3a9a637857d79Cbf7333Ce48Fe10569";
-const devFund = "0xfC9BF2F54BF5D9777Ded41c297f15Eb106342a18";
-const user = "0xC755762e85dF5C1B36BbE90BB9D3554E9b1433D3";
-const user2 = "0x750F5688b42bd6Ba4A06F64AF77b9C8028182716";
+const owner = accounts[0];
+const safu = accounts[1];
+const devFund = accounts[2];
+const user = accounts[3];
+const user2 = accounts[4];
 const daiAmount = 400000;
 const rateBalance = 10 ** 6;
 const loanRate = 500000;
