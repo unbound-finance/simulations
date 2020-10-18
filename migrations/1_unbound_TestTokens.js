@@ -16,7 +16,6 @@ module.exports = async (deployer, network, accounts) => {
     await deployer.deploy(testDai19, tester, "5777");
     await deployer.deploy(testEth, tester);
     await deployer.deploy(testLink, tester);
-
     await deployer.deploy(uniFactory, accounts[0]);
     await deployer.deploy(weth);
     await deployer.deploy(router, uniFactory.address, weth.address);

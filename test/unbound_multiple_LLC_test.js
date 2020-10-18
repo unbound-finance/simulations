@@ -12,22 +12,18 @@ const { BN, constants, balance, expectEvent, expectRevert } = require("@openzepp
  */
 const uDai = artifacts.require("UnboundDollar");
 const valuing = artifacts.require("Valuing_01");
-//  const test = artifacts.require("../contracts/testLPT.sol");
 const LLC = artifacts.require("LLC_EthDai");
 const testDai = artifacts.require("TestDai");
 const testEth = artifacts.require("TestEth");
+const testLink = artifacts.require("TestLink");
 const uniFactory = artifacts.require("UniswapV2Factory");
 const uniPair = artifacts.require("UniswapV2Pair");
-
-const weth9 = artifacts.require("WETH9");
-
 const router = artifacts.require("UniswapV2Router02");
 
 contract("unboundSystem", function (_accounts) {
   // Initial settings
   const totalSupply = 0;
   const decimal = 10 ** 18;
-  const amount = 0;
   const owner = _accounts[0];
   const safu = _accounts[1];
   const devFund = _accounts[2];
@@ -44,50 +40,52 @@ contract("unboundSystem", function (_accounts) {
   let lockContract;
   let tDai;
   let tEth;
-  let weth;
+  let tLink;
   let factory;
   let pair;
   let route;
   let lockedTokens;
   let storedFee = 0;
-
-  /////////
   let stakePair;
+
+  before(async function () {
+    tEth = await testEth.deployed();
+    tLink = await testLink.deployed();
+    tDai = await testDai.deployed();
+    route = await router.deployed();
+    unboundDai = await uDai.deployed();
+    valueContract = await valuing.deployed();
+    lockContract = await LLC.deployed();
+    factory = await uniFactory.deployed();
+    pair = await uniPair.at(await lockContract.pair.call());
+
+    // Ethereum
+    await tDai.approve.sendTransaction(route.address, daiAmount);
+    await tEth.approve.sendTransaction(route.address, 1000);
+    let d = new Date();
+    let time = d.getTime();
+    await route.addLiquidity.sendTransaction(
+      tDai.address,
+      tEth.address,
+      daiAmount,
+      1000,
+      3000,
+      10,
+      owner,
+      parseInt(time / 1000 + 100)
+    );
+
+    let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
+    stakePair = await uniPair.at(stakePool.logs[0].args.pair);
+    await unboundDai.changeStaking.sendTransaction(stakePair.address);
+
+    // Link
+  });
 
   //=================
   // Default Functionality
   //=================
   describe("Check default functionality", () => {
-    before(async function () {
-      tEth = await testEth.deployed();
-      tDai = await testDai.deployed();
-      route = await router.deployed();
-      unboundDai = await uDai.deployed();
-      valueContract = await valuing.deployed();
-      lockContract = await LLC.deployed();
-      factory = await uniFactory.deployed();
-      pair = await uniPair.at(await lockContract.pair.call());
-
-      await tDai.approve.sendTransaction(route.address, 400000);
-      await tEth.approve.sendTransaction(route.address, 1000);
-      let d = new Date();
-      let time = d.getTime();
-      await route.addLiquidity.sendTransaction(
-        tDai.address,
-        tEth.address,
-        daiAmount,
-        1000,
-        3000,
-        10,
-        owner,
-        parseInt(time / 1000 + 100)
-      );
-
-      let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
-      stakePair = await uniPair.at(stakePool.logs[0].args.pair);
-      await unboundDai.changeStaking.sendTransaction(stakePair.address);
-    });
-
     //=== UnboundDai ===//
     it("UND should have 0 as total suply", async () => {
       const retval = await unboundDai.totalSupply.call();
@@ -334,7 +332,6 @@ contract("unboundSystem", function (_accounts) {
       tEth = await testEth.deployed();
       tDai = await testDai.deployed();
 
-      weth = await weth9.deployed();
       route = await router.deployed();
 
       let approveTdai = await tDai.approve.sendTransaction(route.address, 10000);
