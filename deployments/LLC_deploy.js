@@ -30,13 +30,6 @@ const feeRate = "ENTER DESIRED FEE RATE"
 
 // Deploys UND and 
 module.exports = async (deployer, network, accounts) => {
-  let safu1 = "0x";
-  let devFund1 = "0x";
-
-  if (network == "development" || network == "test") {
-    safu1 = accounts[1];
-    devFund1 = accounts[2];
-  }
 
   const lockContract = await deployer.deploy(LLC, valueAddress, LPTAddress, stableCoin);
   
