@@ -12,7 +12,8 @@ const { BN, constants, balance, expectEvent, expectRevert } = require("@openzepp
  */
 const uDai = artifacts.require("UnboundDollar");
 const valuing = artifacts.require("Valuing_01");
-const LLC = artifacts.require("LLC_EthDai");
+const llcEth = artifacts.require("LLC_EthDai");
+const llcLink = artifacts.require("LLC_LinkDai");
 const testDai = artifacts.require("TestDai");
 const testEth = artifacts.require("TestEth");
 const testLink = artifacts.require("TestLink");
@@ -30,8 +31,8 @@ contract("unboundSystem", function (_accounts) {
   const user = _accounts[3];
   const daiAmount = 400000;
   const rateBalance = 10 ** 6;
-  const loanRate = 500000;
-  const feeRate = 5000;
+  const loanRate = 600000;
+  const feeRate = 4000;
   const stakeSharesPercent = 50;
   const safuSharesPercent = 50;
 
@@ -55,9 +56,14 @@ contract("unboundSystem", function (_accounts) {
     route = await router.deployed();
     unboundDai = await uDai.deployed();
     valueContract = await valuing.deployed();
-    lockContract = await LLC.deployed();
+    // lockContract = await llcEth.deployed();
+    lockContract = await llcLink.deployed();
     factory = await uniFactory.deployed();
     pair = await uniPair.at(await lockContract.pair.call());
+
+    let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
+    stakePair = await uniPair.at(stakePool.logs[0].args.pair);
+    await unboundDai.changeStaking.sendTransaction(stakePair.address);
 
     // Ethereum
     await tDai.approve.sendTransaction(route.address, daiAmount);
@@ -75,11 +81,19 @@ contract("unboundSystem", function (_accounts) {
       parseInt(time / 1000 + 100)
     );
 
-    let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
-    stakePair = await uniPair.at(stakePool.logs[0].args.pair);
-    await unboundDai.changeStaking.sendTransaction(stakePair.address);
-
     // Link
+    await tDai.approve.sendTransaction(route.address, daiAmount);
+    await tLink.approve.sendTransaction(route.address, 1000);
+    await route.addLiquidity.sendTransaction(
+      tDai.address,
+      tLink.address,
+      daiAmount,
+      1000,
+      3000,
+      10,
+      owner,
+      parseInt(time / 1000 + 100)
+    );
   });
 
   //=================
@@ -194,7 +208,7 @@ contract("unboundSystem", function (_accounts) {
     it("UND check loan", async () => {
       let tokenBal0 = await unboundDai.checkLoan.call(owner, lockContract.address);
 
-      assert.equal(tokenBal0.words[0], 95000, "valuing incorrect");
+      assert.equal(tokenBal0.words[0], 114000, "valuing incorrect"); // TODO: Delete magic number
     });
 
     it("UND mint - second", async () => {
