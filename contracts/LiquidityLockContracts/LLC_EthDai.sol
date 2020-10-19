@@ -37,8 +37,14 @@ contract LLC_EthDai {
     using SafeMath for uint256;
     using Address for address;
 
+    // killswitch event
+    event KillSwitch(bool position);
+
     //Owner Address
     address private _owner;
+
+    // If killSwitch = true, cannot lock LPT and mint new UND
+    bool public killSwitch;
 
     // LPT address
     address public pair;
@@ -73,6 +79,9 @@ contract LLC_EthDai {
         LPTContract = IUniswapV2Pair_0(LPTaddress);
         stableCoinErc20 = IERC20_2(stableCoin);
 
+        // killSwitch MUST be false for lockLPT to work
+        killSwitch = false;
+
         // set LPT address
         pair = LPTaddress;
 
@@ -95,6 +104,7 @@ contract LLC_EthDai {
     // Lock/Unlock functions
     // Mint path
     function lockLPTWithPermit (uint256 LPTamt, address uTokenAddr, uint deadline, uint8 v, bytes32 r, bytes32 s) public {
+        require(!killSwitch, "LLC: This LLC is Deprecated");
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
@@ -161,6 +171,7 @@ contract LLC_EthDai {
 
     // Requires approval first (permit excluded for simplicity)
     function lockLPT (uint256 LPTamt, address uTokenAddr) public {
+        require(!killSwitch, "LLC: This LLC is Deprecated");
         require(LPTContract.balanceOf(msg.sender) >= LPTamt, "LLC: Insufficient LPTs");
         uint256 totalLPTokens = LPTContract.totalSupply();
         
@@ -271,6 +282,12 @@ contract LLC_EthDai {
         require(_tokenAddr != pair, "Cannot move LP tokens");
         uint256 tokenBal = IERC20_2(_tokenAddr).balanceOf(address(this));
         require(IERC20_2(_tokenAddr).transfer(to, tokenBal), "LLC: Transfer Failed");
+    }
+
+    // Kill Switch - deactivate locking of LPT
+    function disableLock() public onlyOwner {
+        killSwitch = !killSwitch;
+        emit KillSwitch(killSwitch);
     }
 
     // Checks if sender is owner
