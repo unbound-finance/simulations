@@ -358,7 +358,7 @@ contract("unboundSystem", function (_accounts) {
       await lockContract.unlockLPT(1, unboundDai.address); // Be able to unlock under killed status
 
       // Rechange kill switch
-      await lockContract.disableLock();
+      expectEvent(await lockContract.disableLock(), "KillSwitch", { position: false });
       assert.isFalse(await lockContract.killSwitch(), "Changed killSwitch incorrect");
     });
   });
