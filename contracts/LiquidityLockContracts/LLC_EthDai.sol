@@ -37,6 +37,9 @@ contract LLC_EthDai {
     using SafeMath for uint256;
     using Address for address;
 
+    // killswitch event
+    event KillSwitch(bool position);
+
     //Owner Address
     address private _owner;
 
@@ -283,7 +286,8 @@ contract LLC_EthDai {
 
     // Kill Switch - deactivate locking of LPT
     function disableLock() public onlyOwner {
-        killSwitch = true;
+        killSwitch = !killSwitch;
+        emit KillSwitch(killSwitch);
     }
 
     // Checks if sender is owner
