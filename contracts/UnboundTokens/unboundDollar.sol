@@ -55,10 +55,16 @@ contract UnboundDollar is Context, IERC20 {
     // Dev fund (20%)
     address _devFundAddr;
 
+    // auto fee deposit
+    bool public autoFeeDistribution;
+
     // Dev Fund split variables
     uint256 public stakeShares;// % of staking to total fee
     uint256 public safuSharesOfStoredFee;// % of safu to stored fee
     uint256 public storedFee;
+
+    // funds that do not get written immediately. Is distributed when distribute function is called.
+    uint256 public passiveStake;
 
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _loaned;
@@ -235,8 +241,13 @@ contract UnboundDollar is Context, IERC20 {
             // Credits user with their UND loan, minus fees
             _balances[account] = _balances[account].add(loanAmount.sub(feeAmount));
 
+            if (autoFeeDistribution) {
+                _balances[_stakeAddr] = _balances[_stakeAddr].add(stakeShare);
+            } else {
+                passiveStake = passiveStake.add(stakeShare);
+            }
             // sends 40% to staking. MUST SET UND Liquidity pool first
-            _balances[_stakeAddr] = _balances[_stakeAddr].add(stakeShare);
+            
 
             // store remaining of fee
             storedFee = storedFee.add(feeAmount.sub(stakeShare));
@@ -280,9 +291,15 @@ contract UnboundDollar is Context, IERC20 {
 
     function distributeFee() external {
         require (storedFee > 0, "There is nothing to distribute");
+        
 
         // amount of fee for safu
         uint256 safuShare = storedFee.mul(safuSharesOfStoredFee).div(100);
+
+
+        // sends to stake
+        _balances[_stakeAddr] = _balances[_stakeAddr].add(passiveStake);
+        passiveStake = 0;
 
         // sends to Safu Fund
         _balances[_safuAddr] = _balances[_safuAddr].add(safuShare);
@@ -295,6 +312,11 @@ contract UnboundDollar is Context, IERC20 {
     }
     
     // onlyOwner Functions
+
+    // change autoFeeDistribution
+    function flipFeeDistribution() public onlyOwner {
+        autoFeeDistribution = !autoFeeDistribution;
+    }
 
     // change safuShare
     function changeSafuShare(uint256 rate) public onlyOwner {
