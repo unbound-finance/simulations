@@ -70,6 +70,7 @@ contract("unboundSystem", function (_accounts) {
 
       await tDai.approve.sendTransaction(route.address, 400000);
       await tEth.approve.sendTransaction(route.address, 1000);
+
       let d = new Date();
       let time = d.getTime();
       await route.addLiquidity.sendTransaction(
@@ -319,6 +320,34 @@ contract("unboundSystem", function (_accounts) {
         }),
         "Insufficient liquidity locked"
       );
+    });
+
+    it("LLC - default kill switch", async () => {
+      const killSwitch = await lockContract.killSwitch.call();
+      assert.isFalse(killSwitch, "Default killSwitch incorrect");
+    });
+
+    it("LLC - only owner can use disableLock", async () => {
+      await expectRevert(lockContract.disableLock({ from: user }), "Ownable: caller is not the owner");
+    });
+
+    it("LLC - change kill switch", async () => {
+      // Change kill switch
+      expectEvent(await lockContract.disableLock(), "KillSwitch", { position: true });
+      assert.isTrue(await lockContract.killSwitch(), "Changed killSwitch incorrect");
+
+      // Check public functions
+      const b32 = web3.utils.asciiToHex("1");
+      await expectRevert(
+        lockContract.lockLPTWithPermit(1, unboundDai.address, 1, b32, b32, b32),
+        "LLC: This LLC is Deprecated"
+      );
+      await expectRevert(lockContract.lockLPT(1, unboundDai.address), "LLC: This LLC is Deprecated");
+      await lockContract.unlockLPT(1, unboundDai.address); // Be able to unlock under killed status
+
+      // Rechange kill switch
+      expectEvent(await lockContract.disableLock(), "KillSwitch", { position: false });
+      assert.isFalse(await lockContract.killSwitch(), "Changed killSwitch incorrect");
     });
   });
 
