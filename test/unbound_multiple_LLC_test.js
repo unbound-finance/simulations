@@ -10,7 +10,7 @@ const { BN, constants, balance, expectEvent, expectRevert } = require("@openzepp
  *  Tests of public & external functions in Tier1a contract
  *  ========================================================
  */
-const uDai = artifacts.require("UnboundDollar");
+const UND = artifacts.require("UnboundDollar");
 const valuing = artifacts.require("Valuing_01");
 const llcEth = artifacts.require("LLC_EthDai");
 const llcLink = artifacts.require("LLC_LinkDai");
@@ -31,19 +31,23 @@ contract("unboundSystem", function (_accounts) {
   const user = _accounts[3];
   const daiAmount = 400000;
   const rateBalance = 10 ** 6;
-  const loanRate = 600000;
-  const feeRate = 4000;
+  const rates = {
+    eth: { loanRate: 500000, feeRate: 5000 },
+    link: { loanRate: 600000, feeRate: 4000 },
+  };
   const stakeSharesPercent = 50;
   const safuSharesPercent = 50;
 
-  let unboundDai;
+  let und;
   let valueContract;
-  let lockContract;
+  let lockContractEth;
+  let lockContractLink;
   let tDai;
   let tEth;
   let tLink;
   let factory;
-  let pair;
+  let pairEthDai;
+  let pairLinkDai;
   let route;
   let lockedTokens;
   let storedFee = 0;
@@ -54,16 +58,17 @@ contract("unboundSystem", function (_accounts) {
     tLink = await testLink.deployed();
     tDai = await testDai.deployed();
     route = await router.deployed();
-    unboundDai = await uDai.deployed();
+    und = await UND.deployed();
     valueContract = await valuing.deployed();
-    // lockContract = await llcEth.deployed();
-    lockContract = await llcLink.deployed();
+    lockContractEth = await llcEth.deployed();
+    lockContractLink = await llcLink.deployed();
     factory = await uniFactory.deployed();
-    pair = await uniPair.at(await lockContract.pair.call());
+    pairEthDai = await uniPair.at(await lockContractEth.pair.call());
+    pairLinkDai = await uniPair.at(await lockContractLink.pair.call());
 
-    let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
+    let stakePool = await factory.createPair.sendTransaction(tDai.address, und.address);
     stakePair = await uniPair.at(stakePool.logs[0].args.pair);
-    await unboundDai.changeStaking.sendTransaction(stakePair.address);
+    await und.changeStaking.sendTransaction(stakePair.address);
 
     // Ethereum
     await tDai.approve.sendTransaction(route.address, daiAmount);
@@ -102,27 +107,27 @@ contract("unboundSystem", function (_accounts) {
   describe("Check default functionality", () => {
     //=== UnboundDai ===//
     it("UND should have 0 as total suply", async () => {
-      const retval = await unboundDai.totalSupply.call();
+      const retval = await und.totalSupply.call();
       assert.equal(retval, totalSupply * decimal, "Total suply is not 0");
     });
 
     it("UND should have valuator", async () => {
-      const retval = await unboundDai.valuator.call();
+      const retval = await und.valuator.call();
       assert.equal(retval, valueContract.address, "incorrect Valuator");
     });
 
     it("UND should have staking contract address", async () => {
-      const retval = await unboundDai.stakeAddr.call();
+      const retval = await und.stakeAddr.call();
       assert.equal(retval, stakePair.address, "incorrect staking contract address");
     });
 
     it("UND should have emergency fund address", async () => {
-      const retval = await unboundDai.safuAddr.call();
+      const retval = await und.safuAddr.call();
       assert.equal(retval, safu, "incorrect emergency fund address");
     });
 
     it("UND should have dev fund address", async () => {
-      const retval = await unboundDai.devFundAddr.call();
+      const retval = await und.devFundAddr.call();
       assert.equal(retval, devFund, "incorrect dev fund address");
     });
 
@@ -130,7 +135,7 @@ contract("unboundSystem", function (_accounts) {
       const transferAmount = 5;
 
       await expectRevert(
-        unboundDai.transfer.sendTransaction(user, transferAmount),
+        und.transfer.sendTransaction(user, transferAmount),
         "ERC20: transfer amount exceeds balance"
       );
     });
@@ -139,21 +144,25 @@ contract("unboundSystem", function (_accounts) {
       const transferAmount = 5;
 
       await expectRevert(
-        unboundDai.transferFrom.sendTransaction(user, owner, transferAmount),
+        und.transferFrom.sendTransaction(user, owner, transferAmount),
         "ERC20: transfer amount exceeds balance"
       );
     });
 
     //=== LLC ===//
     it("valuator has correct LLC", async () => {
-      let LLCstruct = await valueContract.getLLCStruct.call(lockContract.address);
-      assert.equal(LLCstruct.loanrate.words[0], loanRate, "incorrect loanRate");
-      assert.equal(LLCstruct.fee.words[0], feeRate, "incorrect feeRate");
+      const LLCstructEth = await valueContract.getLLCStruct.call(lockContractEth.address);
+      assert.equal(LLCstructEth.loanrate.words[0], rates.eth.loanRate, "incorrect loanRate");
+      assert.equal(LLCstructEth.fee.words[0], rates.eth.feeRate, "incorrect feeRate");
+
+      const LLCstructLink = await valueContract.getLLCStruct.call(lockContractLink.address);
+      assert.equal(LLCstructLink.loanrate.words[0], rates.link.loanRate, "incorrect loanRate");
+      assert.equal(LLCstructLink.fee.words[0], rates.link.feeRate, "incorrect feeRate");
     });
 
     it("cannot call unboundCreate() on valuator", async () => {
       await expectRevert(
-        valueContract.unboundCreate.sendTransaction(20, owner, unboundDai.address),
+        valueContract.unboundCreate.sendTransaction(20, owner, und.address),
         "LLC not authorized"
       );
     });
@@ -162,7 +171,7 @@ contract("unboundSystem", function (_accounts) {
       const mintAmount = 10;
 
       await expectRevert(
-        lockContract.lockLPT.sendTransaction(mintAmount, unboundDai.address, {
+        lockContractEth.lockLPT.sendTransaction(mintAmount, und.address, {
           from: user,
         }),
         "LLC: Insufficient LPTs"
@@ -172,115 +181,152 @@ contract("unboundSystem", function (_accounts) {
     it("cannot call lockLPT() small amount", async () => {
       const mintAmount = 1;
 
-      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
-      const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
-      const LPTValueInDai = parseInt((totalUSD * mintAmount) / totalLPTokens); //% value of Liq pool in Dai
-      const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
-      const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
-
-      let approveLP = await pair.approve.sendTransaction(lockContract.address, mintAmount);
-      await expectRevert(lockContract.lockLPT.sendTransaction(mintAmount, unboundDai.address), "amount is too small");
+      let approveLP = await pairEthDai.approve.sendTransaction(lockContractEth.address, mintAmount);
+      await expectRevert(lockContractEth.lockLPT.sendTransaction(mintAmount, und.address), "amount is too small");
     });
 
-    it("UND mint - first", async () => {
-      let LPTbal = parseInt(await pair.balanceOf.call(owner));
-      let LPtokens = parseInt(LPTbal / 4); // Amount of token to be lock
-      lockedTokens = LPtokens;
+    it("UND mint - EthDai first", async () => {
+      const lptBalanceBefore = parseInt(await pairEthDai.balanceOf.call(owner));
+      const LPtokens = parseInt(lptBalanceBefore / 4); // Amount of token to be lock
+      const lockedTokenBefore = parseInt(await lockContractEth.tokensLocked(owner));
+      const undBalanceBefore = parseInt(await und.balanceOf.call(owner));
+      const stakingBalanceBefore = parseInt(await und.balanceOf.call(stakePair.address));
+      const LPTbal = parseInt(await pairEthDai.balanceOf.call(owner));
+      const { loanAmount, feeAmount, stakingAmount } = await getAmounts(daiAmount, pairEthDai, LPtokens, rates.eth);
 
-      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
-      const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
-      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
-      const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
-      const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
-      const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
+      await pairEthDai.approve.sendTransaction(lockContractEth.address, LPtokens);
+      const receipt = await lockContractEth.lockLPT(LPtokens, und.address);
+      expectEvent.inTransaction(receipt.tx, und, "Mint", {
+        user: owner,
+        newMint: loanAmount.toString(),
+      });
+      
+      const lptBalanceAfter = parseInt(await pairEthDai.balanceOf.call(owner));
+      const lockedTokenAfter = parseInt(await lockContractEth.tokensLocked(owner));
+      const undBalanceAfter = parseInt(await und.balanceOf.call(owner));
+      const stakingBalanceAfter = parseInt(await und.balanceOf.call(stakePair.address));
+      const loanedAmount = await und.checkLoan.call(owner, lockContractEth.address);
 
-      let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-      let minted = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-      let ownerBal = parseInt(await unboundDai.balanceOf.call(owner));
-      let stakingBal = parseInt(await unboundDai.balanceOf.call(stakePair.address));
-
-      assert.equal(ownerBal, loanAmount - feeAmount, "owner balance incorrect");
-      assert.equal(stakingBal, stakingAmount, "staking balance incorrect");
+      assert.equal(lptBalanceAfter, lptBalanceBefore - LPtokens, "pool balance incorrect");
+      assert.equal(lockedTokenAfter, lockedTokenBefore + LPtokens, "locked token incorrect");
+      assert.equal(undBalanceAfter, undBalanceBefore + loanAmount - feeAmount, "owner balance incorrect");
+      assert.equal(stakingBalanceAfter, stakingBalanceBefore + stakingAmount, "staking balance incorrect");
+      assert.equal(loanedAmount, loanAmount, "loaned amount incorrect");
       console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - stakingAmount;
     });
 
-    it("UND check loan", async () => {
-      let tokenBal0 = await unboundDai.checkLoan.call(owner, lockContract.address);
+    it("UND mint - LinkDai first", async () => {
+      const lptBalanceBefore = parseInt(await pairLinkDai.balanceOf.call(owner));
+      const LPtokens = parseInt(lptBalanceBefore / 4); // Amount of token to be lock
+      const lockedTokenBefore = parseInt(await lockContractLink.tokensLocked(owner));
+      const undBalanceBefore = parseInt(await und.balanceOf.call(owner));
+      const stakingBalanceBefore = parseInt(await und.balanceOf.call(stakePair.address));
+      const { loanAmount, feeAmount, stakingAmount } = await getAmounts(daiAmount, pairLinkDai, LPtokens, rates.link);
 
-      assert.equal(tokenBal0.words[0], 114000, "valuing incorrect"); // TODO: Delete magic number
-    });
+      await pairLinkDai.approve.sendTransaction(lockContractLink.address, LPtokens);
+      const receipt = await lockContractLink.lockLPT(LPtokens, und.address);
+      expectEvent.inTransaction(receipt.tx, und, "Mint", {
+        user: owner,
+        newMint: loanAmount.toString(),
+      });
 
-    it("UND mint - second", async () => {
-      let LPTbal = await pair.balanceOf.call(owner);
-      let LPtokens = parseInt(LPTbal.words[0] / 3);
+      const lptBalanceAfter = parseInt(await pairLinkDai.balanceOf.call(owner));
+      const lockedTokenAfter = parseInt(await lockContractLink.tokensLocked(owner));
+      const undBalanceAfter = parseInt(await und.balanceOf.call(owner));
+      const stakingBalanceAfter = parseInt(await und.balanceOf.call(stakePair.address));
+      const loanedAmount = parseInt(await und.checkLoan.call(owner, lockContractLink.address));
+      console.log(loanedAmount);
 
-      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
-      const totalLPTokens = parseInt(await pair.totalSupply.call()); // Total token amount of Liq pool
-      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
-      const loanAmount = parseInt((LPTValueInDai * loanRate) / rateBalance); // Loan amount that user can get
-      const feeAmount = parseInt((loanAmount * feeRate) / rateBalance); // Amount of fee
-      const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
-
-      // second mint
-      let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-      let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-      let newBal = await pair.balanceOf.call(owner);
-      assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect");
+      assert.equal(lptBalanceAfter, lptBalanceBefore - LPtokens, "pool balance incorrect");
+      assert.equal(lockedTokenAfter, lockedTokenBefore + LPtokens, "locked token incorrect");
+      assert.equal(undBalanceAfter, undBalanceBefore + loanAmount - feeAmount, "owner balance incorrect");
+      assert.equal(stakingBalanceAfter, stakingBalanceBefore + stakingAmount, "staking balance incorrect");
+      assert.equal(loanedAmount, loanAmount, "loaned amount incorrect");
       console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - stakingAmount;
     });
 
-    it("UND burn", async () => {
-      let uDaiBal = await unboundDai.balanceOf.call(owner);
-      uDaiBal = uDaiBal.words[0];
-      let tokenBal4 = await unboundDai.checkLoan.call(owner, lockContract.address);
+    async function getAmounts(daiAmount, pair, LPtokens, rates) {
+      const totalUSD = daiAmount * 2; // Total value in Liquidity pool
+      const totalLPTokens = parseInt(await pairEthDai.totalSupply.call()); // Total token amount of Liq pool
+      const LPTValueInDai = parseInt((totalUSD * LPtokens) / totalLPTokens); //% value of Liq pool in Dai
+      const loanAmount = parseInt((LPTValueInDai * rates.loanRate) / rateBalance); // Loan amount that user can get
+      const feeAmount = parseInt((loanAmount * rates.feeRate) / rateBalance); // Amount of fee
+      const stakingAmount = parseInt((feeAmount * stakeSharesPercent) / 100);
+      return { loanAmount, feeAmount, stakingAmount };
+    }
 
-      let LPTbal = await pair.balanceOf.call(owner);
-      let LPtokens = parseInt(LPTbal.words[0]);
-      let tokenBal0 = await unboundDai.balanceOf.call(owner);
+    it("UND burn - EthDai", async () => {
+      const lptBalanceBefore = parseInt(await pairEthDai.balanceOf.call(owner));
+      const lockedTokenAmount = parseInt(await lockContractEth.tokensLocked(owner));
+      const undBalanceBefore = parseInt(await und.balanceOf.call(owner));
+      const loanedAmount = parseInt(await und.checkLoan.call(owner, lockContractEth.address));
 
       // burn
-      let burn = await lockContract.unlockLPT.sendTransaction(lockedTokens, unboundDai.address);
-      let tokenBal1 = await unboundDai.balanceOf.call(owner);
-      let newBal = await pair.balanceOf.call(owner);
+      const receipt = await lockContractEth.unlockLPT(lockedTokenAmount, und.address);
+      expectEvent.inTransaction(receipt.tx, und, "Burn", {
+        user: owner,
+        burned: loanedAmount.toString(),
+      });
 
-      let uDaiBalFinal = await unboundDai.balanceOf.call(owner);
-      uDaiBalFinal = uDaiBalFinal.words[0];
-
-      assert.equal(newBal.words[0], LPtokens + lockedTokens, "valuing incorrect");
+      const lptBalanceAfter = parseInt(await pairEthDai.balanceOf.call(owner));
+      const lockedTokenAfter = parseInt(await lockContractEth.tokensLocked(owner));
+      const undBalanceAfter = parseInt(await und.balanceOf.call(owner));
+      
+      assert.equal(lptBalanceAfter, lptBalanceBefore + lockedTokenAmount, "pool balance incorrect");
+      assert.equal(lockedTokenAfter, 0, "locked token incorrect");
+      assert.equal(undBalanceAfter, undBalanceBefore - loanedAmount, "owner balance incorrect");
     });
 
-    it("UND can transfer", async () => {
-      const transferAmount = 10;
-      let beforeBal = await unboundDai.balanceOf.call(owner);
-      let beforeUser = await unboundDai.balanceOf.call(user);
-      beforeBal = parseInt(beforeBal.words[0]);
-      beforeUser = parseInt(beforeUser.words[0]);
+    it("cannot unlock with less than necessary amount of UND", async () => {
+      const lockedTokenAmount = parseInt(await lockContractLink.tokensLocked(owner));
 
-      let theTransfer = await unboundDai.transfer.sendTransaction(user, transferAmount);
-      let finalBal = await unboundDai.balanceOf.call(owner);
-      let userBal = await unboundDai.balanceOf.call(user);
-      finalBal = parseInt(finalBal.words[0]);
-      userBal = parseInt(userBal.words[0]);
+      // burn
+      await expectRevert(
+        lockContractLink.unlockLPT(lockedTokenAmount, und.address),
+        "Insufficient UND to pay back loan"
+      );
+    })
+    
+    it("UND burn - LinkDai", async () => {
+      const lptBalanceBefore = parseInt(await pairLinkDai.balanceOf.call(owner));
+      const lockedTokenAmountBefore = parseInt(await lockContractLink.tokensLocked(owner));
+      const tokenAmount = lockedTokenAmountBefore / 2;
+      const undBalanceBefore = parseInt(await und.balanceOf.call(owner));
+      const loanedAmountBefore = parseInt(await und.checkLoan.call(owner, lockContractLink.address));
+      const loanedAmount = loanedAmountBefore / 2;
 
-      assert.equal(userBal, beforeUser + transferAmount, "receiver balance incorrect");
-      assert.equal(finalBal, beforeBal - transferAmount, "sender balance incorrect");
+      // burn
+      const receipt = await lockContractLink.unlockLPT(tokenAmount, und.address);
+      expectEvent.inTransaction(receipt.tx, und, "Burn", {
+        user: owner,
+        burned: loanedAmount.toString(),
+      });
+
+      const lptBalanceAfter = parseInt(await pairLinkDai.balanceOf.call(owner));
+      const lockedTokenAmountAfter = parseInt(await lockContractLink.tokensLocked(owner));
+      const undBalanceAfter = parseInt(await und.balanceOf.call(owner));
+      console.log(undBalanceAfter);
+      
+      assert.equal(lptBalanceAfter, lptBalanceBefore + tokenAmount, "pool balance incorrect");
+      assert.equal(lockedTokenAmountAfter, lockedTokenAmountBefore - tokenAmount, "locked token incorrect");
+      assert.equal(undBalanceAfter, undBalanceBefore - loanedAmount, "owner balance incorrect");
     });
 
     it("UND can distribute the fee to safu and devFund", async () => {
-      const beforeStoredFee = parseInt(await unboundDai.storedFee.call());
+      const beforeStoredFee = parseInt(await und.storedFee.call());
       assert.equal(beforeStoredFee, storedFee, "incorrect before stored fee");
 
-      const beforeSafuBal = parseInt(await unboundDai.balanceOf.call(safu));
-      const beforeDevFundBal = parseInt(await unboundDai.balanceOf.call(devFund));
+      const beforeSafuBal = parseInt(await und.balanceOf.call(safu));
+      const beforeDevFundBal = parseInt(await und.balanceOf.call(devFund));
       const safuShare = parseInt((storedFee * safuSharesPercent) / 100);
 
-      await unboundDai.distributeFee({ from: user });
+      await und.distributeFee({ from: user });
 
-      const afterSafuBal = parseInt(await unboundDai.balanceOf.call(safu));
-      const afterDevFundBal = parseInt(await unboundDai.balanceOf.call(devFund));
-      const afterStoredFee = parseInt(await unboundDai.storedFee.call());
+      const afterSafuBal = parseInt(await und.balanceOf.call(safu));
+      const afterDevFundBal = parseInt(await und.balanceOf.call(devFund));
+      const afterStoredFee = parseInt(await und.storedFee.call());
 
       assert.equal(afterSafuBal, beforeSafuBal + safuShare, "incorrect safu balance");
       console.log(`safa: ${safuShare}`);
@@ -291,143 +337,49 @@ contract("unboundSystem", function (_accounts) {
     });
 
     it("LLC can claim tokens", async () => {
-      let sendEth = await tEth.transfer.sendTransaction(lockContract.address, 10);
-      let claim = await lockContract.claimTokens.sendTransaction(tEth.address, user);
+      let sendEth = await tEth.transfer.sendTransaction(lockContractEth.address, 10);
+      let claim = await lockContractEth.claimTokens.sendTransaction(tEth.address, user);
       let finalBalance = await tEth.balanceOf.call(user);
 
       assert.equal(10, finalBalance.words[0], "Claim is not working");
     });
 
     it("LLC cannot claim from its own Liquidity Pool", async () => {
-      let sendEth = await tEth.transfer.sendTransaction(lockContract.address, 10);
-      await expectRevert(lockContract.claimTokens.sendTransaction(pair.address, user), "Cannot move LP tokens");
+      let sendEth = await tEth.transfer.sendTransaction(lockContractEth.address, 10);
+      await expectRevert(
+        lockContractEth.claimTokens.sendTransaction(pairEthDai.address, user),
+        "Cannot move LP tokens"
+      );
     });
 
     it("LLC - other user can't pay off someone elses loan", async () => {
-      let LPTbal = await pair.balanceOf.call(owner);
+      let LPTbal = await pairEthDai.balanceOf.call(owner);
       let LPtokens = parseInt(LPTbal.words[0] / 3);
 
-      // let tokenBal0 = await unboundDai.balanceOf.call(owner);
+      // let tokenBal0 = await und.balanceOf.call(owner);
 
       // first mint
-      let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-      let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
+      let approveLP = await pairEthDai.approve.sendTransaction(lockContractEth.address, LPtokens);
+      let mint0 = await lockContractEth.lockLPT.sendTransaction(LPtokens, und.address);
 
       // user A balance before
-      let tokenBal = await unboundDai.balanceOf.call(owner);
+      let tokenBal = await und.balanceOf.call(owner);
       tokenBal = parseInt(tokenBal.words[0] / 4);
 
       // user B balance before
-      let beforeSafuBal = await unboundDai.balanceOf.call(user);
+      let beforeSafuBal = await und.balanceOf.call(user);
       beforeSafuBal = beforeSafuBal.words[0];
 
       // transfer funds to other user
-      let moveUND = await unboundDai.transfer.sendTransaction(user, tokenBal);
+      let moveUND = await und.transfer.sendTransaction(user, tokenBal);
 
       // Trys to unlockLPT with User B
       await expectRevert(
-        lockContract.unlockLPT.sendTransaction(LPtokens, unboundDai.address, {
+        lockContractEth.unlockLPT.sendTransaction(LPtokens, und.address, {
           from: user,
         }),
         "Insufficient liquidity locked"
       );
     });
-  });
-
-  //=================
-  // Test Staking Pool
-  //=================
-  describe("Test Staking Function", () => {
-    before(async function () {
-      unboundDai = await uDai.deployed();
-      valueContract = await valuing.deployed();
-
-      factory = await uniFactory.deployed();
-      tEth = await testEth.deployed();
-      tDai = await testDai.deployed();
-
-      route = await router.deployed();
-
-      let approveTdai = await tDai.approve.sendTransaction(route.address, 10000);
-      let approveUND = await unboundDai.approve.sendTransaction(route.address, 10000);
-
-      // let stakePool = await factory.createPair.sendTransaction(
-      //   tDai.address,
-      //   unboundDai.address
-      // );
-      // stakePair = await uniPair.at(stakePool.logs[0].args.pair);
-      let d = new Date();
-      let time = d.getTime();
-      let addLiq = await route.addLiquidity.sendTransaction(
-        tDai.address,
-        unboundDai.address,
-        10000,
-        10000,
-        10,
-        10,
-        owner,
-        parseInt(time / 1000 + 100)
-      );
-
-      // let setStake = await unboundDai.changeStaking.sendTransaction(
-      //   stakePair.address
-      // );
-    });
-
-    it("mint UND, check if staking LP receives it", async () => {
-      let LPinit = await stakePair.getReserves.call();
-
-      let LPTbal = await pair.balanceOf.call(owner);
-      let LPtokens = parseInt(LPTbal.words[0] / 3);
-
-      let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-      let minted = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-
-      let newBal = await pair.balanceOf.call(owner);
-
-      let UNDfinal = await unboundDai.balanceOf.call(stakePair.address);
-      // console.log(UNDfinal.words[0]);
-
-      assert.equal(newBal, LPTbal - LPtokens, "valuing incorrect");
-    });
-
-    // it("uDai double mint", async () => {
-    //   let LPTbal = await pair.balanceOf.call(owner);
-    //   let LPtokens = parseInt(LPTbal.words[0] / 4);
-
-    //   let tokenBal0 = await unboundDai.balanceOf.call(owner);
-
-    //   // first mint
-    //   let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-    //   let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal = await unboundDai.balanceOf.call(owner);
-
-    //   // second mint
-    //   let approveLP1 = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-    //   let mint1 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal1 = await unboundDai.balanceOf.call(owner);
-
-    //   let newBal = await pair.balanceOf.call(owner);
-
-    //   assert.equal(newBal, LPTbal - LPtokens * 2, "valuing incorrect");
-    // });
-
-    // it("uDai mint and burn", async () => {
-    //   let LPTbal = await pair.balanceOf.call(owner);
-    //   let LPtokens = parseInt(LPTbal.words[0]);
-    //   let tokenBal0 = await unboundDai.balanceOf.call(owner);
-
-    //   // mint
-    //   let approveLP = await pair.approve.sendTransaction(lockContract.address, LPtokens);
-    //   let mint0 = await lockContract.lockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal = await unboundDai.balanceOf.call(owner);
-
-    //   // burn
-    //   let burn = await lockContract.unlockLPT.sendTransaction(LPtokens, unboundDai.address);
-    //   let tokenBal1 = await unboundDai.balanceOf.call(owner);
-    //   let newBal = await pair.balanceOf.call(owner);
-
-    //   assert.equal(newBal.words[0], LPTbal.words[0], "valuing incorrect");
-    // });
   });
 });
