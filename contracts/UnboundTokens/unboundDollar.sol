@@ -284,7 +284,7 @@ contract UnboundDollar is Context, IERC20 {
         owed = _loaned[user][lockLocation];
     }
 
-    function distributeFee() external {
+    function distributeFee() public returns (bool) {
         require (storedFee > 0, "There is nothing to distribute");
 
         if (autoFeeDistribution) {
@@ -320,12 +320,15 @@ contract UnboundDollar is Context, IERC20 {
         }
         // set the fees to zero
         storedFee = 0;
+
+        return true;
     }
     
     // onlyOwner Functions
 
     // change autoFeeDistribution
     function flipFeeDistribution() public onlyOwner {
+        require(distributeFee(), 'fee distribution failed');
         autoFeeDistribution = !autoFeeDistribution;
     }
 
