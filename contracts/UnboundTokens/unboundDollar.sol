@@ -63,9 +63,6 @@ contract UnboundDollar is Context, IERC20 {
     uint256 public safuSharesOfStoredFee;// % of safu to stored fee
     uint256 public storedFee;
 
-    // funds that do not get written immediately. Is distributed when distribute function is called.
-    uint256 public passiveStake;
-
     // tracks user loan amount in UND. This is the amount of UND they need to pay back to get all locked tokens returned. 
     mapping (address => mapping (address => uint256)) private _loaned;
 
@@ -239,9 +236,15 @@ contract UnboundDollar is Context, IERC20 {
             _balances[account] = _balances[account].add(loanAmount.sub(feeAmount));
 
             if (autoFeeDistribution) {
+
                 // distribute the fee to staking right away
                 uint256 stakeShare = feeAmount.mul(stakeShares).div(100);
+                
+                // Send fee to staking pool
                 _balances[_stakeAddr] = _balances[_stakeAddr].add(stakeShare);
+                
+                // store remaining fees
+                storedFee = storedFee.add(feeAmount.sub(stakeShare));
             } else {
                 // store total to distribute later
                 storedFee = storedFee.add(feeAmount);
