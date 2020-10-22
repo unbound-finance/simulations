@@ -5,8 +5,8 @@ module.exports = async (deployer, network, accounts) => {
   let devFund = "0x";// Dev fund address in the product version
 
   if (network == "development" || network == "test") {
-    safu1 = accounts[1];
-    devFund1 = accounts[2];
+    safu = accounts[1];
+    devFund = accounts[2];
   }
 
   await deployer.deploy(uDai, "Unbound Dollar", "UND", safu, devFund);
