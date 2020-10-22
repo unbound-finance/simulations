@@ -331,7 +331,9 @@ contract UnboundDollar is Context, IERC20 {
 
     // change autoFeeDistribution
     function flipFeeDistribution() public onlyOwner {
-        require(distributeFee(), 'fee distribution failed');
+        if (storedFee > 0) {
+            distributeFee();
+        }
         autoFeeDistribution = !autoFeeDistribution;
     }
 
