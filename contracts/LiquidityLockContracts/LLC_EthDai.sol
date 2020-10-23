@@ -40,6 +40,12 @@ contract LLC_EthDai {
     // killswitch event
     event KillSwitch(bool position);
 
+    // lockLPTEvent
+    event LockLPT(uint256 LPTamt, address user, address uToken);
+
+    // unlockLPTEvent
+    event UnlockLPT(uint256 LPTamt, address user, address uToken);
+
     //Owner Address
     address private _owner;
 
@@ -122,7 +128,9 @@ contract LLC_EthDai {
 
         // Call Valuing Contract
         valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
-        
+
+        // emit lockLPT event
+        emit LockLPT(LPTamt, msg.sender, uTokenAddr);
     }
 
     // Requires approval first (permit excluded for simplicity)
@@ -144,8 +152,10 @@ contract LLC_EthDai {
         transferLPT(LPTamt);
 
         // Call Valuing Contract
-        valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); // Hardcode "0" for AAA rating
-        
+        valuingContract.unboundCreate(LPTValueInDai, msg.sender, uTokenAddr); 
+
+        // emit lockLPT event
+        emit LockLPT(LPTamt, msg.sender, uTokenAddr);
     }
 
     // Acquires total value of liquidity pool (in stablecoin) and normalizes decimals to 18.
@@ -226,6 +236,9 @@ contract LLC_EthDai {
         
         // send LP tokens back to user
         require(LPTContract.transfer(msg.sender, LPToken), "LLC: Transfer Failed");
+
+        // emit unlockLPT event
+        emit UnlockLPT(LPToken, msg.sender, uTokenAddr);
         
     }
     
