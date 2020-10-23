@@ -41,10 +41,10 @@ contract LLC_EthDai {
     event KillSwitch(bool position);
 
     // lockLPTEvent
-    event LockLPT(uint256 LPTamt, address user, address uToken);
+    event LockLPT(uint256 LPTamt, address indexed user, address indexed uToken);
 
     // unlockLPTEvent
-    event UnlockLPT(uint256 LPTamt, address user, address uToken);
+    event UnlockLPT(uint256 LPTamt, address indexed user, address indexed uToken);
 
     //Owner Address
     address private _owner;
