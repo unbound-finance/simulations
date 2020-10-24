@@ -59,32 +59,21 @@ contract("unboundSystem", function (_accounts) {
   //=================
   describe("Check default functionality", () => {
     before(async function () {
-      unboundDai = await uDai.deployed();
-      valueContract = await valuing.deployed();
-
-      factory = await uniFactory.deployed();
       tEth = await testEth.deployed();
       tDai = await testDai.deployed();
-      // lockContract = await LLC.deployed();
-      weth = await weth9.deployed();
       route = await router.deployed();
+      unboundDai = await uDai.deployed();
+      valueContract = await valuing.deployed();
+      lockContract = await LLC.deployed();
+      factory = await uniFactory.deployed();
+      pair = await uniPair.at(await lockContract.pair.call());
 
-      const pairAddr = await factory.createPair.sendTransaction(tDai.address, tEth.address);
-      pair = await uniPair.at(pairAddr.logs[0].args.pair);
-
-      lockContract = await LLC.new(valueContract.address, pairAddr.logs[0].args.pair, tDai.address);
-
-      let permissionLLC = await valueContract.addLLC.sendTransaction(lockContract.address, loanRate, feeRate);
-      let permissionUdai = await valueContract.allowToken.sendTransaction(unboundDai.address);
-
-      let newValuator = await unboundDai.changeValuator.sendTransaction(valueContract.address);
-
-      let approveTdai = await tDai.approve.sendTransaction(route.address, 400000);
-      let approveTeth = await tEth.approve.sendTransaction(route.address, 1000);
+      await tDai.approve.sendTransaction(route.address, 400000);
+      await tEth.approve.sendTransaction(route.address, 1000);
 
       let d = new Date();
       let time = d.getTime();
-      let addLiq = await route.addLiquidity.sendTransaction(
+      await route.addLiquidity.sendTransaction(
         tDai.address,
         tEth.address,
         daiAmount,
@@ -97,7 +86,6 @@ contract("unboundSystem", function (_accounts) {
 
       let stakePool = await factory.createPair.sendTransaction(tDai.address, unboundDai.address);
       stakePair = await uniPair.at(stakePool.logs[0].args.pair);
-
       await unboundDai.changeStaking.sendTransaction(stakePair.address);
     });
 
@@ -361,13 +349,6 @@ contract("unboundSystem", function (_accounts) {
       expectEvent(await lockContract.disableLock(), "KillSwitch", { position: false });
       assert.isFalse(await lockContract.killSwitch(), "Changed killSwitch incorrect");
     });
-  });
-
-  //=================
-  // Test basic functions
-  //=================
-  describe("Test basic functions", () => {
-    it("UND can change staking address", () => {});
   });
 
   //=================
