@@ -49,7 +49,6 @@ contract("unboundSystem", function (_accounts) {
   let pairEthDai;
   let pairLinkDai;
   let route;
-  let lockedTokens;
   let storedFee = 0;
   let stakePair;
 
@@ -149,6 +148,17 @@ contract("unboundSystem", function (_accounts) {
       );
     });
 
+    it('UND should be not auto fee distribution', async () => {
+      assert.isFalse(await und.autoFeeDistribution(), 'incorrect autoFeeDistribution');
+    });
+
+    it('UND should be able to change autoFeeDistribution', async () => {
+      await und.flipFeeDistribution();
+
+      assert.isTrue(await und.autoFeeDistribution(), 'incorrect autoFeeDistribution');
+    });
+
+
     //=== LLC ===//
     it("valuator has correct LLC", async () => {
       const LLCstructEth = await valueContract.getLLCStruct.call(lockContractEth.address);
@@ -212,8 +222,11 @@ contract("unboundSystem", function (_accounts) {
       assert.equal(undBalanceAfter, undBalanceBefore + loanAmount - feeAmount, "owner balance incorrect");
       assert.equal(stakingBalanceAfter, stakingBalanceBefore + stakingAmount, "staking balance incorrect");
       assert.equal(loanedAmount, loanAmount, "loaned amount incorrect");
-      console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - stakingAmount;
+
+      console.log(`LLC-Eth.locked: ${await pairEthDai.balanceOf(lockContractEth.address)}`);
+      console.log(`LLC-Link.locked: ${await pairLinkDai.balanceOf(lockContractLink.address)}`);
+      console.log(`UND.balance: ${undBalanceAfter}`);
     });
 
     it("UND mint - LinkDai first", async () => {
@@ -236,15 +249,17 @@ contract("unboundSystem", function (_accounts) {
       const undBalanceAfter = parseInt(await und.balanceOf.call(owner));
       const stakingBalanceAfter = parseInt(await und.balanceOf.call(stakePair.address));
       const loanedAmount = parseInt(await und.checkLoan.call(owner, lockContractLink.address));
-      console.log(loanedAmount);
 
       assert.equal(lptBalanceAfter, lptBalanceBefore - LPtokens, "pool balance incorrect");
       assert.equal(lockedTokenAfter, lockedTokenBefore + LPtokens, "locked token incorrect");
       assert.equal(undBalanceAfter, undBalanceBefore + loanAmount - feeAmount, "owner balance incorrect");
       assert.equal(stakingBalanceAfter, stakingBalanceBefore + stakingAmount, "staking balance incorrect");
       assert.equal(loanedAmount, loanAmount, "loaned amount incorrect");
-      console.log(`staking: ${stakingAmount}`);
       storedFee += feeAmount - stakingAmount;
+
+      console.log(`LLC-Eth.locked: ${await pairEthDai.balanceOf(lockContractEth.address)}`);
+      console.log(`LLC-Link.locked: ${await pairLinkDai.balanceOf(lockContractLink.address)}`);
+      console.log(`UND.balance: ${undBalanceAfter}`);
     });
 
     async function getAmounts(daiAmount, pair, LPtokens, rates) {
@@ -277,6 +292,10 @@ contract("unboundSystem", function (_accounts) {
       assert.equal(lptBalanceAfter, lptBalanceBefore + lockedTokenAmount, "pool balance incorrect");
       assert.equal(lockedTokenAfter, 0, "locked token incorrect");
       assert.equal(undBalanceAfter, undBalanceBefore - loanedAmount, "owner balance incorrect");
+
+      console.log(`LLC-Eth.locked: ${await pairEthDai.balanceOf(lockContractEth.address)}`);
+      console.log(`LLC-Link.locked: ${await pairLinkDai.balanceOf(lockContractLink.address)}`);
+      console.log(`UND.balance: ${undBalanceAfter}`);
     });
 
     it("cannot unlock with less than necessary amount of UND", async () => {
@@ -307,11 +326,14 @@ contract("unboundSystem", function (_accounts) {
       const lptBalanceAfter = parseInt(await pairLinkDai.balanceOf.call(owner));
       const lockedTokenAmountAfter = parseInt(await lockContractLink.tokensLocked(owner));
       const undBalanceAfter = parseInt(await und.balanceOf.call(owner));
-      console.log(undBalanceAfter);
       
       assert.equal(lptBalanceAfter, lptBalanceBefore + tokenAmount, "pool balance incorrect");
       assert.equal(lockedTokenAmountAfter, lockedTokenAmountBefore - tokenAmount, "locked token incorrect");
       assert.equal(undBalanceAfter, undBalanceBefore - loanedAmount, "owner balance incorrect");
+
+      console.log(`LLC-Eth.locked: ${await pairEthDai.balanceOf(lockContractEth.address)}`);
+      console.log(`LLC-Link.locked: ${await pairLinkDai.balanceOf(lockContractLink.address)}`);
+      console.log(`UND.balance: ${undBalanceAfter}`);
     });
 
     it("UND can distribute the fee to safu and devFund", async () => {
@@ -329,9 +351,7 @@ contract("unboundSystem", function (_accounts) {
       const afterStoredFee = parseInt(await und.storedFee.call());
 
       assert.equal(afterSafuBal, beforeSafuBal + safuShare, "incorrect safu balance");
-      console.log(`safa: ${safuShare}`);
       assert.equal(afterDevFundBal, beforeDevFundBal + storedFee - safuShare, "incorrect dev fund balance");
-      console.log(`devFund: ${storedFee - safuShare}`);
       storedFee = 0;
       assert.equal(afterStoredFee, storedFee, "incorrect stored fee");
     });
