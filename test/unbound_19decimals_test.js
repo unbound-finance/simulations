@@ -176,6 +176,16 @@ contract("unboundSystem decimals19", function (_accounts) {
       );
     });
 
+    it('UND should be not auto fee distribution', async () => {
+      assert.isFalse(await unboundDai.autoFeeDistribution(), 'incorrect autoFeeDistribution');
+    });
+
+    it('UND should be able to change autoFeeDistribution', async () => {
+      await unboundDai.flipFeeDistribution();
+
+      assert.isTrue(await unboundDai.autoFeeDistribution(), 'incorrect autoFeeDistribution');
+    });
+
     //=== LLC ===//
     it("valuator has correct LLC", async () => {
       let LLCstruct = await valueContract.getLLCStruct.call(
