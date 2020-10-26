@@ -4,7 +4,7 @@ pragma solidity >=0.4.23 <0.8.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-import "../Interfaces/IUnboundDollar.sol";
+import "../Interfaces/IUnboundToken.sol";
 
 
 // ---------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ import "../Interfaces/IUnboundDollar.sol";
 // ---------------------------------------------------------------------------------------
 // This contract contains the logic of applying the LTV rate to the baseAsset value of 
 // the provided liquidity. The fee to be deducted from the user is also stored here, and 
-// passed to the UND mint function.
+// passed to the uToken mint function.
 // 
 // Each LLC must be registered with this contract, and assigned fee and LTV rates. The user
 // can only call this function via the LLC.
@@ -51,21 +51,21 @@ contract Valuing_01 {
     }
 
     // Constructor
-    constructor (address UND) public {
-        isUnbound[UND] = true;
+    constructor (address uToken) public {
+        isUnbound[uToken] = true;
         _owner = msg.sender;
     }
 
     // Token Creation Function - only called from LLC
     //
     // receives the total value (in stablecoin) of the locked liquidity from LLC,
-    // calculates loan amount in UND using loanRate variable from struct
+    // calculates loan amount in uToken using loanRate variable from struct
     function unboundCreate(uint256 amount, address user, address token) external {
         require (amount > 0, "Cannot valuate nothing");
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
         
-        IUnboundDollar unboundContract = IUnboundDollar(token);
+        IUnboundToken unboundContract = IUnboundToken(token);
 
         // computes loan amount
         uint256 loanAmt = amount;
@@ -92,15 +92,15 @@ contract Valuing_01 {
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
 
-        // obtains amount of loan user owes (in UND)
-        IUnboundDollar unboundContract = IUnboundDollar(token);
+        // obtains amount of loan user owes (in uToken)
+        IUnboundToken unboundContract = IUnboundToken(token);
         uint256 userLoaned = unboundContract.checkLoan(user, msg.sender);
 
-        // compute amount of UND necessary to unlock LPT
-        uint256 toPayInUND = userLoaned.mul(toUnlock).div(totalLocked);
+        // compute amount of uToken necessary to unlock LPT
+        uint256 toPayInUToken = userLoaned.mul(toUnlock).div(totalLocked);
         
         // calls burn
-        unboundContract._burn(user, toPayInUND, msg.sender);
+        unboundContract._burn(user, toPayInUToken, msg.sender);
         
     }
 
