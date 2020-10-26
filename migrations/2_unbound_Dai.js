@@ -21,6 +21,8 @@ const weth8 = artifacts.require("WETH9");
 const tester = "0x8559c741Ae422fD3CA9209112c5d477C5392B170";
 
 module.exports = async (deployer, network, accounts) => {
+
+  console.log('Starting Simulations')
   let safu1 = "0x";
   let devFund1 = "0x";
 
@@ -90,6 +92,8 @@ const pairAddr = await factory.createPair.sendTransaction(
 );
 pair = await uniPair.at(pairAddr.logs[0].args.pair);
 
+// console.log(uniPair.totalSupply.call())
+
 lockContract = await LLC.new(
   valueContract.address,
   pairAddr.logs[0].args.pair,
@@ -111,7 +115,7 @@ let newValuator = await unboundDai.changeValuator.sendTransaction(
 
 let approveTdai1 = await tDai.approve.sendTransaction(
   route.address,
-  1000000000
+  4000000000
 );
 let approveTeth1 = await tEth.approve.sendTransaction(route.address, 10000000);
 
@@ -120,7 +124,7 @@ let time = d.getTime();
 let addLiq = await route.addLiquidity.sendTransaction(
   tDai.address,
   tEth.address,
-  1000000000,
+  4000000000,
   10000000,
   10000,
   1000,
@@ -139,20 +143,22 @@ await unboundDai.changeStaking.sendTransaction(stakePair.address);
 let ethBalBefore = await tEth.balanceOf.call(owner);
 let daiBalBefore = await tDai.balanceOf.call(owner);
 
-let priceOfEthBefore = 1000000000 / 10000000;
+let priceOfEthBefore = 4000000000 / 10000000;
 //console.log(ethBalBefore);
 
 let initialLiq = await pair.getReserves.call()
 let daiBefore = initialLiq._reserve0.toString();
 let ethBefore = initialLiq._reserve1.toString();
 
-console.log(daiBefore);
-console.log(ethBefore);
-console.log(priceOfEthBefore);
+console.log('daiBefore',daiBefore);
+console.log('ethBefore',ethBefore);
+console.log('priceOfEthBefore',priceOfEthBefore);
 
 //console.log(ethBefore);
-let randAmt = parseInt((Math.random() * 10000) + 500);
-console.log(randAmt);
+// let randAmt = parseInt((Math.random() * 10000) + 500);
+let randAmt = 100;
+
+console.log('randAmt',randAmt);
 let approveTdai = await tEth.approve.sendTransaction(
   route.address,
   randAmt, 
@@ -194,12 +200,31 @@ if (daiBefore <= ethBefore) {
   priceBefore = daiBefore/ethBefore;
 }
 
+
+//--------------------------------------------
+//--------------------------------------------
+//--------------------------------------------
+// set the break even price
+
+const breakEvenPrice = 330.28
+
+//--------------------------------------------
+//--------------------------------------------
+
+
 let i = 0;
 // set price change to test. 1.05 is 5%
-while (price > priceBefore * 0.431) {
+while (price > priceBefore * breakEvenPrice / priceOfEthBefore) {
+
+  console.log('TX_NO: ', i)
+  console.log('CURRENT_ETH_PRICE: ', price)
 
   let buyOrSell = parseInt((Math.random() * 1000)+ 1);
+
   if (buyOrSell < 980) {
+    console.log(
+      'ETH_SELL_AMT', buyOrSell
+    )
     let randAmt1 = parseInt((Math.random() * 10000) + 500);
 
     let approveTdai1 = await tEth.approve.sendTransaction(
@@ -226,11 +251,15 @@ while (price > priceBefore * 0.431) {
       price = daiAfter / ethAfter;
     }
     i++;
-    if (i % 20 == 0) {
-      console.log(i);
-      console.log(price);
-    }
+    // if (i % 20 == 0) {
+    //   console.log('i', i);
+    //   console.log( 'price',price);
+    // }
   } else {
+
+    console.log(
+      'ETH_BUY_AMT', buyOrSell
+    )
     let randAmt1 = parseInt((Math.random() * 10000) + 500);
 
     let approveTdai1 = await tDai.approve.sendTransaction(
@@ -258,8 +287,8 @@ while (price > priceBefore * 0.431) {
     }
     i++;
     if (i % 20 == 0) {
-      console.log(i);
-      console.log(price);
+      console.log('i', i);
+      console.log('price', price);
     }
   }
 
@@ -268,14 +297,14 @@ while (price > priceBefore * 0.431) {
 
 
 console.log(" --- ");
-console.log(daiBefore);
-console.log(ethBefore);
+console.log('daiBefore',daiBefore);
+console.log('ethBefore',ethBefore);
 if (daiBefore <= ethBefore) {
-  console.log(ethBefore/daiBefore);
-  console.log(ethBefore * 2)
+  console.log('oldPrice',ethBefore/daiBefore);
+  console.log('poolValue',ethBefore * 2)
 } else {
-  console.log(daiBefore/ethBefore);
-  console.log(daiBefore * 2)
+  console.log('oldPrice',daiBefore/ethBefore);
+  console.log('poolValue',daiBefore * 2)
 }
 
 
@@ -285,26 +314,37 @@ let daiAfter1 = finalLiq1._reserve0.toString();
 let ethAfter1 = finalLiq1._reserve1.toString();
 
 console.log(" --- ");
-console.log(daiAfter1);
-console.log(ethAfter1);
+console.log('daiAfter',daiAfter1);
+console.log('ethAfter',ethAfter1);
 
 if (daiBefore <= ethBefore) {
   let newPrice = ethAfter1/daiAfter1;
-  console.log(newPrice);
+  console.log('newPrice',newPrice);
   let newValue = parseFloat(newPrice) * parseInt(daiAfter1) + parseInt(ethAfter1);
   let potentialValue = parseFloat(newPrice) * parseInt(daiBefore) + parseInt(ethBefore);
-  console.log(newValue);
-  console.log(potentialValue);
-  console.log(newValue / potentialValue);
+  // console.log('newValue',newValue);
+  // console.log('potentialValue',potentialValue);
+  // console.log('newValue / potentialValue', newValue / potentialValue);
 } else {
   let newPrice = daiAfter1/ethAfter1;
-  console.log(newPrice);
+  console.log('newPrice',newPrice);
   let newValue = parseFloat(newPrice) * parseInt(ethAfter1) + parseInt(daiAfter1);
   let potentialValue = parseFloat(newPrice) * parseInt(ethBefore) + parseInt(daiBefore);
-  console.log(newValue);
-  console.log(potentialValue);
-  console.log(newValue / potentialValue);
+  // console.log('newValue',newValue);
+  // console.log('potentialValue',potentialValue);
+  // console.log('newValue / potentialValue', newValue / potentialValue);
 }
+
+const daiBeforePoolValue = daiBefore * 2
+const daiAfterPoolValue = daiAfter1 * 2
+
+console.log({
+  initialPrice: priceOfEthBefore,
+  breakEvenPrice: breakEvenPrice,
+  initialLPTPrice: daiBefore * 2,
+  finalLPTPrice: daiAfter1 * 2,
+  LTV: daiBeforePoolValue / daiAfterPoolValue ,
+})
   
 };
-
+``
