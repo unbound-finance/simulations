@@ -12,7 +12,7 @@ import "../Interfaces/IUnboundDollar.sol";
 //         
 //                                     By: Unbound Finance
 // ---------------------------------------------------------------------------------------
-// This contract contains the logic of applying the LTV rate to the stablecoin value of 
+// This contract contains the logic of applying the LTV rate to the baseAsset value of 
 // the provided liquidity. The fee to be deducted from the user is also stored here, and 
 // passed to the UND mint function.
 // 
