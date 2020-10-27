@@ -58,9 +58,9 @@ contract Valuing_01 {
 
     // Token Creation Function - only called from LLC
     //
-    // receives the total value (in stablecoin) of the locked liquidity from LLC,
+    // receives the total value (in uToken) of the locked liquidity from LLC,
     // calculates loan amount in uToken using loanRate variable from struct
-    function unboundCreate(uint256 amount, address user, address token) external {
+    function unboundCreate(uint256 amount, address user, address token, uint256 minTokenAmount) external {
         require (amount > 0, "Cannot valuate nothing");
         require (listOfLLC[msg.sender].active, "LLC not authorized");
         require (isUnbound[token], "invalid unbound contract");
@@ -83,7 +83,7 @@ contract Valuing_01 {
 
     
         // calls mint 
-        unboundContract._mint(user, loanAmt, feeAmt, msg.sender);
+        unboundContract._mint(user, loanAmt, feeAmt, msg.sender, minTokenAmount);
 
     }
 
