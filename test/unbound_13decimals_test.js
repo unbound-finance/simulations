@@ -248,7 +248,7 @@ contract('unboundSystem decimals13', function (_accounts) {
       let tokenBal0 = await unboundDai.balanceOf.call(owner);
 
       // burn
-      let burn = await lockContract.unlockLPT(lockedTokens, unboundDai.address);
+      let burn = await lockContract.unlockLPT(lockedTokens);
       let tokenBal1 = await unboundDai.balanceOf.call(owner);
       let newBal = parseInt(await pair.balanceOf.call(owner));
 
@@ -333,7 +333,7 @@ contract('unboundSystem decimals13', function (_accounts) {
 
       // Trys to unlockLPT with User B
       await expectRevert(
-        lockContract.unlockLPT(LPtokens, unboundDai.address, {
+        lockContract.unlockLPT(LPtokens, {
           from: user,
         }),
         'Insufficient liquidity locked'

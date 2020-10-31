@@ -277,7 +277,7 @@ contract('unboundSystem', function (_accounts) {
       const burnTokenAmount = parseInt((loanedAmount * burnTokens) / LPtokens);
 
       // burn
-      await lockContract.unlockLPT(burnTokens, und.address);
+      await lockContract.unlockLPT(burnTokens);
       const tokenBal = parseInt(await und.balanceOf(owner));
       const newBal = parseInt(await pair.balanceOf(owner));
       const uDaiBalFinal = parseInt(await und.balanceOf(owner));
@@ -366,7 +366,7 @@ contract('unboundSystem', function (_accounts) {
 
       // Trys to unlockLPT with User B
       await expectRevert(
-        lockContract.unlockLPT(LPtokens, und.address, {
+        lockContract.unlockLPT(LPtokens, {
           from: user,
         }),
         'Insufficient liquidity locked'
@@ -390,9 +390,10 @@ contract('unboundSystem', function (_accounts) {
       // Check public functions
       const anyNumber = 123;
       const b32 = web3.utils.asciiToHex('1');
+
       await expectRevert(lockContract.lockLPTWithPermit(1, 1, b32, b32, b32, anyNumber), 'LLC: This LLC is Deprecated');
       await expectRevert(lockContract.lockLPT(1, anyNumber), 'LLC: This LLC is Deprecated');
-      await lockContract.unlockLPT(1, und.address); // Be able to unlock under killed status
+      await lockContract.unlockLPT(1); // Be able to unlock under killed status
 
       // Rechange kill switch
       expectEvent(await lockContract.disableLock(), 'KillSwitch', { position: false });
