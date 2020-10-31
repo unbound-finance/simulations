@@ -24,7 +24,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 // ----------------------------------------------------------------------------------------
 
 
-contract UnboundDollar is Context, IERC20 {
+contract UnboundETH is Context, IERC20 {
     using SafeMath for uint256;
     using Address for address;
 
