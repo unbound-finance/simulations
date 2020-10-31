@@ -182,7 +182,7 @@ contract('unboundSystem multiple LLC', function (_accounts) {
       const loanedAmount = parseInt(await und.checkLoan(owner, lockContractEth.address));
 
       // burn
-      const receipt = await lockContractEth.unlockLPT(lockedTokenAmount, und.address);
+      const receipt = await lockContractEth.unlockLPT(lockedTokenAmount);
       expectEvent.inTransaction(receipt.tx, und, 'Burn', {
         user: owner,
         burned: loanedAmount.toString(),
@@ -206,7 +206,7 @@ contract('unboundSystem multiple LLC', function (_accounts) {
 
       // burn
       await expectRevert(
-        lockContractLink.unlockLPT(lockedTokenAmount, und.address),
+        lockContractLink.unlockLPT(lockedTokenAmount),
         'Insufficient UND to pay back loan'
       );
     });
@@ -220,7 +220,7 @@ contract('unboundSystem multiple LLC', function (_accounts) {
       const loanedAmount = loanedAmountBefore / 2;
 
       // burn
-      const receipt = await lockContractLink.unlockLPT(tokenAmount, und.address);
+      const receipt = await lockContractLink.unlockLPT(tokenAmount);
       expectEvent.inTransaction(receipt.tx, und, 'Burn', {
         user: owner,
         burned: loanedAmount.toString(),
