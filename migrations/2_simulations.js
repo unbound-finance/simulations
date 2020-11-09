@@ -20,6 +20,31 @@ const weth8 = artifacts.require("WETH9");
 
 const tester = "0x8559c741Ae422fD3CA9209112c5d477C5392B170";
 
+//--------------------------------------------
+//--------------------------------------------
+//--------------------------------------------
+// set current ETH brekeven price
+
+const ethPoolAmt = 4415400000
+
+//--------------------------------------------
+//--------------------------------------------
+
+
+
+
+//--------------------------------------------
+//--------------------------------------------
+//--------------------------------------------
+// set the break even price
+
+const breakEvenPrice = 357.64
+
+//--------------------------------------------
+//--------------------------------------------
+
+
+
 module.exports = async (deployer, network, accounts) => {
 
   console.log('Starting Simulations')
@@ -94,28 +119,28 @@ pair = await uniPair.at(pairAddr.logs[0].args.pair);
 
 // console.log(uniPair.totalSupply.call())
 
-lockContract = await LLC.new(
-  valueContract.address,
-  pairAddr.logs[0].args.pair,
-  tDai.address
-);
+// lockContract = await LLC.new(
+//   valueContract.address,
+//   pairAddr.logs[0].args.pair,
+//   tDai.address
+// );
 
-let permissionLLC = await valueContract.addLLC.sendTransaction(
-  lockContract.address,
-  loanRate,
-  feeRate
-);
-let permissionUdai = await valueContract.allowToken.sendTransaction(
-  unboundDai.address
-);
+// let permissionLLC = await valueContract.addLLC.sendTransaction(
+//   lockContract.address,
+//   loanRate,
+//   feeRate
+// );
+// let permissionUdai = await valueContract.allowToken.sendTransaction(
+//   unboundDai.address
+// );
 
-let newValuator = await unboundDai.changeValuator.sendTransaction(
-  valueContract.address
-);
+// let newValuator = await unboundDai.changeValuator.sendTransaction(
+//   valueContract.address
+// );
 
 let approveTdai1 = await tDai.approve.sendTransaction(
   route.address,
-  4000000000
+  ethPoolAmt
 );
 let approveTeth1 = await tEth.approve.sendTransaction(route.address, 10000000);
 
@@ -124,7 +149,7 @@ let time = d.getTime();
 let addLiq = await route.addLiquidity.sendTransaction(
   tDai.address,
   tEth.address,
-  4000000000,
+  ethPoolAmt,
   10000000,
   10000,
   1000,
@@ -143,7 +168,7 @@ await unboundDai.changeStaking.sendTransaction(stakePair.address);
 let ethBalBefore = await tEth.balanceOf.call(owner);
 let daiBalBefore = await tDai.balanceOf.call(owner);
 
-let priceOfEthBefore = 4000000000 / 10000000;
+let priceOfEthBefore = ethPoolAmt / 10000000;
 //console.log(ethBalBefore);
 
 let initialLiq = await pair.getReserves.call()
@@ -199,17 +224,6 @@ if (daiBefore <= ethBefore) {
 } else {
   priceBefore = daiBefore/ethBefore;
 }
-
-
-//--------------------------------------------
-//--------------------------------------------
-//--------------------------------------------
-// set the break even price
-
-const breakEvenPrice = 330.28
-
-//--------------------------------------------
-//--------------------------------------------
 
 
 let i = 0;
@@ -297,8 +311,8 @@ while (price > priceBefore * breakEvenPrice / priceOfEthBefore) {
 
 
 console.log(" --- ");
-console.log('daiBefore',daiBefore);
-console.log('ethBefore',ethBefore);
+console.log('ethBefore',daiBefore);
+console.log('daiBefore',ethBefore);
 if (daiBefore <= ethBefore) {
   console.log('oldPrice',ethBefore/daiBefore);
   console.log('poolValue',ethBefore * 2)
@@ -314,8 +328,8 @@ let daiAfter1 = finalLiq1._reserve0.toString();
 let ethAfter1 = finalLiq1._reserve1.toString();
 
 console.log(" --- ");
-console.log('daiAfter',daiAfter1);
-console.log('ethAfter',ethAfter1);
+console.log('ethAfter',daiAfter1);
+console.log('daiAfter',ethAfter1);
 
 if (daiBefore <= ethBefore) {
   let newPrice = ethAfter1/daiAfter1;
@@ -343,7 +357,7 @@ console.log({
   breakEvenPrice: breakEvenPrice,
   initialLPTPrice: daiBefore * 2,
   finalLPTPrice: daiAfter1 * 2,
-  LTV: daiBeforePoolValue / daiAfterPoolValue ,
+  LTVRatio: daiAfterPoolValue / daiBeforePoolValue,
 })
   
 };
