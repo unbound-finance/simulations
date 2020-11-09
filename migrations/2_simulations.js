@@ -24,8 +24,7 @@ const tester = "0x8559c741Ae422fD3CA9209112c5d477C5392B170";
 //--------------------------------------------
 //--------------------------------------------
 // set current ETH brekeven price
-
-const ethPoolAmt = 4415400000
+const daiPoolAmt = 4470400000
 
 //--------------------------------------------
 //--------------------------------------------
@@ -38,7 +37,7 @@ const ethPoolAmt = 4415400000
 //--------------------------------------------
 // set the break even price
 
-const breakEvenPrice = 357.64
+const breakEvenPrice = 438.14
 
 //--------------------------------------------
 //--------------------------------------------
@@ -140,7 +139,7 @@ pair = await uniPair.at(pairAddr.logs[0].args.pair);
 
 let approveTdai1 = await tDai.approve.sendTransaction(
   route.address,
-  ethPoolAmt
+  daiPoolAmt
 );
 let approveTeth1 = await tEth.approve.sendTransaction(route.address, 10000000);
 
@@ -149,7 +148,7 @@ let time = d.getTime();
 let addLiq = await route.addLiquidity.sendTransaction(
   tDai.address,
   tEth.address,
-  ethPoolAmt,
+  daiPoolAmt,
   10000000,
   10000,
   1000,
@@ -168,7 +167,7 @@ await unboundDai.changeStaking.sendTransaction(stakePair.address);
 let ethBalBefore = await tEth.balanceOf.call(owner);
 let daiBalBefore = await tDai.balanceOf.call(owner);
 
-let priceOfEthBefore = ethPoolAmt / 10000000;
+let priceOfEthBefore = daiPoolAmt / 10000000;
 //console.log(ethBalBefore);
 
 let initialLiq = await pair.getReserves.call()
@@ -311,8 +310,8 @@ while (price > priceBefore * breakEvenPrice / priceOfEthBefore) {
 
 
 console.log(" --- ");
-console.log('ethBefore',daiBefore);
-console.log('daiBefore',ethBefore);
+console.log('ethBefore',ethBefore);
+console.log('daiBefore',daiBefore);
 if (daiBefore <= ethBefore) {
   console.log('oldPrice',ethBefore/daiBefore);
   console.log('poolValue',ethBefore * 2)
@@ -328,8 +327,8 @@ let daiAfter1 = finalLiq1._reserve0.toString();
 let ethAfter1 = finalLiq1._reserve1.toString();
 
 console.log(" --- ");
-console.log('ethAfter',daiAfter1);
-console.log('daiAfter',ethAfter1);
+console.log('ethAfter', ethAfter1);
+console.log('daiAfter',daiAfter1);
 
 if (daiBefore <= ethBefore) {
   let newPrice = ethAfter1/daiAfter1;
@@ -357,7 +356,7 @@ console.log({
   breakEvenPrice: breakEvenPrice,
   initialLPTPrice: daiBefore * 2,
   finalLPTPrice: daiAfter1 * 2,
-  LTVRatio: daiAfterPoolValue / daiBeforePoolValue,
+  LTVRatio: daiAfterPoolValue /  daiBeforePoolValue,
 })
   
 };
