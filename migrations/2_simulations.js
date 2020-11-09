@@ -24,7 +24,7 @@ const tester = "0x8559c741Ae422fD3CA9209112c5d477C5392B170";
 //--------------------------------------------
 //--------------------------------------------
 // set current ETH brekeven price
-const daiPoolAmt = 4470400000
+const daiPoolAmt = 4393800000
 
 //--------------------------------------------
 //--------------------------------------------
@@ -37,7 +37,7 @@ const daiPoolAmt = 4470400000
 //--------------------------------------------
 // set the break even price
 
-const breakEvenPrice = 438.14
+const breakEvenPrice =  388.24
 
 //--------------------------------------------
 //--------------------------------------------
@@ -70,294 +70,325 @@ module.exports = async (deployer, network, accounts) => {
   }
 
   // Initial settings
-const totalSupply = 0;
-const decimal = 10 ** 18;
-const amount = 0;
-const owner = accounts[0];
-const safu = accounts[1];
-const devFund = accounts[2];
-const user = accounts[3];
-const user2 = accounts[4];
-const daiAmount = 400000;
-const rateBalance = 10 ** 6;
-const loanRate = 500000;
-const feeRate = 5000;
-const stakeSharesPercent = 50;
-const safuSharesPercent = 50;
+  const totalSupply = 0;
+  const decimal = 10 ** 18;
+  const amount = 0;
+  const owner = accounts[0];
+  const safu = accounts[1];
+  const devFund = accounts[2];
+  const user = accounts[3];
+  const user2 = accounts[4];
+  const daiAmount = 400000;
+  const rateBalance = 10 ** 6;
+  const loanRate = 500000;
+  const feeRate = 5000;
+  const stakeSharesPercent = 50;
+  const safuSharesPercent = 50;
 
-let unboundDai;
-let valueContract;
-let lockContract;
-let tDai;
-let tEth;
-let weth;
-let factory;
-let pair;
-let route;
-let lockedTokens;
-let storedFee = 0;
+  let unboundDai;
+  let valueContract;
+  let lockContract;
+  let tDai;
+  let tEth;
+  let weth;
+  let factory;
+  let pair;
+  let route;
+  let lockedTokens;
+  let storedFee = 0;
 
-/////////
-let stakePair;
+  /////////
+  let stakePair;
 
-unboundDai = await uDai.deployed();
-valueContract = await valuing.deployed();
+  unboundDai = await uDai.deployed();
+  valueContract = await valuing.deployed();
 
-factory = await uniFactory.deployed();
-tEth = await testEth.deployed();
-tDai = await testDai.deployed();
-// lockContract = await LLC.deployed();
-weth = await weth8.deployed();
-route = await router.deployed();
+  factory = await uniFactory.deployed();
+  tEth = await testEth.deployed();
+  tDai = await testDai.deployed();
+  // lockContract = await LLC.deployed();
+  weth = await weth8.deployed();
+  route = await router.deployed();
 
-const pairAddr = await factory.createPair.sendTransaction(
-  tDai.address,
-  tEth.address
-);
-pair = await uniPair.at(pairAddr.logs[0].args.pair);
+  const pairAddr = await factory.createPair.sendTransaction(
+    tDai.address,
+    tEth.address
+  );
+  pair = await uniPair.at(pairAddr.logs[0].args.pair);
 
-// console.log(uniPair.totalSupply.call())
+  // console.log(uniPair.totalSupply.call())
 
-// lockContract = await LLC.new(
-//   valueContract.address,
-//   pairAddr.logs[0].args.pair,
-//   tDai.address
-// );
+  // lockContract = await LLC.new(
+  //   valueContract.address,
+  //   pairAddr.logs[0].args.pair,
+  //   tDai.address
+  // );
 
-// let permissionLLC = await valueContract.addLLC.sendTransaction(
-//   lockContract.address,
-//   loanRate,
-//   feeRate
-// );
-// let permissionUdai = await valueContract.allowToken.sendTransaction(
-//   unboundDai.address
-// );
+  // let permissionLLC = await valueContract.addLLC.sendTransaction(
+  //   lockContract.address,
+  //   loanRate,
+  //   feeRate
+  // );
+  // let permissionUdai = await valueContract.allowToken.sendTransaction(
+  //   unboundDai.address
+  // );
 
-// let newValuator = await unboundDai.changeValuator.sendTransaction(
-//   valueContract.address
-// );
+  // let newValuator = await unboundDai.changeValuator.sendTransaction(
+  //   valueContract.address
+  // );
 
-let approveTdai1 = await tDai.approve.sendTransaction(
-  route.address,
-  daiPoolAmt
-);
-let approveTeth1 = await tEth.approve.sendTransaction(route.address, 10000000);
+  let approveTdai1 = await tDai.approve.sendTransaction(
+    route.address,
+    daiPoolAmt
+  );
+  let approveTeth1 = await tEth.approve.sendTransaction(route.address, 10000000);
 
-let d = new Date();
-let time = d.getTime();
-let addLiq = await route.addLiquidity.sendTransaction(
-  tDai.address,
-  tEth.address,
-  daiPoolAmt,
-  10000000,
-  10000,
-  1000,
-  owner,
-  parseInt(time / 1000 + 100)
-);
+  let d = new Date();
+  let time = d.getTime();
+  let addLiq = await route.addLiquidity.sendTransaction(
+    tDai.address,
+    tEth.address,
+    daiPoolAmt,
+    10000000,
+    10000,
+    1000,
+    owner,
+    parseInt(time / 1000 + 100)
+  );
 
-let stakePool = await factory.createPair.sendTransaction(
-  tDai.address,
-  unboundDai.address
-);
-stakePair = await uniPair.at(stakePool.logs[0].args.pair);
+  let stakePool = await factory.createPair.sendTransaction(
+    tDai.address,
+    unboundDai.address
+  );
+  stakePair = await uniPair.at(stakePool.logs[0].args.pair);
 
-await unboundDai.changeStaking.sendTransaction(stakePair.address);
+  await unboundDai.changeStaking.sendTransaction(stakePair.address);
 
-let ethBalBefore = await tEth.balanceOf.call(owner);
-let daiBalBefore = await tDai.balanceOf.call(owner);
+  let ethBalBefore = await tEth.balanceOf.call(owner);
+  let daiBalBefore = await tDai.balanceOf.call(owner);
 
-let priceOfEthBefore = daiPoolAmt / 10000000;
-//console.log(ethBalBefore);
+  let priceOfEthBefore = daiPoolAmt / 10000000;
+  //console.log(ethBalBefore);
 
-let initialLiq = await pair.getReserves.call()
-let daiBefore = initialLiq._reserve0.toString();
-let ethBefore = initialLiq._reserve1.toString();
+  let initialLiq = await pair.getReserves.call()
+  let daiBefore = initialLiq._reserve0.toString();
+  let ethBefore = initialLiq._reserve1.toString();
 
-console.log('daiBefore',daiBefore);
-console.log('ethBefore',ethBefore);
-console.log('priceOfEthBefore',priceOfEthBefore);
+  console.log('daiBefore', daiBefore);
+  console.log('ethBefore', ethBefore);
+  console.log('priceOfEthBefore', priceOfEthBefore);
 
-//console.log(ethBefore);
-// let randAmt = parseInt((Math.random() * 10000) + 500);
-let randAmt = 100;
+  //console.log(ethBefore);
+  // let randAmt = parseInt((Math.random() * 10000) + 500);
+  let randAmt = 100;
 
-console.log('randAmt',randAmt);
-let approveTdai = await tEth.approve.sendTransaction(
-  route.address,
-  randAmt, 
-  {from: user2}
-);
-
-let d1 = new Date();
-let time1 = d1.getTime();
-
-let getMin = await route.getAmountsOut.call(randAmt, [tEth.address, tDai.address]);
-let ethMin = getMin[1].toString();
-let simpleSwap = await route.swapExactTokensForTokens.sendTransaction(
-  randAmt, 
-  ethMin, 
-  [tEth.address, tDai.address], 
-  owner, 
-  parseInt(time1 / 1000 + 100), 
-  {from: user2}
-);
-
-let afterLiq = await pair.getReserves.call();
-//console.log(afterLiq._reserve0.words[0]);
-//console.log(afterLiq._reserve1.words[0]);
-
-let ethBalAfter = await tEth.balanceOf.call(user2);
-ethBalAfter = ethBalAfter.toString();
-//console.log(ethBalAfter);
-//console.log(ethBefore - afterLiq._reserve1.words[0])
-//console.log(ethBalAfter - ethBalBefore.words[0]);
-
-//assert.equal(ethBefore - afterLiq._reserve1.words[0], ethBalAfter - ethBalBefore.words[0], "something wrong");
-
-let priceBefore;
-let price = priceOfEthBefore;
-
-if (daiBefore <= ethBefore) {
-  priceBefore = ethBefore/daiBefore; 
-} else {
-  priceBefore = daiBefore/ethBefore;
-}
-
-
-let i = 0;
-// set price change to test. 1.05 is 5%
-while (price > priceBefore * breakEvenPrice / priceOfEthBefore) {
-
-  console.log('TX_NO: ', i)
-  console.log('CURRENT_ETH_PRICE: ', price)
-
-  let buyOrSell = parseInt((Math.random() * 1000)+ 1);
-
-  if (buyOrSell < 980) {
-    console.log(
-      'ETH_SELL_AMT', buyOrSell
-    )
-    let randAmt1 = parseInt((Math.random() * 10000) + 500);
-
-    let approveTdai1 = await tEth.approve.sendTransaction(
-      route.address,
-      randAmt1,
-      {from: user2}
-    );
-
-    let getMin1 = await route.getAmountsOut.call(randAmt1, [tEth.address, tDai.address]);
-    let ethMin1 = getMin1[1].toString();
-    
-    let d2 = new Date();
-    let time2 = d2.getTime();
-    let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(randAmt1, ethMin1, [tEth.address, tDai.address], owner, parseInt(time2 / 1000 + 100), {from: user2});
-    
-    let finalLiq = await pair.getReserves.call();
-    let daiAfter = finalLiq._reserve0.toString();
-    let ethAfter = finalLiq._reserve1.toString();
-    
-    
-    if (daiBefore <= ethBefore) {
-      price = ethAfter / daiAfter;
-    } else {
-      price = daiAfter / ethAfter;
+  console.log('randAmt', randAmt);
+  let approveTdai = await tEth.approve.sendTransaction(
+    route.address,
+    randAmt, {
+      from: user2
     }
-    i++;
-    // if (i % 20 == 0) {
-    //   console.log('i', i);
-    //   console.log( 'price',price);
-    // }
+  );
+
+  let d1 = new Date();
+  let time1 = d1.getTime();
+
+  let getMin = await route.getAmountsOut.call(randAmt, [tEth.address, tDai.address]);
+  let ethMin = getMin[1].toString();
+  let simpleSwap = await route.swapExactTokensForTokens.sendTransaction(
+    randAmt,
+    ethMin,
+    [tEth.address, tDai.address],
+    owner,
+    parseInt(time1 / 1000 + 100), {
+      from: user2
+    }
+  );
+
+  let afterLiq = await pair.getReserves.call();
+  //console.log(afterLiq._reserve0.words[0]);
+  //console.log(afterLiq._reserve1.words[0]);
+
+  let ethBalAfter = await tEth.balanceOf.call(user2);
+  ethBalAfter = ethBalAfter.toString();
+  //console.log(ethBalAfter);
+  //console.log(ethBefore - afterLiq._reserve1.words[0])
+  //console.log(ethBalAfter - ethBalBefore.words[0]);
+
+  //assert.equal(ethBefore - afterLiq._reserve1.words[0], ethBalAfter - ethBalBefore.words[0], "something wrong");
+
+  let priceBefore;
+  let price = priceOfEthBefore;
+
+  if (daiBefore <= ethBefore) {
+    priceBefore = ethBefore / daiBefore;
   } else {
-
-    console.log(
-      'ETH_BUY_AMT', buyOrSell
-    )
-    let randAmt1 = parseInt((Math.random() * 10000) + 500);
-
-    let approveTdai1 = await tDai.approve.sendTransaction(
-      route.address,
-      randAmt1,
-      {from: user2}
-    );
-
-    let getMin1 = await route.getAmountsOut.call(randAmt1, [tDai.address, tEth.address]);
-    let ethMin1 = getMin1[1].toString();
-    
-    let d2 = new Date();
-    let time2 = d2.getTime();
-    let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(randAmt1, ethMin1, [tDai.address, tEth.address], owner, parseInt(time2 / 1000 + 100), {from: user2});
-    
-    let finalLiq = await pair.getReserves.call();
-    let daiAfter = finalLiq._reserve0.toString();
-    let ethAfter = finalLiq._reserve1.toString();
-    
-    
-    if (daiBefore <= ethBefore) {
-      price = ethAfter / daiAfter;
-    } else {
-      price = daiAfter / ethAfter;
-    }
-    i++;
-    if (i % 20 == 0) {
-      console.log('i', i);
-      console.log('price', price);
-    }
+    priceBefore = daiBefore / ethBefore;
   }
 
-  
-}
+
+  let i = 0;
+  // set price change to test. 1.05 is 5%
+  while (price > priceBefore * breakEvenPrice / priceOfEthBefore) {
+
+    console.log('TX_NO: ', i)
+    console.log('CURRENT_ETH_PRICE: ', price)
+
+    let buyOrSell = parseInt((Math.random() * 1000) + 1);
+
+    if (buyOrSell < 980) {
+      console.log(
+        'ETH_SELL_AMT', buyOrSell
+      )
+      let randAmt1 = parseInt((Math.random() * 10000) + 500);
+
+      let approveTdai1 = await tEth.approve.sendTransaction(
+        route.address,
+        randAmt1, {
+          from: user2
+        }
+      );
+
+      let getMin1 = await route.getAmountsOut.call(randAmt1, [tEth.address, tDai.address]);
+      let ethMin1 = getMin1[1].toString();
+
+      let d2 = new Date();
+      let time2 = d2.getTime();
+      let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(randAmt1, ethMin1, [tEth.address, tDai.address], owner, parseInt(time2 / 1000 + 100), {
+        from: user2
+      });
+
+      let finalLiq = await pair.getReserves.call();
+      let daiAfter = finalLiq._reserve0.toString();
+      let ethAfter = finalLiq._reserve1.toString();
 
 
-console.log(" --- ");
-console.log('ethBefore',ethBefore);
-console.log('daiBefore',daiBefore);
-if (daiBefore <= ethBefore) {
-  console.log('oldPrice',ethBefore/daiBefore);
-  console.log('poolValue',ethBefore * 2)
-} else {
-  console.log('oldPrice',daiBefore/ethBefore);
-  console.log('poolValue',daiBefore * 2)
-}
+      if (daiBefore <= ethBefore) {
+        price = ethAfter / daiAfter;
+      } else {
+        price = daiAfter / ethAfter;
+      }
+      i++;
+      // if (i % 20 == 0) {
+      //   console.log('i', i);
+      //   console.log( 'price',price);
+      // }
+    } else {
+
+      console.log(
+        'ETH_BUY_AMT', buyOrSell
+      )
+      let randAmt1 = parseInt((Math.random() * 10000) + 500);
+
+      let approveTdai1 = await tDai.approve.sendTransaction(
+        route.address,
+        randAmt1, {
+          from: user2
+        }
+      );
+
+      let getMin1 = await route.getAmountsOut.call(randAmt1, [tDai.address, tEth.address]);
+      let ethMin1 = getMin1[1].toString();
+
+      let d2 = new Date();
+      let time2 = d2.getTime();
+      let simpleSwap1 = await route.swapExactTokensForTokens.sendTransaction(randAmt1, ethMin1, [tDai.address, tEth.address], owner, parseInt(time2 / 1000 + 100), {
+        from: user2
+      });
+
+      let finalLiq = await pair.getReserves.call();
+      let daiAfter = finalLiq._reserve0.toString();
+      let ethAfter = finalLiq._reserve1.toString();
+
+
+      if (daiBefore <= ethBefore) {
+        price = ethAfter / daiAfter;
+      } else {
+        price = daiAfter / ethAfter;
+      }
+      i++;
+      if (i % 20 == 0) {
+        console.log('i', i);
+        console.log('price', price);
+      }
+    }
+
+
+  }
+
+
+  if (daiBefore <= ethBefore) {
+    console.log('oldPrice', ethBefore / daiBefore);
+    console.log('poolValue', ethBefore * 2)
+  } else {
+    console.log('oldPrice', daiBefore / ethBefore);
+    console.log('poolValue', daiBefore * 2)
+  }
 
 
 
-let finalLiq1 = await pair.getReserves.call();
-let daiAfter1 = finalLiq1._reserve0.toString();
-let ethAfter1 = finalLiq1._reserve1.toString();
+  let finalLiq1 = await pair.getReserves.call();
+  let daiAfter1 = finalLiq1._reserve0.toString();
+  let ethAfter1 = finalLiq1._reserve1.toString();
 
-console.log(" --- ");
-console.log('ethAfter', ethAfter1);
-console.log('daiAfter',daiAfter1);
+  if (daiBefore <= ethBefore) {
+    let newPrice = daiAfter1 / ethAfter1;
+    console.log('newPrice', newPrice);
+    let newValue = parseFloat(newPrice) * parseInt(ethAfter1) + parseInt(daiAfter1);
+    let potentialValue = parseFloat(newPrice) * parseInt(ethBefore) + parseInt(daiBefore);
+    // console.log('newValue',newValue);
+    // console.log('potentialValue',potentialValue);
+    // console.log('newValue / potentialValue', newValue / potentialValue);
 
-if (daiBefore <= ethBefore) {
-  let newPrice = ethAfter1/daiAfter1;
-  console.log('newPrice',newPrice);
-  let newValue = parseFloat(newPrice) * parseInt(daiAfter1) + parseInt(ethAfter1);
-  let potentialValue = parseFloat(newPrice) * parseInt(daiBefore) + parseInt(ethBefore);
-  // console.log('newValue',newValue);
-  // console.log('potentialValue',potentialValue);
-  // console.log('newValue / potentialValue', newValue / potentialValue);
-} else {
-  let newPrice = daiAfter1/ethAfter1;
-  console.log('newPrice',newPrice);
-  let newValue = parseFloat(newPrice) * parseInt(ethAfter1) + parseInt(daiAfter1);
-  let potentialValue = parseFloat(newPrice) * parseInt(ethBefore) + parseInt(daiBefore);
-  // console.log('newValue',newValue);
-  // console.log('potentialValue',potentialValue);
-  // console.log('newValue / potentialValue', newValue / potentialValue);
-}
+    console.log(" --- ");
+    console.log('ethBefore', daiBefore);
+    console.log('daiBefore', ethBefore);
 
-const daiBeforePoolValue = daiBefore * 2
-const daiAfterPoolValue = daiAfter1 * 2
+    console.log(" --- ");
+    console.log('ethAfter', daiAfter1);
+    console.log('daiAfter', ethAfter1);
 
-console.log({
-  initialPrice: priceOfEthBefore,
-  breakEvenPrice: breakEvenPrice,
-  initialLPTPrice: daiBefore * 2,
-  finalLPTPrice: daiAfter1 * 2,
-  LTVRatio: daiAfterPoolValue /  daiBeforePoolValue,
-})
-  
+
+    const daiBeforePoolValue = ethBefore * 2
+    const daiAfterPoolValue = ethAfter1 * 2
+
+    console.log({
+      initialPrice: priceOfEthBefore,
+      breakEvenPrice: breakEvenPrice,
+      initialLPTPrice: ethBefore * 2,
+      finalLPTPrice: ethAfter1 * 2,
+      LTV: daiAfterPoolValue / daiBeforePoolValue,
+    })
+  } else {
+    let newPrice = ethAfter1 / daiAfter1;
+    console.log('newPrice', newPrice);
+    let newValue = parseFloat(newPrice) * parseInt(daiAfter1) + parseInt(ethAfter1);
+    let potentialValue = parseFloat(newPrice) * parseInt(daiBefore) + parseInt(ethBefore);
+
+    console.log(" --- ");
+    console.log('ethBefore', ethBefore);
+    console.log('daiBefore', daiBefore);
+
+    console.log(" --- ");
+    console.log('ethAfter', ethAfter1);
+    console.log('daiAfter', daiAfter1);
+    // console.log('newValue',newValue);
+    // console.log('potentialValue',potentialValue);
+    // console.log('newValue / potentialValue', newValue / potentialValue);
+
+
+    const daiBeforePoolValue = daiBefore * 2
+    const daiAfterPoolValue = daiAfter1 * 2
+
+    console.log({
+      initialPrice: priceOfEthBefore,
+      breakEvenPrice: breakEvenPrice,
+      initialLPTPrice: daiBefore * 2,
+      finalLPTPrice: daiAfter1 * 2,
+      LTV: daiAfterPoolValue * 100 / daiBeforePoolValue,
+    })  
+
+  }
+
 };
 ``
